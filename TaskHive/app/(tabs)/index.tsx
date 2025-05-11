@@ -1,15 +1,10 @@
-import { ThemedView } from "@/components/ThemedView";
-import { Text, View } from "react-native";
-import "../../global.css";
+import 'react-native-gesture-handler';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import HomeScreen from '../screens/HomeScreen';
+import { registerRootComponent } from 'expo';
 
-export default function HomeScreen() {
-  return (
-    <View className="mt-[30px] pt-5 h-screen bg-white">
-      <ThemedView className="">
-        <Text className="bg-white text-black text-3xl font-bold text-center">
-          Welcome!
-        </Text>
-      </ThemedView>
-    </View>
-  );
-}
+// Register the HomeScreen as the root component of the app
+registerRootComponent(HomeScreen);
+

@@ -2,19 +2,10 @@ import {View,Text,StyleSheet,TouchableOpacity} from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import {LinearGradient} from 'expo-linear-gradient';
 import React from 'react';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
-import { RouteProp } from '@react-navigation/native';
 
-type RootDrawerParamList = {
-  Home: undefined;
-};
 
-type HomeScreenProps = {
-  navigation: DrawerNavigationProp<RootDrawerParamList, 'Home'>;
-  route: RouteProp<RootDrawerParamList, 'Home'>;
-};
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen() {
   return (
     <View style={styles.mainpage}>
       <View>
@@ -24,9 +15,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         start={{x:0,y:0}}
         end={{x:1,y:0}}
         >
-        <TouchableOpacity onPress={()=>navigation.openDrawer()}>
+        {/* <TouchableOpacity onPress={()=>()}> */}
               <Ionicons name='menu' size={28} color='white' style={styles.menuicon}/>
-        </TouchableOpacity>
+        {/* </TouchableOpacity> */}
               <Text style={styles.headerText}>DashBoard</Text>
               <Ionicons name='search' size={28} color='white' style={styles.searchicon}/>
               <Ionicons name='notifications-outline' size={28} color='white' style={styles.notificationicon}/>
