@@ -1,19 +1,20 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { BlurView } from 'expo-blur';
-import { StyleSheet } from 'react-native';
+// components/ui/TabBarBackground.tsx
+import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet } from "react-native";
 
-export default function BlurTabBarBackground() {
+export default function TabBarBackground() {
   return (
-    <BlurView
-      // System chrome material automatically adapts to the system's theme
-      // and matches the native tab bar appearance on iOS.
-      tint="systemChromeMaterial"
-      intensity={100}
-      style={StyleSheet.absoluteFill}
+    <LinearGradient
+      colors={["#76C68F", "#005F94"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.gradient}
     />
   );
 }
 
-export function useBottomTabOverflow() {
-  return useBottomTabBarHeight();
-}
+const styles = StyleSheet.create({
+  gradient: {
+    flex: 1
+  }
+});

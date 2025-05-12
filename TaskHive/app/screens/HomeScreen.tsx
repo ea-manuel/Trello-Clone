@@ -44,21 +44,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      
-      <LinearGradient
-       colors={['#76C68F','#005F94']}
-       start={{x:0,y:0}}
-       end={{x:1,y:0}}
-      >
-         <View style={styles.footer}>
-              <View style={{alignItems:'center'}}><Ionicons name='people' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>Workspace</Text></View>
-              <View style={{alignItems:'center'}}><Ionicons name='albums' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>My Cards</Text></View>
-              <View style={{alignItems:'center'}}><Ionicons name='folder-open' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>Templates</Text></View>
-              <View style={{alignItems:'center'}}><Ionicons name='information-circle-outline' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>Help</Text></View>
-          </View>
-        </LinearGradient>
-          
-      
     </View>
   );
 }
