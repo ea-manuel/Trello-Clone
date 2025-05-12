@@ -1,4 +1,4 @@
-import {View,Text,StyleSheet,TouchableOpacity} from 'react-native'
+import {View,Text,StyleSheet,TouchableOpacity,Image} from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import {LinearGradient} from 'expo-linear-gradient';
 import React from 'react';
@@ -16,15 +16,16 @@ export default function HomeScreen() {
         end={{x:1,y:0}}
         >
         {/* <TouchableOpacity onPress={()=>()}> */}
-              <Ionicons name='menu' size={28} color='white' style={styles.menuicon}/>
+              <Ionicons name='person-circle' size={35} color='white' style={styles.profileicon}/>
         {/* </TouchableOpacity> */}
-              <Text style={styles.headerText}>DashBoard</Text>
+              <Text style={styles.headerText}>User@31...</Text>
               <Ionicons name='search' size={28} color='white' style={styles.searchicon}/>
               <Ionicons name='notifications-outline' size={28} color='white' style={styles.notificationicon}/>
               <Ionicons name='settings-outline' size={28} color='white' style={styles.settingsicon}/>
       </LinearGradient>
       </View>
       <View style={styles.body}>
+        
         <Text style={styles.maintext}>No Boards</Text>
         <Text style={styles.subtext}>Create Your First Task Board</Text>
         <View style={styles.createBoardButton}>
@@ -43,6 +44,21 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      
+      <LinearGradient
+       colors={['#76C68F','#005F94']}
+       start={{x:0,y:0}}
+       end={{x:1,y:0}}
+      >
+         <View style={styles.footer}>
+              <View style={{alignItems:'center'}}><Ionicons name='people' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>Workspace</Text></View>
+              <View style={{alignItems:'center'}}><Ionicons name='albums' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>My Cards</Text></View>
+              <View style={{alignItems:'center'}}><Ionicons name='folder-open' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>Templates</Text></View>
+              <View style={{alignItems:'center'}}><Ionicons name='information-circle-outline' size={38} color='white' style={styles.workspaceicon}/><Text style={{color:'white',fontWeight:'medium'}}>Help</Text></View>
+          </View>
+        </LinearGradient>
+          
+      
     </View>
   );
 }
@@ -66,7 +82,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    paddingLeft:15,
+    paddingLeft:11,
     bottom:-3,
     // right:-60
 
@@ -87,20 +103,20 @@ const styles = StyleSheet.create({
     fontWeight:'medium',
     color:'#808080',
   },
-  menuicon: {
-    marginTop:7,
+  profileicon: {
+    marginTop:3,
   },
   searchicon: {
     marginTop:7,
-    left:90,
+    left:80,
   },
   notificationicon: {
     marginTop:7,
-    left:110,
+    left:100,
   },
   settingsicon: {
     marginTop:7,
-    left:130,
+    left:120,
   },
 
   createBoardButton:{
@@ -120,6 +136,16 @@ const styles = StyleSheet.create({
   },
   addicon:{
     bottom:-7,
-  }
+  },
+  footer:{
+    height:70,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    paddingVertical:6,
+    paddingHorizontal:10,
+  },
+  workspaceicon:{
+       
+  },
 
 });
