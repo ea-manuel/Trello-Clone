@@ -1,9 +1,13 @@
-import { Drawer } from 'expo-router/drawer';
-import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { StatusBar } from "expo-status-bar";
-import "../global.css";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Drawer } from "expo-router/drawer";
+import { StatusBar } from "expo-status-bar";
+import Header from "@/components/Header";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -11,17 +15,22 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf")
   });
 
-  if (!loaded) {
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Drawer>
-        <Drawer.Screen name="(tabs)" options={{ headerShown: false, title: "Home" }} />
-        {/* You can add more Drawer screens here if needed */}
-      </Drawer>
-      <StatusBar style="auto" />
+      <Drawer
+        screenOptions={{
+          header: (props) => <Header {...props} />,
+          drawerContentStyle: {
+            backgroundColor: colorScheme === "dark" ? "#18181b" : "#7CCABE"
+          }
+        }}
+      />
+      <StatusBar
+        style={colorScheme === "dark" ? "light" : "dark"}
+        backgroundColor={colorScheme === "dark" ? "#18181b" : "#7CCABE"}
+      />
     </ThemeProvider>
   );
 }
