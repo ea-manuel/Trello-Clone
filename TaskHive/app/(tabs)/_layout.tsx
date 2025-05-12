@@ -15,8 +15,12 @@ export default function TabsLayout() {
         tabBarActiveTintColor: "#2EC", // or any color you want for active tab
         tabBarInactiveTintColor: "white", // inactive tabs will be white
         tabBarStyle: Platform.select({
-          ios: { position: "absolute", backgroundColor: "transparent" },
-          default: { backgroundColor: "transparent" }
+          ios: {
+            position: "absolute",
+            backgroundColor: "transparent",
+            height: 60, paddingTop: 5 
+          },
+          default: { backgroundColor: "transparent", height: 60, paddingTop: 5 }
         })
       }}
     >
