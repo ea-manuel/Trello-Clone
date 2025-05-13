@@ -1,15 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { DrawerActions } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import "../global.css";
+import { useRouter } from "expo-router";
+import type { DrawerHeaderProps } from "@react-navigation/drawer";
 
-export default function Header() {
-  const navigation = useNavigation();
 
+
+export default function Header(props: DrawerHeaderProps){
+  const router = useRouter();
+  const navigation = useNavigation()
   return (
-    <View style={styles.container}>
+    <View style={styles.mainpage}>
       <LinearGradient
         colors={["#90EE90", "#0077B6"]}
         style={styles.header}
@@ -35,12 +40,14 @@ export default function Header() {
           color="white"
           style={styles.notificationicon}
         />
-        <Ionicons
-          name="settings-outline"
-          size={28}
-          color="white"
-          style={styles.settingsicon}
-        />
+        <TouchableOpacity onPress={()=>router.push("/settings")}>
+            <Ionicons
+              name="settings-outline"
+              size={28}
+              color="white"
+              style={styles.settingsicon}
+            />
+        </TouchableOpacity>
       </LinearGradient>
     </View>
   );
@@ -49,7 +56,8 @@ export default function Header() {
 const styles = StyleSheet.create({
   mainpage: {
     flex: 1,
-    backgroundColor: "white"
+    backgroundColor: "white",
+    
   },
   header: {
     height: 100,
@@ -65,8 +73,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
-    paddingLeft: 11,
-    bottom: -3
+    paddingLeft: 13,
+    bottom: 33,
+    left:30
     // right:-60
   },
   body: {
@@ -88,15 +97,15 @@ const styles = StyleSheet.create({
 
   searchicon: {
     marginTop: 7,
-    left: 80
+    left: 90
   },
   notificationicon: {
     marginTop: 7,
-    left: 100
+    left: 110
   },
   settingsicon: {
     marginTop: 7,
-    left: 120
+    left: 130
   },
 
   createBoardButton: {
