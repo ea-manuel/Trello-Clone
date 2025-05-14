@@ -1,12 +1,9 @@
-import React,{useEffect} from 'react';
-import {View,Text,Image,TouchableOpacity,StyleSheet,Switch} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollView } from 'react-native-gesture-handler';
-import { useState } from 'react';
-
-
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function Settings(){
 
@@ -24,13 +21,7 @@ export default function Settings(){
                     >  
                 <View style={styles.settingsHeader}>
                     <Ionicons name='arrow-back' size={30} color='white'/>
-                    <View style={styles.profilecard}>
-                         <Ionicons name='person-circle' size={100} color='white'/>
-                         <Text style={styles.profiletext}>TaskHive User</Text>
-                         <Text style={styles.profiletext}>@taskhiveuser1324</Text>
-                         <Text style={styles.profiletext}>taskhiveuser@gmail.com</Text>
-                    </View>
-                    <Ionicons name='settings-sharp' size={30} color='white' style={{left:110}}/>
+                    <Text style={styles.settingsheaderText}>Settings</Text>
                 </View>
             </LinearGradient>
             ),
@@ -73,7 +64,7 @@ export default function Settings(){
                    />
               </View>
               <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
-                   <Text style={styles.subtext}>Show label names {'\n'}on card front</Text>
+                   <Text style={styles.subtext}>Show label names on card front</Text>
                    <Switch 
                       trackColor={{false: "#767577", true: "#636B2F"}}
                       thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
@@ -115,65 +106,43 @@ export default function Settings(){
     );
 
 }
-const styles=StyleSheet.create({
-  mainpage:{
-    flex:1,
-    backgroundColor:'#36393e',
-
-    
-
-
+const styles = StyleSheet.create({
+  mainpage: {
+    flex: 1,
+    backgroundColor: "#36393e",
+    paddingVertical: 10
   },
 
   settingsHeader:{
-    height:250,
-    width:'100%',
+    height:110,
     paddingTop:60,
     paddingHorizontal:20,
     flexDirection:'row',
-    borderBottomLeftRadius:100,
-    borderBottomRightRadius:200,
   },
-  settingsheaderText:{
-    color:'white',
-    fontSize:25,
-    fontWeight:'bold',
-    bottom:6,
-    left:8,
-
+  settingsheaderText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingLeft: 13
   },
-  headertext:{
-    color:'#A8A8A8',
-    fontWeight:'bold',
-    fontSize:15,
-    left:70,
-    paddingTop:30,
-
+  headertext: {
+    color: "#A8A8A8",
+    fontWeight: "bold",
+    fontSize: 15,
+    left: 70,
+    paddingTop: 30
   },
-  subtext:{
-    color:'#EEECE7',
-    fontWeight:'medium',
-    fontSize:17,
-    left:70,
-    paddingTop:30,
-    paddingBottom:15,
+  subtext: {
+    color: "#EEECE7",
+    fontWeight: "medium",
+    fontSize: 17,
+    left: 70,
+    paddingTop: 30,
+    paddingBottom: 15
   },
   notificationsettings:{
     borderBottomColor:'#EEECE7',
     borderBottomWidth:0.2,
   },
-
-  profilecard:{
-    alignContent:'center',
-    justifyContent:'center',
-    alignItems:'center',
-    textAlign:'center',
-    left:55,
- },
- profiletext:{
-    color:'white',
-    fontWeight:'medium',
-
- },
 })
 
