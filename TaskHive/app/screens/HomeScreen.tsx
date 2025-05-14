@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View,Image } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View,Image,Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 
@@ -12,24 +12,26 @@ export default function HomeScreen() {
           
               <View style={styles.mainpage}>
                 <View style={styles.body}> 
-                  <Text style={styles.maintext}>No Boards again</Text>
+                  <Text style={styles.maintext}>No Boards</Text>
                   <Text style={styles.subtext}>Create Your First Task Board</Text>
                   <View style={styles.createBoardButton}>
                     <TouchableOpacity onPress={() => console.log("Button pressed")}>
-                      <LinearGradient
-                        colors={["#90EE90", "#0077B6"]}
-                        style={styles.button}
-                      >
-                        <Text style={styles.buttonText}>
-                          <Ionicons
-                            name="add"
-                            size={20}
-                            color="white"
-                            style={styles.addicon}
-                          />
-                          Create Board
-                        </Text>
-                      </LinearGradient>
+                      <View style={styles.shadowWrapper}>
+                         <LinearGradient
+                           colors={["#90EE90", "#0077B6"]}
+                           style={styles.button}
+                         >
+                           <Text style={styles.buttonText}>
+                             <Ionicons
+                               name="add"
+                               size={20}
+                               color="white"
+                               style={styles.addicon}
+                             />
+                             Create Board
+                           </Text>
+                         </LinearGradient>
+                      </View>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -92,14 +94,21 @@ export default function HomeScreen() {
         },
       
         createBoardButton: {
-          bottom: -300,
-          left: 120
+          bottom: -250,
+          left: 120,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
+          elevation:5,
+
+          
         },
         button: {
-          backgroundColor: "blue",
           paddingVertical: 14,
           paddingHorizontal: 14,
-          borderRadius: 15
+          borderRadius: 15,
+          
         },
         buttonText: {
           color: "white",
@@ -107,7 +116,15 @@ export default function HomeScreen() {
           bottom: 5
         },
         addicon: {
-          bottom: -7
+          top:10,
+        },
+        shadowWrapper:{
+          borderRadius:12,
+          shadowColor: 'black',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
+          elevation:8,
         },
         footer: {
           height: 70,
