@@ -5,8 +5,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function HomeTab() {
   return (
-    <SafeAreaProvider>
-      <HomeScreen />;
-    </SafeAreaProvider>
+    
+      <HomeScreen />
+    
   );
 }

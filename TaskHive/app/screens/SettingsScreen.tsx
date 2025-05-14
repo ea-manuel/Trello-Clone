@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useState } from 'react';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 
 
@@ -34,7 +33,7 @@ export default function Settings(){
     },[navigation]);
 
     return(
-       <SafeAreaView>  
+       
          <ScrollView>
         <View style={styles.mainpage}>
             <View style={styles.notificationsettings}>
@@ -106,7 +105,7 @@ export default function Settings(){
         </View>
          
          </ScrollView> 
-       </SafeAreaView>
+       
     );
 
 }

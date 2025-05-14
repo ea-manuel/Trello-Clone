@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
   return (
-    <SafeAreaView>  
+     
       <Tabs
       screenOptions={{
         headerShown: true,
@@ -64,6 +64,6 @@ export default function TabsLayout() {
       />
       
       </Tabs>
-    </SafeAreaView>
+    
   );
 }

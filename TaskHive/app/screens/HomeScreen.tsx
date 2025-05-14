@@ -3,13 +3,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View,Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 
 
 export default function HomeScreen() {
         const navigation=useNavigation();
         return (
-          <SafeAreaView>
+          
               <View style={styles.mainpage}>
                 <View style={styles.body}> 
                   <Text style={styles.maintext}>No Boards again</Text>
@@ -34,7 +34,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-          </SafeAreaView>
+          
         );
       }
       
