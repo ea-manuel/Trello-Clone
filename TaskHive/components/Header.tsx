@@ -1,18 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation, useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import "../global.css";
-import { useRouter } from "expo-router";
+
 import type { DrawerHeaderProps } from "@react-navigation/drawer";
 
-
-
-export default function Header(props: DrawerHeaderProps){
+export default function Header(props: DrawerHeaderProps) {
   const router = useRouter();
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   return (
     <View style={styles.mainpage}>
       <LinearGradient
@@ -23,31 +21,38 @@ export default function Header(props: DrawerHeaderProps){
       >
         <TouchableOpacity
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          className="flex-row items-center pb-5"
+          className="flex-row items-center justify-center"
         >
           <Ionicons name="person-circle" size={35} color="white" />{" "}
-          <Text style={styles.headerText} className="text-3xl">User@31...</Text>
+          <Text style={styles.headerText}>User@31...</Text>
         </TouchableOpacity>
-        <Ionicons
-          name="search"
-          size={28}
-          color="white"
-          style={styles.searchicon}
-        />
-        <Ionicons
-          name="notifications-outline"
-          size={28}
-          color="white"
-          style={styles.notificationicon}
-        />
-        <TouchableOpacity onPress={()=>router.push("/settings")}>
+        <View style={{ flexDirection: "row", right: -50 }}>
+          <TouchableOpacity>
+            <Ionicons
+              name="search"
+              size={28}
+              color="white"
+              style={styles.searchicon}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity>
+            <Ionicons
+              name="notifications-outline"
+              size={28}
+              color="white"
+              style={styles.notificationicon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/settings")}>
             <Ionicons
               name="settings-outline"
               size={28}
               color="white"
               style={styles.settingsicon}
             />
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
     </View>
   );
@@ -57,7 +62,7 @@ const styles = StyleSheet.create({
   mainpage: {
     flex: 1,
     backgroundColor: "white",
-    
+    paddingVertical: 20
   },
   header: {
     height: 100,
@@ -67,15 +72,16 @@ const styles = StyleSheet.create({
     textAlign: "left",
     display: "flex",
     flexDirection: "row",
-    paddingLeft: 10
+    paddingLeft: 10,
+    bottom: 10
   },
   headerText: {
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
     paddingLeft: 13,
-    bottom: 33,
-    left:30
+    bottom: 30,
+    left: 30
     // right:-60
   },
   body: {
