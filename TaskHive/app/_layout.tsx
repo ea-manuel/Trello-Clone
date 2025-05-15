@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   DarkTheme,
@@ -5,10 +6,9 @@ import {
   ThemeProvider
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import { usePathname } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
-import Header from "@/components/Header";
-import { usePathname } from "expo-router";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -23,15 +23,18 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Drawer
         screenOptions={{
-          header: pathname !== "/settings" ? (props) => <Header {...props} />:undefined,
+          header:
+            pathname !== "/settings"
+              ? (props) => <Header {...props} />
+              : undefined,
           drawerContentStyle: {
-            backgroundColor: colorScheme === "dark" ? "#18181b" : "#7CCABE"
-          },
+            backgroundColor: colorScheme === "dark" ? "#4C99E6" : "#7CCABE"
+          }
         }}
       />
       <StatusBar
         style={colorScheme === "dark" ? "light" : "dark"}
-        backgroundColor={colorScheme === "dark" ? "#18181b" : "#7CCABE"}
+        backgroundColor={colorScheme === "dark" ? "#4C99E6" : "#7CCABE"}
       />
     </ThemeProvider>
   );

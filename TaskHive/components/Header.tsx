@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -8,29 +7,26 @@ import "../global.css";
 
 import type { DrawerHeaderProps } from "@react-navigation/drawer";
 
+const PRIMARY_COLOR = "#1F80E0";
+
 export default function Header(props: DrawerHeaderProps) {
   const router = useRouter();
   const navigation = useNavigation();
   return (
     <View style={styles.mainpage}>
-      <LinearGradient
-        colors={["#90EE90", "#0077B6"]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
+      <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          className="flex-row items-center justify-center"
+          className=""
         >
           <Ionicons name="person-circle" size={35} color="white" />{" "}
           <Text style={styles.headerText}>User@31...</Text>
         </TouchableOpacity>
-        <View style={{ flexDirection: "row", right: -50 }}>
+        <View style={{ flexDirection: "row", right: -30 }}>
           <TouchableOpacity>
             <Ionicons
               name="search"
-              size={28}
+              size={24}
               color="white"
               style={styles.searchicon}
             />
@@ -39,7 +35,7 @@ export default function Header(props: DrawerHeaderProps) {
           <TouchableOpacity>
             <Ionicons
               name="notifications-outline"
-              size={28}
+              size={24}
               color="white"
               style={styles.notificationicon}
             />
@@ -47,13 +43,13 @@ export default function Header(props: DrawerHeaderProps) {
           <TouchableOpacity onPress={() => router.push("/settings")}>
             <Ionicons
               name="settings-outline"
-              size={28}
+              size={24}
               color="white"
               style={styles.settingsicon}
             />
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -65,10 +61,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20
   },
   header: {
-    height: 100,
-    backgroundColor: "#0000FF",
-    // justifyContent: 'center',
-    paddingTop: 50,
+    height: 90,
+    backgroundColor: PRIMARY_COLOR, // Use your primary color here
+    paddingTop: 40,
     textAlign: "left",
     display: "flex",
     flexDirection: "row",
@@ -119,7 +114,7 @@ const styles = StyleSheet.create({
     left: 120
   },
   button: {
-    backgroundColor: "blue",
+    backgroundColor: PRIMARY_COLOR, // Use primary color for buttons too!
     paddingVertical: 14,
     paddingHorizontal: 14,
     borderRadius: 15

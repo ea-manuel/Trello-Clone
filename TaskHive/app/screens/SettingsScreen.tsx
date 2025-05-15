@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+
+const PRIMARY_COLOR = "#1F80E0";
 
 export default function Settings() {
   const navigation = useNavigation();
@@ -13,18 +14,12 @@ export default function Settings() {
   useEffect(() => {
     navigation.setOptions({
       header: () => (
-        <LinearGradient
-          colors={["#90EE90", "#0077B6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <View style={styles.settingsHeader}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <Text style={styles.settingsheaderText}>Settings</Text>
-          </View>
-        </LinearGradient>
+        <View style={styles.settingsHeader}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.settingsheaderText}>Settings</Text>
+        </View>
       )
     });
   }, [navigation]);
@@ -134,12 +129,12 @@ const styles = StyleSheet.create({
   },
 
   settingsHeader: {
-    height: 110,
-    paddingTop: 60,
+    height: 100,
+    paddingTop: 40,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
-    bottom: 10
+    backgroundColor: PRIMARY_COLOR
   },
   settingsheaderText: {
     color: "#fff",

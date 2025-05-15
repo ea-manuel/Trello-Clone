@@ -3,14 +3,13 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
   return (
      
       <Tabs
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
         tabBarBackground() {
           return <TabBarBackground />;
         },
@@ -23,7 +22,7 @@ export default function TabsLayout() {
             height: 60, paddingTop: 5 
           },
           default: { backgroundColor: "transparent", height: 60, paddingTop: 5 }
-        })
+        }), 
       }}
     >
       <Tabs.Screen
