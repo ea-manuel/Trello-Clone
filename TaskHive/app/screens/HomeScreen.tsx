@@ -67,25 +67,26 @@ const styles = StyleSheet.create({
   createBoardButton: {
     marginTop: 20
   },
-  button: {
-    backgroundColor: PRIMARY_COLOR, // your primary color
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center"
-  },
+button: {
+  backgroundColor: PRIMARY_COLOR, // your primary color
+  paddingVertical: 14,
+  paddingHorizontal: 20,
+  borderRadius: 15,
+  alignItems: "center",
+  justifyContent: "center",
+},
 
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center"
-  },
+buttonContent: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+},
 
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8 // space between icon and text
-  }
+buttonText: {
+  color: "white",
+  fontWeight: "bold",
+  fontSize: 16,
+  marginLeft: 8, // space between icon and text
+},
+
 });
