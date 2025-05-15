@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+// app/auth/login.tsx
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -11,7 +11,7 @@ import {
 
 const PRIMARY_COLOR = "#1F80E0";
 
-export default function HomeScreen() {
+export default function Login() {
   const router = useRouter();
 
   return (
@@ -20,17 +20,14 @@ export default function HomeScreen() {
       contentContainerStyle={styles.scrollContent}
     >
       <View style={styles.body}>
-        <Text style={styles.maintext}>No Boards again</Text>
-        <Text style={styles.subtext}>Create Your First Task Board</Text>
         <View style={styles.createBoardButton}>
           <TouchableOpacity
-            onPress={() => router.push("/auth/login")} // Navigate to /login route
+            onPress={() => router.push("/")} // Navigate to /login route
             style={styles.button}
             activeOpacity={0.8}
           >
             <View style={styles.buttonContent}>
-              <Ionicons name="add" size={20} color="white" />
-              <Text style={styles.buttonText}>Create Board</Text>
+              <Text style={styles.buttonText}>Go Home</Text>
             </View>
           </TouchableOpacity>
         </View>
