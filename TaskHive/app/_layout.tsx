@@ -24,14 +24,15 @@ export default function RootLayout() {
       <Drawer
         screenOptions={{
           header:
-            pathname !== "/settings"
+            pathname !== "/settings" && pathname !== "/auth/login"
               ? (props) => <Header {...props} />
-              : undefined,
+              : () => null,
           drawerContentStyle: {
             backgroundColor: colorScheme === "dark" ? "#4C99E6" : "#7CCABE"
           }
         }}
       />
+
       <StatusBar
         style={colorScheme === "dark" ? "light" : "dark"}
         backgroundColor={colorScheme === "dark" ? "#4C99E6" : "#7CCABE"}
