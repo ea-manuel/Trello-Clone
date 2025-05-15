@@ -18,7 +18,15 @@ export default function Settings() {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
-          <Text style={styles.settingsheaderText}>Settings</Text>
+          <View style={styles.profilecard}>
+    
+                <Ionicons name="person-circle" size={70} color="white" />
+          
+              <Text style={styles.profiletext}>TaskHive User</Text>
+              <Text style={styles.profiletext}>@taskhiveuser1324</Text>
+              <Text style={styles.profiletext}>taskhiveuser@gmail.com</Text>
+            </View>
+         <Ionicons name="settings-sharp" color='white' size={30} style={{left:120}}/>
         </View>
       )
     });
@@ -76,7 +84,7 @@ export default function Settings() {
               alignItems: "center"
             }}
           >
-            <Text style={styles.subtext}>Show label names on card front</Text>
+            <Text style={styles.subtext}>Show label names{'\n'} on card front</Text>
             <Switch
               trackColor={{ false: "#767577", true: "#636B2F" }}
               thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
@@ -129,11 +137,11 @@ const styles = StyleSheet.create({
   },
 
   settingsHeader: {
-    height: 100,
-    paddingTop: 40,
-    paddingHorizontal: 20,
+    height: 220,
+    paddingTop: 60,
+    paddingHorizontal: 10,
     flexDirection: "row",
-    alignItems: "center",
+    
     backgroundColor: PRIMARY_COLOR
   },
   settingsheaderText: {
@@ -160,5 +168,13 @@ const styles = StyleSheet.create({
   notificationsettings: {
     borderBottomColor: "#EEECE7",
     borderBottomWidth: 0.2
-  }
+  },
+  profilecard:{
+    alignItems:'center',
+    left:70,
+  },
+  profiletext:{
+    color:'white',
+    fontWeight:'bold',
+  },
 });

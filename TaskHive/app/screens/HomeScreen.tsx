@@ -20,7 +20,7 @@ export default function HomeScreen() {
       contentContainerStyle={styles.scrollContent}
     >
       <View style={styles.body}>
-        <Text style={styles.maintext}>No Boards again</Text>
+        <Text style={styles.maintext}>No Boards</Text>
         <Text style={styles.subtext}>Create Your First Task Board</Text>
         <View style={styles.createBoardButton}>
           <TouchableOpacity
