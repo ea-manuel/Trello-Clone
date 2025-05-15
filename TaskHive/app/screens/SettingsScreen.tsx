@@ -21,8 +21,15 @@ export default function Settings(){
                     >  
                 <View style={styles.settingsHeader}>
                     <Ionicons name='arrow-back' size={30} color='white'/>
-                    <Text style={styles.settingsheaderText}>Settings</Text>
-                </View>
+                    <View style={styles.profilecard}>
+                         <Ionicons name="person-circle" size={90} color="white" />
+                         <Text style={styles.profiletext}>TaskHive User</Text>
+                         <Text style={styles.profiletext}>@taskhiveuser1324</Text>
+                         <Text style={styles.profiletext}>taskhiveuser@gmail.com</Text>
+                   </View>
+            <Ionicons name="settings-sharp" size={30} color="white" style={{ left: 110 }} />
+          </View>
+    
             </LinearGradient>
             ),
         });
@@ -64,7 +71,7 @@ export default function Settings(){
                    />
               </View>
               <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
-                   <Text style={styles.subtext}>Show label names on card front</Text>
+                   <Text style={styles.subtext}>Show label names{'\n'} on card front</Text>
                    <Switch 
                       trackColor={{false: "#767577", true: "#636B2F"}}
                       thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
@@ -114,7 +121,7 @@ const styles = StyleSheet.create({
   },
 
   settingsHeader:{
-    height:110,
+    height:240,
     paddingTop:60,
     paddingHorizontal:20,
     flexDirection:'row',
@@ -143,6 +150,15 @@ const styles = StyleSheet.create({
   notificationsettings:{
     borderBottomColor:'#EEECE7',
     borderBottomWidth:0.2,
+  },
+  profilecard:{
+      alignItems:'center',
+      color:'white',
+      left:50,
+  },
+  profiletext:{
+    color:'white',
+    fontWeight:'bold'
   },
 })
 
