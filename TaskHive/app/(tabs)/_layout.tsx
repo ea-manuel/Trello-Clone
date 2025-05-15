@@ -35,9 +35,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="cards"
+        name="OfflineBoards"
         options={{
-          title: "Cards",
+          title: "Offline Boards",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="rectangle.stack.fill" color={color} />
           )

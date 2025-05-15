@@ -1,17 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Help() {
+export default function OfflineBoards() {
   return (
     <View style={styles.mainpage}>
-      <Text
-        style={{
-          fontSize: 24,
-          fontWeight: "bold",
-          color: "#36454F",
-          textAlign: "center"
-        }}
-      >
-        Help Screen
+      <Text style={{ fontSize: 24, fontWeight: "bold", color: "#36454F", textAlign: "center" }}>
+        Offline Boards
       </Text>
     </View>
   );
