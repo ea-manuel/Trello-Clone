@@ -33,8 +33,12 @@ export default function HomeScreen() {
 
   return (
    <View  style={styles.mainpage}>
-    
+     {boards.length > 0 && (
+  <Text style={{alignItems:'center',marginTop:70,fontWeight:'bold',fontSize:24,color:'gray',marginBottom:-80,}}>Boards</Text>
+   )}
+
        <FlatList
+      
           contentContainerStyle={styles.scrollContent}
           data={boards}
           keyExtractor={(item) => item.id.toString()}
@@ -59,6 +63,7 @@ export default function HomeScreen() {
        />
         {showModal&&(
         <Modal visible={showModal} transparent animationType="slide">
+          <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)',justifyContent: 'center',alignItems: 'center',marginTop:17, marginBottom:28,}}>
             <View style={styles.modalView}>
                 <Text style={styles.modalTitle}>Enter Board Title</Text>
                 <TextInput
@@ -77,6 +82,7 @@ export default function HomeScreen() {
                   </View>
               </View>
             </View>
+          </View>
       </Modal>
         )}
         <View style={styles.createBoardButton}>
@@ -145,7 +151,7 @@ const styles = StyleSheet.create({
       
   },
   button: {
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: '#5a6b7c',
     paddingVertical: 14,
     elevation:5,
   

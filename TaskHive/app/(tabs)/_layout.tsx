@@ -3,6 +3,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
+import { View } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -11,7 +12,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarBackground() {
-          return <TabBarBackground />;
+          return <View style={{backgroundColor: "#95a5a6"}} ><TabBarBackground /></View>;
         },
         tabBarActiveTintColor: "#2EC", // or any color you want for active tab
         tabBarInactiveTintColor: "white", // inactive tabs will be white
@@ -21,7 +22,7 @@ export default function TabsLayout() {
             backgroundColor: "transparent",
             height: 60, paddingTop: 5 
           },
-          default: { backgroundColor: "transparent", height: 60, paddingTop: 5 }
+          default: { backgroundColor: "#34495e", height: 60, paddingTop: 5 }
         }), 
       }}
     >

@@ -35,7 +35,7 @@ export default function RootLayout() {
 
       <StatusBar
         style={colorScheme === "dark" ? "light" : "dark"}
-        backgroundColor={colorScheme === "dark" ? "#4C99E6" : "#7CCABE"}
+        backgroundColor={colorScheme === "dark" ? "" : "#7CCABE"}
       />
     </ThemeProvider>
   );
