@@ -6,25 +6,78 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Modal,TextInput,Button
 } from "react-native";
+import { useState } from "react";
+import { FlatList } from "react-native";
 
-const PRIMARY_COLOR = "#1F80E0";
+const PRIMARY_COLOR = "#34495e";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+  const [boards, setBoards] = useState<{ id: number; title: string }[]>([]);
+  const [boardTitle, setBoardTitle] = useState('');
+  const handleCreateBoard = () => {
+    if (!boardTitle.trim()) return;
+    const newBoard = { id: Date.now(), title: boardTitle };
+    setBoards([...boards, newBoard]);
+    setShowModal(false);
+    setBoardTitle('');
+    router.push({pathname:"/screens/boards",params: { board: JSON.stringify({ id: Date.now(), title: boardTitle })}}); 
+  
+  };
+
+
 
   return (
-    <ScrollView
-      style={styles.mainpage}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.body}>
+   <View  style={styles.mainpage}>
+    
+       <FlatList
+          contentContainerStyle={styles.scrollContent}
+          data={boards}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+         <View style={{}}>
+            <Text style={{}}>{item.title}</Text>
+         </View>
+         )}
+    
+    ListEmptyComponent={
+    <View style={styles.body}>
         <Text style={styles.maintext}>No Boards</Text>
         <Text style={styles.subtext}>Create Your First Task Board</Text>
+      
+       
+    </View>
+       }
+       />
+        {showModal&&(
+        <Modal visible={showModal} transparent animationType="slide">
+            <View style={styles.modalView}>
+                <Text style={styles.modalTitle}>Enter Board Title</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Sprint Tasks"
+                    value={boardTitle}
+                    onChangeText={setBoardTitle}
+                />
+                
+               <View style={{flexDirection:'row',justifyContent:'space-between'}}>  
+                   <View style={{ backgroundColor: '#34495e', borderRadius:6,margin:5,}}>
+                      <Button title="Create" onPress={handleCreateBoard} color="#34495e"/>  
+                   </View>
+                  <View style={{  borderRadius: 6,margin:5,}}>  
+                     <Button title="Cancel" onPress={() => setShowModal(false)} color="#ADD8E6" />
+                  </View>
+              </View>
+            </View>
+      </Modal>
+        )}
         <View style={styles.createBoardButton}>
           <TouchableOpacity
-            onPress={() => router.push("/auth/login")} // Navigate to /login route
+            onPress={() => setShowModal(true)} 
             style={styles.button}
             activeOpacity={0.8}
           >
@@ -34,8 +87,7 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+       </View>
   );
 }
 
@@ -66,11 +118,12 @@ const styles = StyleSheet.create({
   },
   createBoardButton: {
     marginTop: 20
+
   },
   button: {
     backgroundColor: PRIMARY_COLOR,
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center"
@@ -84,6 +137,27 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
-    marginLeft: 8
-  }
+
+  },
+  modalView: {
+    backgroundColor: 'd5ffff',
+    padding: 50,
+    margin: 30,
+    borderRadius: 10,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  modalTitle: { 
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
 });
