@@ -7,7 +7,7 @@ import "../global.css";
 
 import type { DrawerHeaderProps } from "@react-navigation/drawer";
 
-const PRIMARY_COLOR = "#1F80E0";
+const PRIMARY_COLOR = "#34495e";
 
 export default function Header(props: DrawerHeaderProps) {
   const router = useRouter();
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     left: 120
   },
   button: {
-    backgroundColor: PRIMARY_COLOR, // Use primary color for buttons too!
+    backgroundColor: '#34495e', // Use primary color for buttons too!
     paddingVertical: 14,
     paddingHorizontal: 14,
     borderRadius: 15

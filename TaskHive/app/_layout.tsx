@@ -24,7 +24,7 @@ export default function RootLayout() {
       <Drawer
         screenOptions={{
           header:
-            pathname !== "/settings" && pathname !== "/auth/login"
+            pathname !== "/settings" && pathname !== "/auth/login" && pathname !== "/templates"
               ? (props) => <Header {...props} />
               : () => null,
           drawerContentStyle: {

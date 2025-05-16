@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
-const PRIMARY_COLOR = "#1F80E0";
+const PRIMARY_COLOR = "#34495e";
 
 export default function Settings() {
   const navigation = useNavigation();
