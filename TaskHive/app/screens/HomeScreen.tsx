@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const [boardTitle, setBoardTitle] = useState('');
   const handleCreateBoard = () => {
     if (!boardTitle.trim()) return;
-    const newBoard = { id: Date.now(), title: boardTitle };
+    const newBoard = { id: Date.now(), title: boardTitle,createdAt: new Date().toLocaleString(), };
     setBoards([...boards, newBoard]);
     setShowModal(false);
     setBoardTitle('');
@@ -39,9 +39,13 @@ export default function HomeScreen() {
           data={boards}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-         <View style={{}}>
-            <Text style={{}}>{item.title}</Text>
-         </View>
+          <TouchableOpacity>
+              <View style={styles.boardcard}>
+                <Ionicons name="grid" size={30} color='white'/>
+                 <Text style={styles.boardcardtext}>{item.title}</Text>
+              </View> 
+          </TouchableOpacity>
+           
          )}
     
     ListEmptyComponent={
@@ -97,9 +101,27 @@ const styles = StyleSheet.create({
     backgroundColor: "white"
   },
   scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingVertical: 20
+    flexGrow:1,
+    justifyContent: "flex-start",
+    paddingVertical: 20,
+    marginTop:80,
+  },
+  boardcard:{
+    backgroundColor:'#778899',
+    paddingVertical:15,
+    borderColor:'white',
+    borderWidth:3,
+    paddingHorizontal:15,
+    flexDirection:'row',
+   
+
+  },
+  boardcardtext:{
+    color:'white',
+    fontWeight:'medium',
+    fontSize:22,
+    left:15,
+
   },
   body: {
     padding: 20,
@@ -117,16 +139,17 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   createBoardButton: {
-    marginTop: 20
-
+      width:170,
+      left:220,
+      bottom:10,
+      
   },
   button: {
     backgroundColor: PRIMARY_COLOR,
     paddingVertical: 14,
-    paddingHorizontal: 0,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center"
+    elevation:5,
+  
+    borderRadius: 8,
   },
   buttonContent: {
     flexDirection: "row",
