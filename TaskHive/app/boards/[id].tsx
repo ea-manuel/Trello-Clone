@@ -21,12 +21,17 @@ export default function BoardDetails() {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={28} color="#1F80E0" />
+          <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
+        <Text style={styles.title}>{board?.title ?? "Board"}</Text>
       </View>
       {/* Board Title in the center */}
       <View style={styles.content}>
-        <Text style={styles.title}>{board?.title ?? "Board"}</Text>
+        <View>
+          <TouchableOpacity>
+            <Ionicons name='add' size={25} color='white'/>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -34,7 +39,7 @@ export default function BoardDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#ADD8E6",
     color: "black"
   },
   topBar: {
@@ -48,7 +53,8 @@ const styles = StyleSheet.create({
     bottom: 20
   },
   backButton: {
-    paddingTop: 25
+    paddingTop: 25,
+    left:10,
   },
   content: {
     flex: 1,
@@ -56,9 +62,12 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    color: "#34495e",
-    textAlign: "center"
+    color: "white",
+    textAlign: "center",
+    left:30,
+    top:15,
+    alignItems:'center',
   }
 });
