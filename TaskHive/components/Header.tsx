@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { DrawerActions } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
+
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import SettingsModal from "./SettingsModal"; // Adjust path as needed
@@ -29,26 +29,23 @@ export default function Header() {
           <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
             <Ionicons name="search" size={24} color="white" />
           </TouchableOpacity>
-
           <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
             <Ionicons name="notifications-outline" size={24} color="white" />
           </TouchableOpacity>
-
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.iconButton}
             onPress={() => setSettingsVisible(true)}
           >
             <Ionicons name="settings-outline" size={24} color="white" />
-          </TouchableOpacity>
+          </TouchableOpacity>{" "}
+          {/* Settings Modal */}
+          <SettingsModal
+            visible={isSettingsVisible}
+            onClose={() => setSettingsVisible(false)}
+          />
         </View>
       </View>
-
-      {/* Settings Modal */}
-      <SettingsModal
-        visible={isSettingsVisible}
-        onClose={() => setSettingsVisible(false)}
-      />
     </View>
   );
 }
@@ -57,29 +54,29 @@ const styles = StyleSheet.create({
   mainpage: {
     backgroundColor: PRIMARY_COLOR,
     paddingTop: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
   header: {
     height: 80,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
   userContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   headerText: {
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 10,
+    marginLeft: 10
   },
   rightIcons: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   iconButton: {
-    marginLeft: 20,
-  },
+    marginLeft: 10
+  }
 });

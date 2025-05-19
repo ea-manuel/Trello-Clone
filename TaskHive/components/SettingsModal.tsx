@@ -35,7 +35,6 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
           <Text style={styles.sheetTitle}>Settings</Text>
           <View style={{ width: 30 }} /> {/* Spacer */}
         </View>
-
         {/* Render the detailed settings UI */}
         <SettingsContent />
       </View>
@@ -47,7 +46,7 @@ const styles = StyleSheet.create({
   fullScreenModal: {
     flex: 1,
     backgroundColor: "white",
-    paddingTop: 40,
+    paddingTop: 20,
   },
   sheetHeader: {
     flexDirection: "row",

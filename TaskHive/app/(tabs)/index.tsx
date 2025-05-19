@@ -42,7 +42,8 @@ export default function HomeScreen() {
         <Text
           style={{
             alignItems: "center",
-            marginTop: 70,
+            marginTop: 10,
+            marginLeft: 10,
             fontWeight: "bold",
             fontSize: 24,
             color: "gray",

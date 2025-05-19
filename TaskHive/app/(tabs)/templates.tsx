@@ -1,11 +1,10 @@
-import { useNavigation } from "expo-router";
-import { View, Text, StyleSheet,TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "expo-router";
 import { useEffect } from "react";
-
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Templates() {
-  const navigation=useNavigation()
+  const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -14,17 +13,23 @@ export default function Templates() {
             <Ionicons name="arrow-back" size={24} color="white" />
             <Text>Choose Template</Text>
           </TouchableOpacity>
-        
         </View>
       )
     });
   }, [navigation]);
   return (
     <View style={styles.mainpage}>
-      <View style={styles.templatesheader}>
-
-      </View>
-      <Text style={{ fontSize: 24, fontWeight: "bold", color: "#36454F", textAlign: "center" }}>Templates Screen</Text>
+      <View style={styles.templatesheader}></View>
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: "bold",
+          color: "#36454F",
+          textAlign: "center"
+        }}
+      >
+        Templates Screen
+      </Text>
     </View>
   );
 }
@@ -34,9 +39,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white"
   },
-  templatesheader:{
-    height:110,
-    backgroundColor:'#34495e',
-    alignItems:'center',
-  },
+  templatesheader: {
+    height: 100,
+    backgroundColor: "#34495e",
+    alignItems: "center"
+  }
 });
