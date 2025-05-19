@@ -1,138 +1,85 @@
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
-import { useNavigation, useRouter } from "expo-router";
-import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import "../global.css";
-
-import type { DrawerHeaderProps } from "@react-navigation/drawer";
+import SettingsModal from "./SettingsModal"; // Adjust path as needed
 
 const PRIMARY_COLOR = "#34495e";
 
-export default function Header(props: DrawerHeaderProps) {
-  const router = useRouter();
+export default function Header() {
   const navigation = useNavigation();
+
+  // Control modal visibility here
+  const [isSettingsVisible, setSettingsVisible] = useState(false);
+
   return (
     <View style={styles.mainpage}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          className=""
+          style={styles.userContainer}
+          activeOpacity={0.7}
         >
-          <Ionicons name="person-circle" size={35} color="white" />{" "}
+          <Ionicons name="person-circle" size={35} color="white" />
           <Text style={styles.headerText}>User@31...</Text>
         </TouchableOpacity>
-        <View style={{ flexDirection: "row", right: -30 }}>
-          <TouchableOpacity>
-            <Ionicons
-              name="search"
-              size={24}
-              color="white"
-              style={styles.searchicon}
-            />
+
+        <View style={styles.rightIcons}>
+          <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
+            <Ionicons name="search" size={24} color="white" />
           </TouchableOpacity>
 
-          <TouchableOpacity>
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              color="white"
-              style={styles.notificationicon}
-            />
+          <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
+            <Ionicons name="notifications-outline" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/settings")}>
-            <Ionicons
-              name="settings-outline"
-              size={24}
-              color="white"
-              style={styles.settingsicon}
-            />
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.iconButton}
+            onPress={() => setSettingsVisible(true)}
+          >
+            <Ionicons name="settings-outline" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        visible={isSettingsVisible}
+        onClose={() => setSettingsVisible(false)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   mainpage: {
-    flex: 1,
-    backgroundColor: "white",
-    paddingVertical: 20
+    backgroundColor: PRIMARY_COLOR,
+    paddingTop: 20,
+    paddingHorizontal: 10,
   },
   header: {
-    height: 90,
-    backgroundColor: PRIMARY_COLOR, // Use your primary color here
-    paddingTop: 40,
-    textAlign: "left",
-    display: "flex",
+    height: 80,
     flexDirection: "row",
-    paddingLeft: 10,
-    bottom: 20
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  userContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerText: {
-    color: "#fff",
+    color: "white",
     fontSize: 20,
     fontWeight: "bold",
-    paddingLeft: 13,
-    bottom: 30,
-    left: 30
-    // right:-60
+    marginLeft: 10,
   },
-  body: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  maintext: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#36454F"
-  },
-  subtext: {
-    fontSize: 18,
-    fontWeight: "medium",
-    color: "#808080"
-  },
-
-  searchicon: {
-    marginTop: 7,
-    left: 90
-  },
-  notificationicon: {
-    marginTop: 7,
-    left: 110
-  },
-  settingsicon: {
-    marginTop: 7,
-    left: 130
-  },
-
-  createBoardButton: {
-    bottom: -220,
-    left: 120
-  },
-  button: {
-    backgroundColor: '#34495e', // Use primary color for buttons too!
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderRadius: 15
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    bottom: 5
-  },
-  addicon: {
-    bottom: -7
-  },
-  footer: {
-    height: 70,
+  rightIcons: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 6,
-    paddingHorizontal: 10
+    alignItems: "center",
   },
-  workspaceicon: {}
+  iconButton: {
+    marginLeft: 20,
+  },
 });

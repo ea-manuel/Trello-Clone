@@ -1,5 +1,5 @@
-import DashBoard from "@/app/screens/DashBoard";
 import HomeScreen from "@/app/screens/HomeScreen";
+import Settings from "@/app/settings";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
@@ -12,7 +12,7 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator initialRouteName="Home">
         <Drawer.Screen name="Home" component={HomeScreen} />
-        <Drawer.Screen name="Profile" component={DashBoard} />
+        <Drawer.Screen name="Settings" component={Settings} />
       </Drawer.Navigator>
     </NavigationContainer>
   );

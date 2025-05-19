@@ -2,6 +2,8 @@ import { useNavigation } from "expo-router";
 import { View, Text, StyleSheet,TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
+
+
 export default function Templates() {
   const navigation=useNavigation()
   useEffect(() => {

@@ -24,7 +24,6 @@ export default function RootLayout() {
       <Drawer
         screenOptions={{
           header:
-            pathname !== "/settings" &&
             pathname !== "/auth/login" &&
             pathname !== "/templates" &&
             !pathname.startsWith("/boards")
