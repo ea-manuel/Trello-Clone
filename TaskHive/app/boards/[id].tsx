@@ -52,6 +52,7 @@ export default function BoardDetails() {
                          title:'',
                          cards:[],
                          editingTitle:true,  
+                         newCardText: '',
                          }]);
                     }}>
                         <Ionicons name='add' size={25} color='white'/>
@@ -92,27 +93,56 @@ export default function BoardDetails() {
                      </TouchableOpacity>
                    )}
              
-                   {/* Render cards here */}
                    <FlatList
                      data={item.cards}
                      keyExtractor={(card, i) => i.toString()}
-                     renderItem={({ item: card }) => (
-                       <View style={styles.card}>
-                         <Text>{card}</Text>
-                       </View>
-                     )}
+                     renderItem={({ item: card, index: cardIndex }) => (
+                      <View style={styles.card}>
+                        <TouchableOpacity
+                          style={styles.radio}
+                          onPress={() => {
+                            const updated = [...lists];
+                            updated[index].cards[cardIndex].completed = !updated[index].cards[cardIndex].completed;
+                            setLists(updated);
+                          }}
+                        >
+                        {card.completed ? (
+                                <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+                              ) : (
+                                <Ionicons name="ellipse-outline" size={24} color="#555" />
+                              )}
+                        
+                        </TouchableOpacity>
+                        
+                        <Text style={[styles.cardText, card.completed && styles.completedText]}>
+                          {card.text}
+                        </Text>
+                      </View>
+                    )}
+                    
                    />
              
                    {/* Add card input */}
                    <TextInput
-                     placeholder="Add a card..."
-                     style={styles.cardInput}
-                     onSubmitEditing={(e) => {
-                       const updated = [...lists];
-                       updated[index].cards.push(e.nativeEvent.text);
-                       setLists(updated);
-                     }}
+                         placeholder="+ Add a card..."
+                         style={styles.cardInput}
+                         value={item.newCardText}
+                         onChangeText={text => {
+                           const updated = [...lists];
+                           updated[index].newCardText = text;
+                           setLists(updated);
+                         }}
+                         onSubmitEditing={(e) => {
+                           const updated = [...lists];
+                           const text = updated[index].newCardText.trim();
+                           if (text) {
+                             updated[index].cards.push({ text: text, completed: false });
+                             updated[index].newCardText = ''; 
+                             setLists(updated);
+                           }
+                         }}
                    />
+
                </View>
              
            )}
@@ -170,23 +200,83 @@ const styles = StyleSheet.create({
     elevation:8,
   },
   listCard:{
-    backgroundColor:'gray',
+    backgroundColor:'#6F8FAF',
     alignItems:'center',
     marginLeft:20,
     width:270,
-    borderRadius:20,
+    borderRadius:30,
     height:350,
-   
+    paddingTop:10,
+    marginTop:20,
+   borderColor:'white',
+   borderWidth:2,
   },
   listTitleInput:{
-   
+    color:'white',
+    fontWeight:'bold',
+    fontSize:20,
   },
   listTitle:{
     color:'white',
     fontWeight:'bold',
     fontSize:20,
+    marginBottom:15,
 
   },
-  card:{},
-  cardInput:{},
+  card:{
+    backgroundColor:'#0e1d3e',
+    marginHorizontal:10,
+    textAlign:'left',
+    width:250,
+    height:50,
+    marginVertical:5,
+    borderRadius:15,
+    paddingHorizontal:15,
+    paddingVertical:10,
+    color:'white',
+  },
+  cardInput:{
+    borderColor:'white',
+    borderWidth:1,
+    width:270,
+    alignItems:'center',
+    textAlign:'center',
+    borderBottomLeftRadius:30,
+    borderBottomRightRadius:30,
+  },
+  radio: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#333",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  
+  radioUnchecked: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "transparent",
+  },
+  
+  radioChecked: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#2ecc71"
+  },
+  
+  cardText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight:'medium',
+  },
+  
+  completedText: {
+    textDecorationLine: "line-through",
+    color: "#888",
+  },
 });
