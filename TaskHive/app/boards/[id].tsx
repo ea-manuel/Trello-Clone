@@ -99,7 +99,7 @@ export default function BoardDetails() {
                      renderItem={({ item: card, index: cardIndex }) => (
                       <View style={styles.card}>
                         <TouchableOpacity
-                          style={styles.radio}
+                          // style={styles.radio}
                           onPress={() => {
                             const updated = [...lists];
                             updated[index].cards[cardIndex].completed = !updated[index].cards[cardIndex].completed;
@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
     paddingHorizontal:15,
     paddingVertical:10,
     color:'white',
+    flexDirection:'row',
   },
   cardInput:{
     borderColor:'white',
@@ -244,35 +245,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius:30,
     borderBottomRightRadius:30,
   },
-  radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#333",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  
-  radioUnchecked: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "transparent",
-  },
-  
-  radioChecked: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#2ecc71"
-  },
-  
+
   cardText: {
     fontSize: 16,
     color: "white",
     fontWeight:'medium',
+    paddingLeft:10,
   },
   
   completedText: {
