@@ -1,4 +1,3 @@
-// app/auth/login.tsx
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -14,24 +13,24 @@ import {
 
 const PRIMARY_COLOR = "#1F80E0";
 
-export default function Login() {
+export default function Signup() {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
-
-  const handleLogin = () => {
-    router.replace("/(tabs)");
-  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Logo */}
       <Image
-        source={require("../../assets/images/splash.png")} // Replace with your image path
-        style={styles.topImage}
+        source={require("../../assets/images/splash.png")} // Use your logo image path
+        style={styles.logo}
       />
-      {/* Logo placeholder */}
-      <View style={{ height: 60 }} />
 
-      <Text style={styles.title}>sign up to continue</Text>
+      <Text style={styles.title}>Signup to continue</Text>
+
+      {/* Input fields */}
       <TextInput
         style={styles.input}
         placeholder="Enter your email"
@@ -41,17 +40,51 @@ export default function Login() {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Enter username"
+        placeholderTextColor="#888"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your password"
+        placeholderTextColor="#888"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm password"
+        placeholderTextColor="#888"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+
+      {/* Terms text */}
       <Text style={styles.terms}>
         By signing up, you agree to our{" "}
         <Text style={styles.link}>Terms of service</Text> and the{" "}
         <Text style={styles.link}>Privacy Policy</Text>
       </Text>
-      <TouchableOpacity onPress={handleLogin} style={styles.signupButton}>
+
+      {/* Sign up button */}
+      <TouchableOpacity style={styles.signupButton}>
         <Text style={styles.signupButtonText}>Sign up</Text>
       </TouchableOpacity>
+
+      {/* Or continue with */}
       <Text style={styles.orText}>Or continue with:</Text>
+
+      {/* Social buttons */}
       <View style={styles.socialButtonsContainer}>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton}>
           <AntDesign
             name="google"
             size={24}
@@ -60,7 +93,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Google</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton}>
           <FontAwesome
             name="windows"
             size={24}
@@ -69,7 +102,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Microsoft</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton}>
           <AntDesign
             name="apple1"
             size={24}
@@ -78,7 +111,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Apple</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton}>
           <FontAwesome5
             name="slack"
             size={24}
@@ -88,10 +121,11 @@ export default function Login() {
           <Text style={styles.socialButtonText}>Slack</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={() => router.push("/auth/signup")}>
+
+      {/* Link to Login page */}
+      <TouchableOpacity onPress={() => router.push("/auth/login")}>
         <Text style={styles.loginText}>
-          Dont have an account?
-          <Text style={styles.loginLink}>Sign up</Text>
+          Already have an account? <Text style={styles.loginLink}>Log in</Text>
         </Text>
       </TouchableOpacity>
     </ScrollView>
@@ -107,18 +141,20 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center"
   },
-  topImage: {
-    width: 200,
-    height: 100,
-    resizeMode: "cover"
+  logo: {
+    width: 120,
+    height: 60,
+    resizeMode: "contain",
+    marginBottom: 10,
+    marginTop: 10
   },
   title: {
     fontWeight: "bold",
-    fontSize: 22,
+    fontSize: 20,
     alignSelf: "center",
     marginBottom: 20,
     marginTop: 10,
-    textTransform: "lowercase"
+    textTransform: "capitalize"
   },
   input: {
     width: "100%",
@@ -171,7 +207,6 @@ const styles = StyleSheet.create({
   },
   socialButtonsContainer: {
     width: "100%",
-    gap: 14,
     marginBottom: 24
   },
   socialButton: {
@@ -186,7 +221,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10
   },
-
   socialButtonText: {
     fontSize: 16,
     color: "#222",
@@ -194,7 +228,7 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 15,
-    color: "#4C99E6",
+    color: "#1F80E0",
     alignSelf: "center",
     marginTop: 10
   },
