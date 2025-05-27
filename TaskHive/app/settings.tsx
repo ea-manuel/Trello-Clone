@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
+  Modal,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
-  View,
-  Modal,
-  ScrollView,
-  Dimensions,
+  View
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 const PRIMARY_COLOR = "#34495e";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -36,15 +36,18 @@ export default function Settings() {
         </TouchableOpacity>
       ),
       headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 15 }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ marginLeft: 15 }}
+        >
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
       ),
       title: "Settings",
       headerStyle: {
-        backgroundColor: PRIMARY_COLOR,
+        backgroundColor: PRIMARY_COLOR
       },
-      headerTintColor: "#fff",
+      headerTintColor: "#fff"
     });
   }, [navigation]);
 
@@ -52,7 +55,6 @@ export default function Settings() {
     <View style={styles.container}>
       {/* Main content can be empty or summary */}
       <Text style={styles.mainText}>Settings Summary or Placeholder</Text>
-
       {/* Bottom Sheet Modal */}
       <Modal
         visible={isSheetVisible}
@@ -74,7 +76,11 @@ export default function Settings() {
             <ScrollView style={{ flex: 1 }}>
               {/* Profile Card */}
               <View style={styles.profileCard}>
-                <Ionicons name="person-circle" size={70} color={PRIMARY_COLOR} />
+                <Ionicons
+                  name="person-circle"
+                  size={70}
+                  color={PRIMARY_COLOR}
+                />
                 <Text style={styles.profileText}>TaskHive User</Text>
                 <Text style={styles.profileText}>@taskhiveuser1324</Text>
                 <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
@@ -94,7 +100,9 @@ export default function Settings() {
               <View style={styles.section}>
                 <Text style={styles.sectionHeader}>Accessibility</Text>
                 <View style={styles.row}>
-                  <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
+                  <Text style={styles.sectionSubtext}>
+                    Color blind friendly mode
+                  </Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
                     thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
@@ -112,7 +120,9 @@ export default function Settings() {
                   />
                 </View>
                 <View style={styles.row}>
-                  <Text style={styles.sectionSubtext}>Show label names on card front</Text>
+                  <Text style={styles.sectionSubtext}>
+                    Show label names on card front
+                  </Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
                     thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
@@ -129,7 +139,9 @@ export default function Settings() {
 
               <View style={styles.section}>
                 <Text style={styles.sectionHeader}>General</Text>
-                <Text style={styles.sectionSubtext}>Profile and visibility</Text>
+                <Text style={styles.sectionSubtext}>
+                  Profile and visibility
+                </Text>
                 <Text style={styles.sectionSubtext}>Set app language</Text>
                 <View style={styles.row}>
                   <Text style={styles.sectionSubtext}>Show quick add</Text>
@@ -144,7 +156,9 @@ export default function Settings() {
                 <Text style={styles.sectionSubtext}>About Trello</Text>
                 <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
                 <Text style={styles.sectionSubtext}>Contact support</Text>
-                <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
+                <Text style={styles.sectionSubtext}>
+                  Manage accounts on browser
+                </Text>
                 <Text style={styles.sectionSubtext}>Log out</Text>
               </View>
             </ScrollView>
@@ -160,16 +174,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#36393e",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
   mainText: {
     color: "white",
-    fontSize: 20,
+    fontSize: 20
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
+    justifyContent: "flex-end"
   },
   bottomSheet: {
     height: SCREEN_HEIGHT * 0.85,
@@ -177,48 +191,48 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     paddingHorizontal: 20,
-    paddingTop: 15,
+    paddingTop: 15
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 10
   },
   sheetTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: PRIMARY_COLOR,
+    color: PRIMARY_COLOR
   },
   profileCard: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 20
   },
   profileText: {
     fontWeight: "bold",
     fontSize: 16,
-    color: PRIMARY_COLOR,
+    color: PRIMARY_COLOR
   },
   section: {
     borderBottomColor: "#ccc",
     borderBottomWidth: 0.5,
-    paddingVertical: 10,
+    paddingVertical: 10
   },
   sectionHeader: {
     fontWeight: "bold",
     fontSize: 16,
     color: PRIMARY_COLOR,
-    marginBottom: 5,
+    marginBottom: 5
   },
   sectionSubtext: {
     fontSize: 14,
     color: "#333",
-    marginBottom: 5,
+    marginBottom: 5
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
-  },
+    marginBottom: 10
+  }
 });

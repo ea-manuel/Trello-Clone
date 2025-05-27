@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Switch,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 
 const PRIMARY_COLOR = "#34495e";
 
@@ -16,7 +10,10 @@ export default function SettingsContent() {
   const toggleSwitch = () => setIsEnabled((prev) => !prev);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
       {/* Profile Card */}
       <View style={styles.profileCard}>
         <Ionicons name="person-circle" size={70} color={PRIMARY_COLOR} />
@@ -59,7 +56,9 @@ export default function SettingsContent() {
           />
         </View>
         <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Show label names on card front</Text>
+          <Text style={styles.sectionSubtext}>
+            Show label names on card front
+          </Text>
           <Switch
             trackColor={{ false: "#767577", true: "#636B2F" }}
             thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
@@ -104,37 +103,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20
   },
   profileCard: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 20
   },
   profileText: {
     fontWeight: "bold",
     fontSize: 16,
-    color: PRIMARY_COLOR,
-    marginTop: 4,
+    color: "white",
+    marginTop: 4
   },
   section: {
-    borderBottomColor: "#ccc",
+    borderBottomColor: "white",
     borderBottomWidth: 0.5,
-    paddingVertical: 10,
+    paddingVertical: 10
   },
   sectionHeader: {
     fontWeight: "bold",
     fontSize: 16,
-    color: PRIMARY_COLOR,
-    marginBottom: 5,
+    color: "white",
+    marginBottom: 5
   },
   sectionSubtext: {
     fontSize: 14,
-    color: "#333",
-    marginBottom: 5,
+    color: "white",
+    marginBottom: 5
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
-  },
+    marginBottom: 10
+  }
 });

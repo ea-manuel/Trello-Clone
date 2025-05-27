@@ -1,19 +1,41 @@
-import HomeScreen from "@/app/screens/HomeScreen";
-import Settings from "@/app/settings";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { NavigationContainer } from "@react-navigation/native";
-import React from "react";
-// import ProfileScreen from './ProfileScreen';
+import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
+import { useRouter } from "expo-router";
+import { Drawer } from "expo-router/drawer";
 
-const Drawer = createDrawerNavigator();
-
-export default function App() {
+function CustomDrawerContent(props) {
+  const router = useRouter();
   return (
-    <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Home">
-        <Drawer.Screen name="Home" component={HomeScreen} />
-        <Drawer.Screen name="Settings" component={Settings} />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <DrawerContentScrollView
+      {...props}
+      style={{ backgroundColor: "#34495e", flex: 1 }}
+    >
+      <DrawerItem
+        label="Home"
+        labelStyle={{ color: "white" }}
+        onPress={() => router.push("/")}
+      />
+      <DrawerItem
+        label="Settings"
+        labelStyle={{ color: "white" }}
+        onPress={() => router.push("/settings")}
+      />
+      {/* Add more custom links as needed */}
+      {/* <DrawerItem label="Profile" labelStyle={{ color: 'white' }} onPress={() => router.push('/profile')} /> */}
+    </DrawerContentScrollView>
+  );
+}
+
+export default function Layout() {
+  return (
+    <Drawer
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: "#34495e" // Your custom color
+        },
+        drawerActiveTintColor: "#fff",
+        drawerInactiveTintColor: "#ccc"
+      }}
+    />
   );
 }

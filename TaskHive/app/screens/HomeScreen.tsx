@@ -2,18 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur"; // <-- Import BlurView
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import bee from '../../assets/images/bee.png';
 import {
   Button,
   FlatList,
+  Image,
   Modal,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Image
+  View
 } from "react-native";
+import bee from "../../assets/images/bee.png";
 
 const PRIMARY_COLOR = "#34495e";
 
@@ -76,7 +76,7 @@ export default function HomeScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.body}>
-            <Image source={bee} style={{width:300,height:300}}/>
+            <Image source={bee} style={{ width: 300, height: 300 }} />
             <Text style={styles.maintext}>No Boards</Text>
             <Text style={styles.subtext}>Create Your First Task Board</Text>
           </View>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     paddingHorizontal: 15,
     flexDirection: "row",
-    elevation:8,
+    elevation: 8
   },
   boardcardtext: {
     color: "Black",
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     bottom: 10
   },
   button: {
-    backgroundColor: "#5a6b7c",
+    backgroundColor: "#34495e",
     paddingVertical: 14,
     elevation: 5,
     borderRadius: 8
