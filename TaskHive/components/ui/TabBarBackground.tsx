@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-const PRIMARY_COLOR = "#34495e";
+const PRIMARY_COLOR = "#0B1F3A";
 
 export default function TabBarBackground() {
   return <View style={styles.background} />;

@@ -12,7 +12,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarBackground() {
-          return <View style={{backgroundColor: "#95a5a6"}} ><TabBarBackground /></View>;
+          return <View style={{backgroundColor: "#0B1F3A"}} ><TabBarBackground /></View>;
         },
         tabBarActiveTintColor: "#2EC", // or any color you want for active tab
         tabBarInactiveTintColor: "white", // inactive tabs will be white
@@ -22,7 +22,7 @@ export default function TabsLayout() {
             backgroundColor: "transparent",
             height: 60, paddingTop: 5 
           },
-          default: { backgroundColor: "#34495e", height: 60, paddingTop: 5 }
+          default: { backgroundColor: "#0B1F3A", height: 60, paddingTop: 5 }
         }), 
       }}
     >

@@ -1,46 +1,38 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { SymbolViewProps, SymbolWeight } from "expo-symbols";
-import { ComponentProps } from "react";
-import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 
-type IconMapping = Record<
-  SymbolViewProps["name"],
-  ComponentProps<typeof MaterialIcons>["name"]
->;
-type IconSymbolName = keyof typeof MAPPING;
-
-/**
- * Mapping SF Symbols to Material Icons for your bottom tab icons.
- */
 const MAPPING = {
-  "person.3.fill": "group", // Workspace icon
-  "rectangle.stack.fill": "layers", // My Cards icon
-  "folder.fill": "folder", // Templates icon
-  "questionmark.circle": "help-outline" // Help icon
-} as IconMapping;
+  "person.3.fill": { name: "group", set: "MaterialIcons" },
+  "rectangle.stack.fill": { name: "wifi-off", set: "MaterialCommunityIcons" },
+  "folder.fill": { name: "folder", set: "MaterialIcons" },
+  "questionmark.circle": { name: "error-outline", set: "MaterialIcons" }
+} as const;
 
-/**
- * IconSymbol component that uses native SF Symbols on iOS, and Material Icons on Android/web.
- */
+type IconName = keyof typeof MAPPING;
+
 export function IconSymbol({
   name,
-  size,
+  size = 24,
   color,
-  style,
-  weight
+  style
 }: {
-  name: IconSymbolName;
+  name: IconName;
   size?: number;
-  color: string | white;
+  color: string;
   style?: StyleProp<TextStyle>;
-  weight?: SymbolWeight;
 }) {
+  const icon = MAPPING[name];
+  if (icon.set === "MaterialCommunityIcons") {
+    return (
+      <MaterialCommunityIcons
+        name={icon.name}
+        size={size}
+        color={color}
+        style={style}
+      />
+    );
+  }
   return (
-    <MaterialIcons
-      color={color}
-      size={size}
-      name={MAPPING[name]}
-      style={style}
-    />
+    <MaterialIcons name={icon.name} size={size} color={color} style={style} />
   );
 }

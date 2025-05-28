@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import SettingsModal from "./SettingsModal"; // Adjust path as needed
 
-const PRIMARY_COLOR = "#34495e";
+const PRIMARY_COLOR = "#0B1F3A";
 
 export default function Header() {
   const navigation = useNavigation();

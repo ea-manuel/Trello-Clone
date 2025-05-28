@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Modal from "react-native-modal"; // Import from react-native-modal
 import SettingsContent from "./SettingsContent";
 
-const PRIMARY_COLOR = "#34495e";
+const PRIMARY_COLOR = "#0B1F3A";
 
 interface SettingsModalProps {
   visible: boolean;

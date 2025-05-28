@@ -1,20 +1,15 @@
-// components/ui/TabBarBackground.tsx
-import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet } from "react-native";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+
+const PRIMARY_COLOR = "#0B1F3a";
 
 export default function TabBarBackground() {
-  return (
-    <LinearGradient
-      colors={["#76C68F", "#005F94"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={styles.gradient}
-    />
-  );
+  return <View style={styles.background} />;
 }
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1
+  background: {
+    flex: 1,
+    backgroundColor: PRIMARY_COLOR // Use the primary color as solid background
   }
 });

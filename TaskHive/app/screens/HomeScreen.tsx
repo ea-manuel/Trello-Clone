@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import bee from "../../assets/images/bee.png";
 
-const PRIMARY_COLOR = "#34495e";
+const PRIMARY_COLOR = "#0B1F3A";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -117,7 +117,7 @@ export default function HomeScreen() {
               >
                 <View
                   style={{
-                    backgroundColor: "#34495e",
+                    backgroundColor: PRIMARY_COLOR,
                     borderRadius: 6,
                     margin: 5
                   }}
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   boardcard: {
     backgroundColor: "white",
     paddingVertical: 15,
-    borderColor: "#34495e",
+    borderColor: PRIMARY_COLOR,
     borderWidth: 0.5,
     paddingHorizontal: 15,
     flexDirection: "row",
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     bottom: 10
   },
   button: {
-    backgroundColor: "#34495e",
+    backgroundColor: PRIMARY_COLOR,
     paddingVertical: 14,
     elevation: 5,
     borderRadius: 8

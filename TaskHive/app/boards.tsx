@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const PRIMARY_COLOR = "#34495e";
+const PRIMARY_COLOR = "0B1F3A";
 
 export default function BoardDetails() {
   const router = useRouter();

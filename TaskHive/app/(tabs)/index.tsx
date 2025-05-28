@@ -107,7 +107,7 @@ export default function HomeScreen() {
               >
                 <View
                   style={{
-                    backgroundColor: "#34495e",
+                    backgroundColor: "#0B1F3A",
                     borderRadius: 6,
                     margin: 5
                   }}
@@ -115,7 +115,7 @@ export default function HomeScreen() {
                   <Button
                     title="Create"
                     onPress={handleCreateBoard}
-                    color="#34495e"
+                    color="#0B1F3A"
                   />
                 </View>
                 <View style={{ borderRadius: 6, margin: 5 }}>
@@ -190,10 +190,10 @@ const styles = StyleSheet.create({
   createBoardButton: {
     width: 170,
     left: 200,
-    bottom: 10
+    bottom: 10,
   },
   button: {
-    backgroundColor: "#5a6b7c",
+    backgroundColor: "#0B1F3A",
     paddingVertical: 14,
     elevation: 5,
     borderRadius: 8

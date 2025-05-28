@@ -12,7 +12,7 @@ import {
   View
 } from "react-native";
 
-const PRIMARY_COLOR = "#34495e";
+const PRIMARY_COLOR = "#0B1F3A";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 export default function Settings() {
