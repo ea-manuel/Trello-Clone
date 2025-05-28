@@ -29,7 +29,7 @@ function CustomDrawerContent(props) {
       <DrawerItem
         label="Home"
         labelStyle={{ color: "white" }}
-        onPress={() => router.push("/")}
+        onPress={() => router.push("/(tabs)")}
       />
       <DrawerItem
         label="Boards"

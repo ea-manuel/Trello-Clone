@@ -36,7 +36,7 @@ export default function BoardDetails() {
     <View style={styles.container}>
          <View style={styles.topBar}>
              <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => router.push("/(tabs)")}
                 style={styles.backButton}
               >
                   <Ionicons name="arrow-back" size={28} color="white" />

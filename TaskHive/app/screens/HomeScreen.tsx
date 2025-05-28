@@ -6,7 +6,9 @@ import {
   Button,
   FlatList,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -34,7 +36,7 @@ export default function HomeScreen() {
     setBoardTitle("");
     router.push({
       pathname: "/boards",
-      params: { board: JSON.stringify({ id: Date.now(), title: boardTitle }) }
+      params: { board: JSON.stringify(newBoard) }
     });
   };
 
@@ -67,6 +69,11 @@ export default function HomeScreen() {
                 params: { board: JSON.stringify(item) }
               })
             }
+            ListHeaderComponent={
+              boards.length > 0 ? (
+                <Text style={styles.boardsTitle}>Boards</Text>
+              ) : null
+            }
           >
             <View style={styles.boardcard}>
               <Ionicons name="grid" size={30} color="#34495e" />
@@ -85,7 +92,10 @@ export default function HomeScreen() {
 
       {showModal && (
         <Modal visible={showModal} transparent animationType="slide">
-          <View style={styles.modalBackground}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.modalBackground}
+          >
             <BlurView
               intensity={100}
               tint="dark"
@@ -127,7 +137,7 @@ export default function HomeScreen() {
                 </View>
               </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
       )}
       <View style={styles.createBoardButton}>
@@ -135,6 +145,8 @@ export default function HomeScreen() {
           onPress={() => setShowModal(true)}
           style={styles.button}
           activeOpacity={0.8}
+          accessibilityLabel="Create a new board"
+          accessible={true}
         >
           <View style={styles.buttonContent}>
             <Ionicons name="add" size={20} color="white" />
@@ -239,5 +251,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: 220,
     backgroundColor: "#f8f8f8"
+  },
+  boardsTitle: {
+    fontWeight: "bold",
+    fontSize: 24,
+    color: "gray",
+    marginVertical: 20,
+    textAlign: "center"
   }
 });

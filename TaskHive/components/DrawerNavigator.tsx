@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
@@ -12,7 +13,10 @@ function CustomDrawerContent(props) {
       <DrawerItem
         label="Home"
         labelStyle={{ color: "white" }}
-        onPress={() => router.push("/")}
+        icon={({ color, size }) => (
+          <Ionicons name="home-outline" size={size} color={color} />
+        )}
+        onPress={() => router.push("/(tabs)")}
       />
       <DrawerItem
         label="Settings"

@@ -16,7 +16,7 @@ export default function BoardDetails() {
       {/* Top bar with only back button */}
       <View style={styles.topBar}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.push("/(tabs)")}
           style={styles.backButton}
         >
           <Ionicons name="arrow-back" size={28} color="#1F80E0" />
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    color: "black",
+    color: "black"
   },
   topBar: {
     height: 110,
