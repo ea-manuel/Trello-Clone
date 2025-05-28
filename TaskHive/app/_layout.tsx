@@ -11,6 +11,7 @@ import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 
 import { DrawerContentScrollView } from "@react-navigation/drawer";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -38,13 +39,17 @@ export default function RootLayout() {
             <Text style={styles.workspacesHeader}>Workspaces</Text>
 
             {/* Create Workspace Button */}
-            <TouchableOpacity
-              style={styles.createWorkspaceButton}
-              onPress={() => {}}
-            >
-              <Text style={styles.createWorkspaceButtonText}>
-                + Create Workspace
-              </Text>
+            <TouchableOpacity onPress={() => {}}>
+              <LinearGradient
+                colors={["#00C6AE", "#007CF0"]}
+                style={styles.createWorkspaceButton}
+                start={{ x: 0, y: 0 }} // Optional: Adjust gradient direction
+                end={{ x: 1, y: 0 }} // Optional: Adjust gradient direction
+              >
+                <Text style={styles.createWorkspaceButtonText}>
+                  + Create Workspace
+                </Text>
+              </LinearGradient>
             </TouchableOpacity>
 
             {/* Your Workspaces Label */}
