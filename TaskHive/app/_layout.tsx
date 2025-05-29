@@ -72,6 +72,7 @@ export default function RootLayout() {
           header:
             pathname !== "/auth/login" &&
             pathname !== "/templates" &&
+            pathname !=="/auth/signup"&&
             !pathname.startsWith("/boards")
               ? (props) => <Header {...props} />
               : () => null,

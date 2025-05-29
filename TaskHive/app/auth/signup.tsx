@@ -142,11 +142,11 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   logo: {
-    width: 120,
-    height: 60,
-    resizeMode: "contain",
+    width: 200,
+    height: 100,
+    resizeMode: "cover",
     marginBottom: 10,
-    marginTop: 10
+    marginTop: 0
   },
   title: {
     fontWeight: "bold",
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 12,
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 25,
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

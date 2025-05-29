@@ -31,10 +31,19 @@ export default function Login() {
       {/* Logo placeholder */}
       <View style={{ height: 60 }} />
 
-      <Text style={styles.title}>sign up to continue</Text>
+      <Text style={styles.title}>Login to continue</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter your email"
+        placeholderTextColor="#888"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+       <TextInput
+        style={styles.input}
+        placeholder="Enter your password"
         placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
@@ -47,7 +56,7 @@ export default function Login() {
         <Text style={styles.link}>Privacy Policy</Text>
       </Text>
       <TouchableOpacity onPress={handleLogin} style={styles.signupButton}>
-        <Text style={styles.signupButtonText}>Sign up</Text>
+        <Text style={styles.signupButtonText}>Login</Text>
       </TouchableOpacity>
       <Text style={styles.orText}>Or continue with:</Text>
       <View style={styles.socialButtonsContainer}>
@@ -110,15 +119,16 @@ const styles = StyleSheet.create({
   topImage: {
     width: 200,
     height: 100,
-    resizeMode: "cover"
+    resizeMode: "cover",
+    
   },
   title: {
     fontWeight: "bold",
-    fontSize: 22,
+    fontSize: 20,
     alignSelf: "center",
-    marginBottom: 20,
-    marginTop: 10,
-    textTransform: "lowercase"
+    marginBottom: 40,
+    marginTop: -40,
+    // textTransform: "lowercase"
   },
   input: {
     width: "100%",
@@ -127,7 +137,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 12,
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 25,
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

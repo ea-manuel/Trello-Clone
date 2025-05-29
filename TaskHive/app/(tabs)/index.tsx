@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur"; // <-- Import BlurView
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { BlurView } from "expo-blur";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
 import bee from '../../assets/images/bee.png';
 import {
   Button,
@@ -11,30 +11,90 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,Image
+  View,
+  Image
 } from "react-native";
 
 const PRIMARY_COLOR = "#34495e";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [showModal, setShowModal] = useState(false);
-  const [boards, setBoards] = useState<{ id: number; title: string }[]>([]);
+  const [boards, setBoards] = useState<{
+    id: number;
+    title: string;
+    createdAt: string;
+    lists: { id: string; title: string; cards: { text: string; completed: boolean }[]; editingTitle: boolean; newCardText: string }[];
+  }[]>([]);
   const [boardTitle, setBoardTitle] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [boardToDelete, setBoardToDelete] = useState<number | null>(null);
+  const [longPressedBoardId, setLongPressedBoardId] = useState<number | null>(null);
+
+  // Handle updated board from BoardDetails
+  useEffect(() => {
+    if (params.board) {
+      try {
+        const updatedBoard = JSON.parse(params.board as string);
+        console.log('HomeScreen: Received updated board:', JSON.stringify(updatedBoard, null, 2));
+        setBoards(prev => {
+          const newBoards = prev.map(board =>
+            board.id === updatedBoard.id ? { ...board, ...updatedBoard } : board
+          );
+          console.log('HomeScreen: Updated boards state:', JSON.stringify(newBoards, null, 2));
+          return newBoards;
+        });
+      } catch (e) {
+        console.error("HomeScreen: Failed to parse updated board:", e);
+      }
+    }
+  }, [params.board]);
+
+  // Log boards state for debugging
+  useEffect(() => {
+    console.log('HomeScreen: Current boards state:', JSON.stringify(boards, null, 2));
+  }, [boards]);
+
   const handleCreateBoard = () => {
     if (!boardTitle.trim()) return;
     const newBoard = {
       id: Date.now(),
       title: boardTitle,
-      createdAt: new Date().toLocaleString()
+      createdAt: new Date().toLocaleString(),
+      lists: []
     };
-    setBoards([...boards, newBoard]);
+    setBoards(prev => [...prev, newBoard]);
     setShowModal(false);
     setBoardTitle("");
+    console.log('HomeScreen: Created new board:', JSON.stringify(newBoard, null, 2));
     router.push({
-      pathname: "/boards",
-      params: { board: JSON.stringify({ id: Date.now(), title: boardTitle }) }
+      pathname: `/boards/${newBoard.id}`,
+      params: { board: JSON.stringify(newBoard) }
     });
+  };
+
+  const handleLongPress = (boardId: number) => {
+    setLongPressedBoardId(boardId);
+    console.log('HomeScreen: Long pressed board:', boardId);
+  };
+
+  const handleDeleteBoard = (boardId: number) => {
+    setBoardToDelete(boardId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteBoard = () => {
+    if (boardToDelete !== null) {
+      setBoards(prev => {
+        const newBoards = prev.filter(board => board.id !== boardToDelete);
+        console.log('HomeScreen: Deleted board', boardToDelete, 'New boards:', JSON.stringify(newBoards, null, 2));
+        return newBoards;
+      });
+      setShowDeleteModal(false);
+      setBoardToDelete(null);
+      setLongPressedBoardId(null);
+    }
   };
 
   return (
@@ -60,25 +120,37 @@ export default function HomeScreen() {
         data={boards}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: `/boards/${item.id}`,
-                params: { board: JSON.stringify(item) }
-              })
-            }
-          >
-            <View style={styles.boardcard}>
+          <View style={styles.boardcard}>
+            <TouchableOpacity
+              onPress={() => {
+                console.log('HomeScreen: Navigating to board:', item.id);
+                setLongPressedBoardId(null); // Reset long press state on tap
+                router.push({
+                  pathname: `/boards/${item.id}`,
+                  params: { board: JSON.stringify(item) }
+                });
+              }}
+              onLongPress={() => handleLongPress(item.id)}
+              style={styles.boardcardTouchable}
+            >
               <Ionicons name="grid" size={30} color="#34495e" />
-              <Text style={styles.boardcardtext}>{item.title}</Text>
-            </View>
-          </TouchableOpacity>
+              <Text style={styles.boardcardText}>{item.title}</Text>
+            </TouchableOpacity>
+            {longPressedBoardId === item.id && (
+              <TouchableOpacity
+                onPress={() => handleDeleteBoard(item.id)}
+                style={styles.deleteButton}
+              >
+                <Ionicons name="trash-outline" size={24} color="#e74c3c" />
+              </TouchableOpacity>
+            )}
+          </View>
         )}
         ListEmptyComponent={
-          <View style={styles.body}>
-            <Image source={bee} style={{width:300,height:300}}/>
-            <Text style={styles.maintext}>No Boards</Text>
-            <Text style={styles.subtext}>Create Your First Task Board</Text>
+          <View style={styles.emptyContainer}>
+            <Image source={bee} style={{ width: 300, height: 300 }} />
+            <Text style={styles.emptyText}>No Boards</Text>
+            <Text style={styles.emptySubText}>Create Your First Task Board</Text>
           </View>
         }
       />
@@ -86,11 +158,7 @@ export default function HomeScreen() {
       {showModal && (
         <Modal visible={showModal} transparent animationType="slide">
           <View style={styles.modalBackground}>
-            <BlurView
-              intensity={100}
-              tint="dark"
-              style={StyleSheet.absoluteFill}
-            />
+            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
             <View style={styles.modalView}>
               <Text style={styles.modalTitle}>Enter Board Title</Text>
               <TextInput
@@ -99,26 +167,15 @@ export default function HomeScreen() {
                 value={boardTitle}
                 onChangeText={setBoardTitle}
               />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between"
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor: "#0B1F3A",
-                    borderRadius: 6,
-                    margin: 5
-                  }}
-                >
+              <View style={styles.modalButtons}>
+                <View style={styles.createButton}>
                   <Button
                     title="Create"
                     onPress={handleCreateBoard}
                     color="#0B1F3A"
                   />
                 </View>
-                <View style={{ borderRadius: 6, margin: 5 }}>
+                <View style={styles.cancelButton}>
                   <Button
                     title="Cancel"
                     onPress={() => setShowModal(false)}
@@ -130,6 +187,40 @@ export default function HomeScreen() {
           </View>
         </Modal>
       )}
+
+      {showDeleteModal && (
+        <Modal visible={showDeleteModal} transparent animationType="fade">
+          <View style={styles.modalBackground}>
+            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Delete Board</Text>
+              <Text style={styles.modalText}>
+                Are you sure you want to delete this board? This action cannot be undone.
+              </Text>
+              <View style={styles.modalButtons}>
+                <View style={styles.deleteConfirmButton}>
+                  <Button
+                    title="Delete"
+                    onPress={confirmDeleteBoard}
+                    color="red"
+                  />
+                </View>
+                <View style={styles.cancelButton}>
+                  <Button
+                    title="Cancel"
+                    onPress={() => {
+                      setShowDeleteModal(false);
+                      setBoardToDelete(null);
+                    }}
+                    color="#ADD8E6"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <View style={styles.createBoardButton}>
         <TouchableOpacity
           onPress={() => setShowModal(true)}
@@ -149,87 +240,104 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   mainpage: {
     flex: 1,
-    backgroundColor: "white"
+    backgroundColor: "white",
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "flex-start",
     paddingVertical: 20,
-    marginTop: 80
+    marginTop: 80,
   },
   boardcard: {
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
     paddingVertical: 15,
     borderColor: "#34495e",
     borderWidth: 0.5,
     paddingHorizontal: 15,
     flexDirection: "row",
-    elevation:8,
+    alignItems: "center",
+    elevation: 8,
+    marginVertical: 5,
   },
-  boardcardtext: {
-    color: "Black",
+  boardcardTouchable: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  boardcardText: {
+    color: "black",
     fontWeight: "500",
     fontSize: 22,
-    left: 15
+    marginLeft: 15,
   },
-  body: {
+  deleteButton: {
+    padding: 10,
+  },
+  emptyContainer: {
     padding: 20,
-    alignItems: "center"
+    alignItems: "center",
   },
-  maintext: {
+  emptyText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#36454F"
+    color: "#333",
   },
-  subtext: {
+  emptySubText: {
     fontSize: 18,
     fontWeight: "500",
     color: "#808080",
-    marginBottom: 20
+    marginBottom: 20,
   },
   createBoardButton: {
     width: 170,
-    left: 200,
-    bottom: 10,
+    alignSelf: "flex-end",
+    marginRight: 20,
+    marginBottom: 10,
   },
   button: {
     backgroundColor: "#0B1F3A",
     paddingVertical: 14,
     elevation: 5,
-    borderRadius: 8
+    borderRadius: 8,
   },
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   buttonText: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 16
+    fontSize: 16,
   },
   modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // fallback for blur
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   modalView: {
-    backgroundColor: "rgba(255, 255, 255, 0.85)", // semi-transparent for extra blur effect
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
     padding: 40,
     margin: 30,
-    borderRadius: 20, // More rounded corners
+    borderRadius: 20,
     elevation: 8,
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 10,
     minWidth: 300,
-    alignItems: "center"
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 10
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#333",
   },
   input: {
     borderWidth: 1,
@@ -238,6 +346,26 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 10,
     width: 220,
-    backgroundColor: "#f8f8f8"
-  }
+    backgroundColor: "#f8f8f8",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  createButton: {
+    backgroundColor: "#0B1F3A",
+    borderRadius: 6,
+    margin: 5,
+  },
+  deleteConfirmButton: {
+    backgroundColor: "#e74c3c",
+    borderRadius: 6,
+    margin: 5,
+    color:'black'
+  },
+  cancelButton: {
+    borderRadius: 6,
+    margin: 5,
+  },
 });
