@@ -9,11 +9,13 @@ import { useFonts } from "expo-font";
 import { usePathname, useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
-
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
+import EditWorkspaceModal from "@/components/EditWorkspaceModal";
+import { getWorkspaces } from "../app/stores/workspaceStore";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -21,60 +23,98 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf")
   });
-
   const router = useRouter();
-  const workspaces = ["Marketing", "Design", "Personal"];
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  type Workspace = { id: string; name: string; visibility: string; createdAt: number };
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
 
   if (!loaded) return null;
+
+  const workspaces = getWorkspaces();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Drawer
-        drawerContent={(props) => (
-          <DrawerContentScrollView
-            {...props}
-            style={{ backgroundColor: "#0B1F3A", flex: 1 }}
-          >
-            {/* Workspaces Header */}
-            <Text style={styles.workspacesHeader}>Workspaces</Text>
+        drawerContent={(props) => {
+          // Get workspaceId from navigation state
+          const navState = props.navigation.getState();
+          const workspaceId = navState?.routes[navState.index]?.params?.workspaceId || (workspaces.length > 0 ? workspaces[0].id : null);
+          console.log('Layout: Current workspaceId', workspaceId);
 
-            {/* Create Workspace Button */}
-            <TouchableOpacity onPress={() => {}}>
-              <LinearGradient
-                colors={["#00C6AE", "#007CF0"]}
-                style={styles.createWorkspaceButton}
-                start={{ x: 0, y: 0 }} // Optional: Adjust gradient direction
-                end={{ x: 1, y: 0 }} // Optional: Adjust gradient direction
-              >
-                <Text style={styles.createWorkspaceButtonText}>
-                  + Create Workspace
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {/* Your Workspaces Label */}
-            <Text style={styles.yourWorkspacesLabel}>Your Workspaces</Text>
-
-            {/* List of Workspaces */}
-            {workspaces.map((workspace, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.workspaceItem}
-                onPress={() => {}}
-              >
-                <View style={styles.workspaceIndicator} />
-                <Text style={styles.workspaceText}>{workspace}</Text>
+          return (
+            <DrawerContentScrollView
+              {...props}
+              style={{ backgroundColor: "#0B1F3A", flex: 1 }}
+            >
+              <Text style={styles.workspacesHeader}>Workspaces</Text>
+              <TouchableOpacity onPress={() => setCreateModalVisible(true)}>
+                <LinearGradient
+                  colors={["#00C6AE", "#007CF0"]}
+                  style={styles.createWorkspaceButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.createWorkspaceButtonText}>
+                    + Create Workspace
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
-            ))}
-          </DrawerContentScrollView>
-        )}
+              <Text style={styles.yourWorkspacesLabel}>Your Workspaces</Text>
+              {workspaces.map((workspace) => (
+                <TouchableOpacity
+                  key={workspace.id}
+                  style={styles.workspaceItem}
+                  onPress={() => {
+                    console.log('Layout: Navigating to workspaceId', workspace.id);
+                    router.push({
+                      pathname: "/(tabs)",
+                      params: { workspaceId: workspace.id }
+                    });
+                  }}
+                  onLongPress={() => {
+                    setSelectedWorkspace(workspace);
+                    setEditModalVisible(true);
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.workspaceIndicator,
+                      workspace.id !== workspaceId && { backgroundColor: "transparent" }
+                    ]}
+                  />
+                  <Text style={styles.workspaceText}>{workspace.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <CreateWorkspaceModal
+                visible={createModalVisible}
+                onClose={() => setCreateModalVisible(false)}
+                onCreate={() => setCreateModalVisible(false)}
+              />
+              {selectedWorkspace && (
+                <EditWorkspaceModal
+                  visible={editModalVisible}
+                  onClose={() => {
+                    setEditModalVisible(false);
+                    setSelectedWorkspace(null);
+                  }}
+                  workspace={selectedWorkspace}
+                  onUpdate={() => {
+                    setEditModalVisible(false);
+                    setSelectedWorkspace(null);
+                  }}
+                />
+              )}
+            </DrawerContentScrollView>
+          );
+        }}
         screenOptions={{
           header:
             pathname !== "/auth/login" &&
             pathname !== "/templates" &&
-            pathname !=="/auth/signup"&&
+            pathname !== "/auth/signup" &&
             !pathname.startsWith("/boards")
-              ? (props) => <Header {...props} />
+              ? () => <Header />
               : () => null,
           drawerStyle: {
             backgroundColor: colorScheme === "dark" ? "#0B1F3A" : "#34495e"
@@ -83,7 +123,6 @@ export default function RootLayout() {
           drawerInactiveTintColor: "#ccc"
         }}
       />
-
       <StatusBar
         style={colorScheme === "dark" ? "light" : "light"}
         backgroundColor={colorScheme === "dark" ? "#34495e" : "#34495e"}
@@ -102,7 +141,6 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   createWorkspaceButton: {
-    backgroundColor: "#2ECC71", // Example Green Color
     padding: 12,
     borderRadius: 8,
     marginHorizontal: 16,
@@ -129,7 +167,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#2980B9", // Example Blue Color
+    backgroundColor: "#2980B9",
     marginRight: 10
   },
   workspaceText: {

@@ -14,6 +14,7 @@ import {
   View,
   Image
 } from "react-native";
+import { getWorkspaces, getBoards, createBoard } from '../stores/workspaceStore';
 
 const PRIMARY_COLOR = "#34495e";
 
@@ -22,15 +23,32 @@ export default function HomeScreen() {
   const params = useLocalSearchParams();
   const [showModal, setShowModal] = useState(false);
   const [boards, setBoards] = useState<{
-    id: number;
+    id: string;
     title: string;
-    createdAt: string;
+    workspaceId: string;
+    backgroundColor: string;
+    createdAt: number;
     lists: { id: string; title: string; cards: { text: string; completed: boolean }[]; editingTitle: boolean; newCardText: string }[];
   }[]>([]);
   const [boardTitle, setBoardTitle] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [boardToDelete, setBoardToDelete] = useState<number | null>(null);
-  const [longPressedBoardId, setLongPressedBoardId] = useState<number | null>(null);
+  const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
+  const [longPressedBoardId, setLongPressedBoardId] = useState<string | null>(null);
+
+  // Get selected workspace based on params or default to first workspace
+  const workspaceId = params.workspaceId as string;
+  const selectedWorkspace = workspaceId
+    ? getWorkspaces().find(ws => ws.id === workspaceId) || getWorkspaces()[0]
+    : getWorkspaces()[0];
+
+  // Load boards for selected workspace
+  useEffect(() => {
+    if (selectedWorkspace) {
+      const fetchedBoards = getBoards(selectedWorkspace.id);
+      setBoards(fetchedBoards);
+      console.log('HomeScreen: Current boards state for workspace', selectedWorkspace.id, ':', JSON.stringify(fetchedBoards, null, 2));
+    }
+  }, [selectedWorkspace]);
 
   // Handle updated board from BoardDetails
   useEffect(() => {
@@ -51,19 +69,14 @@ export default function HomeScreen() {
     }
   }, [params.board]);
 
-  // Log boards state for debugging
-  useEffect(() => {
-    console.log('HomeScreen: Current boards state:', JSON.stringify(boards, null, 2));
-  }, [boards]);
-
   const handleCreateBoard = () => {
     if (!boardTitle.trim()) return;
-    const newBoard = {
-      id: Date.now(),
+    const newBoard = createBoard({
       title: boardTitle,
-      createdAt: new Date().toLocaleString(),
+      workspaceId: selectedWorkspace.id,
+      backgroundColor: "#ADD8E6",
       lists: []
-    };
+    });
     setBoards(prev => [...prev, newBoard]);
     setShowModal(false);
     setBoardTitle("");
@@ -74,12 +87,12 @@ export default function HomeScreen() {
     });
   };
 
-  const handleLongPress = (boardId: number) => {
+  const handleLongPress = (boardId: string) => {
     setLongPressedBoardId(boardId);
     console.log('HomeScreen: Long pressed board:', boardId);
   };
 
-  const handleDeleteBoard = (boardId: number) => {
+  const handleDeleteBoard = (boardId: string) => {
     setBoardToDelete(boardId);
     setShowDeleteModal(true);
   };
@@ -362,7 +375,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#e74c3c",
     borderRadius: 6,
     margin: 5,
-    color:'black'
   },
   cancelButton: {
     borderRadius: 6,
