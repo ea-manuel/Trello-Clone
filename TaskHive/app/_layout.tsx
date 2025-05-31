@@ -85,7 +85,7 @@ export default function RootLayout() {
       />
 
       <StatusBar
-        style={colorScheme === "dark" ? "light" : "dark"}
+        style={colorScheme === "dark" ? "light" : "light"}
         backgroundColor={colorScheme === "dark" ? "#34495e" : "#34495e"}
       />
     </ThemeProvider>
