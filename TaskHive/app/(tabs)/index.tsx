@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { getWorkspaces, getBoards, createBoard } from '../stores/workspaceStore';
 
-const PRIMARY_COLOR = "#34495e";
 
 export default function HomeScreen() {
   const router = useRouter();

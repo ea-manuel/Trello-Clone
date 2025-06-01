@@ -1,20 +1,20 @@
+import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
+import EditWorkspaceModal from "@/components/EditWorkspaceModal";
 import Header from "@/components/Header";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { DrawerContentScrollView } from "@react-navigation/drawer";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import { LinearGradient } from "expo-linear-gradient";
 import { usePathname, useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
-import { DrawerContentScrollView } from "@react-navigation/drawer";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
-import EditWorkspaceModal from "@/components/EditWorkspaceModal";
 import { getWorkspaces } from "../app/stores/workspaceStore";
 
 export default function RootLayout() {
@@ -26,8 +26,15 @@ export default function RootLayout() {
   const router = useRouter();
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  type Workspace = { id: string; name: string; visibility: string; createdAt: number };
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  type Workspace = {
+    id: string;
+    name: string;
+    visibility: string;
+    createdAt: number;
+  };
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
+    null
+  );
 
   if (!loaded) return null;
 
@@ -39,8 +46,10 @@ export default function RootLayout() {
         drawerContent={(props) => {
           // Get workspaceId from navigation state
           const navState = props.navigation.getState();
-          const workspaceId = navState?.routes[navState.index]?.params?.workspaceId || (workspaces.length > 0 ? workspaces[0].id : null);
-          console.log('Layout: Current workspaceId', workspaceId);
+          const workspaceId =
+            navState?.routes[navState.index]?.params?.workspaceId ||
+            (workspaces.length > 0 ? workspaces[0].id : null);
+          console.log("Layout: Current workspaceId", workspaceId);
 
           return (
             <DrawerContentScrollView
@@ -66,7 +75,10 @@ export default function RootLayout() {
                   key={workspace.id}
                   style={styles.workspaceItem}
                   onPress={() => {
-                    console.log('Layout: Navigating to workspaceId', workspace.id);
+                    console.log(
+                      "Layout: Navigating to workspaceId",
+                      workspace.id
+                    );
                     router.push({
                       pathname: "/(tabs)",
                       params: { workspaceId: workspace.id }
@@ -80,7 +92,9 @@ export default function RootLayout() {
                   <View
                     style={[
                       styles.workspaceIndicator,
-                      workspace.id !== workspaceId && { backgroundColor: "transparent" }
+                      workspace.id !== workspaceId && {
+                        backgroundColor: "transparent"
+                      }
                     ]}
                   />
                   <Text style={styles.workspaceText}>{workspace.name}</Text>
@@ -111,6 +125,7 @@ export default function RootLayout() {
         screenOptions={{
           header:
             pathname !== "/auth/login" &&
+            pathname !== "/auth/welcome" &&
             pathname !== "/templates" &&
             pathname !== "/auth/signup" &&
             !pathname.startsWith("/boards")
