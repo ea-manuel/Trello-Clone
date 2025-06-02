@@ -128,6 +128,7 @@ export default function RootLayout() {
             pathname !== "/auth/welcome" &&
             pathname !== "/templates" &&
             pathname !== "/auth/signup" &&
+            pathname !== "/screens/SearchScreen" &&
             !pathname.startsWith("/boards")
               ? () => <Header />
               : () => null,

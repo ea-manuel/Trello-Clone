@@ -5,11 +5,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import SettingsModal from "./SettingsModal";
 import { getWorkspaces } from "../app/stores/workspaceStore";
+import {Link,useRouter} from "expo-router";
 
 const PRIMARY_COLOR = "#0B1F3A";
 
 export default function Header() {
   const navigation = useNavigation();
+  const router = useRouter();
   const { workspaceId } = useLocalSearchParams();
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [workspaceName, setWorkspaceName] = useState("Workspace");
@@ -41,7 +43,13 @@ export default function Header() {
         </TouchableOpacity>
 
         <View style={styles.rightIcons}>
-          <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
+          <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}
+            onPress={() => {
+              router.push({
+                pathname: "/screens/SearchScreen",
+               
+              });
+            }}>
             <Ionicons name="search" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
