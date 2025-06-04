@@ -15,9 +15,10 @@ import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getWorkspaces } from "../app/stores/workspaceStore";
+import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
 export default function RootLayout() {
+  const { workspaces, setCurrentWorkspaceId } = useWorkspaceStore();
   const colorScheme = useColorScheme();
   const pathname = usePathname();
   const [loaded] = useFonts({
@@ -32,24 +33,22 @@ export default function RootLayout() {
     visibility: string;
     createdAt: number;
   };
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
-    null
-  );
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
 
   if (!loaded) return null;
-
-  const workspaces = getWorkspaces();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Drawer
         drawerContent={(props) => {
-          // Get workspaceId from navigation state
           const navState = props.navigation.getState();
           const workspaceId =
             navState?.routes[navState.index]?.params?.workspaceId ||
             (workspaces.length > 0 ? workspaces[0].id : null);
           console.log("Layout: Current workspaceId", workspaceId);
+          const [currentWorkspaceId, setCurrentWorkspaceIdLocal] = useState(
+            workspaces.length > 0 ? workspaces[0].id : null
+          );
 
           return (
             <DrawerContentScrollView
@@ -73,12 +72,14 @@ export default function RootLayout() {
               {workspaces.map((workspace) => (
                 <TouchableOpacity
                   key={workspace.id}
-                  style={styles.workspaceItem}
+                  style={[
+                    styles.workspaceItem,
+                    workspace.id === currentWorkspaceId && styles.activeWorkspaceItem
+                  ]}
                   onPress={() => {
-                    console.log(
-                      "Layout: Navigating to workspaceId",
-                      workspace.id
-                    );
+                    console.log("Layout: Navigating to workspaceId", workspace.id);
+                    setCurrentWorkspaceIdLocal(workspace.id);
+                    setCurrentWorkspaceId(workspace.id);
                     router.push({
                       pathname: "/(tabs)",
                       params: { workspaceId: workspace.id }
@@ -92,7 +93,7 @@ export default function RootLayout() {
                   <View
                     style={[
                       styles.workspaceIndicator,
-                      workspace.id !== workspaceId && {
+                      workspace.id !== currentWorkspaceId && {
                         backgroundColor: "transparent"
                       }
                     ]}
@@ -123,15 +124,17 @@ export default function RootLayout() {
           );
         }}
         screenOptions={{
-          header:
-            pathname !== "/auth/login" &&
-            pathname !== "/auth/welcome" &&
-            pathname !== "/templates" &&
-            pathname !== "/auth/signup" &&
-            pathname !== "/screens/SearchScreen" &&
-            !pathname.startsWith("/boards")
-              ? () => <Header />
-              : () => null,
+          header: () =>
+            // Hide header if either modal is visible or pathname matches exclusions
+            createModalVisible || editModalVisible ||
+            pathname === "/auth/login" ||
+            pathname === "/auth/welcome" ||
+            pathname === "/templates" ||
+            pathname === "/auth/signup" ||
+            pathname === "/screens/SearchScreen" ||
+            pathname.startsWith("/boards")
+              ? null
+              : <Header />,
           drawerStyle: {
             backgroundColor: colorScheme === "dark" ? "#0B1F3A" : "#34495e"
           },
@@ -189,5 +192,9 @@ const styles = StyleSheet.create({
   workspaceText: {
     color: "white",
     fontSize: 16
-  }
+  },
+  activeWorkspaceItem: {
+    backgroundColor: "#1A324F",
+    borderRadius: 8
+  },
 });

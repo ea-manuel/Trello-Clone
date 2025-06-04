@@ -1,49 +1,67 @@
-let workspaces = [];
-let boards = [];
-let nextId = 1;
+// app/stores/workspaceStore.js
+import { create } from "zustand";
 
-// Create default workspace if none exist
-if (workspaces.length === 0) {
-  workspaces.push({
-    id: `ws-${nextId++}`,
-    name: "Default Workspace",
-    visibility: "Private",
-    createdAt: Date.now()
-  });
-}
+let nextId = 2;
 
-export const createWorkspace = ({ name, visibility }) => {
-  const workspace = { id: `ws-${nextId++}`, name, visibility, createdAt: Date.now() };
-  workspaces.push(workspace);
-  return workspace;
-};
+export const useWorkspaceStore = create((set, get) => ({
+  workspaces: [
+    {
+      id: "ws-1",
+      name: "Default Workspace",
+      visibility: "Private",
+      createdAt: Date.now(),
+    },
+  ],
+  boards: [],
+  currentWorkspaceId: "ws-1",
 
-export const editWorkspace = (id, { name, visibility }) => {
-  const index = workspaces.findIndex(ws => ws.id === id);
-  if (index !== -1) {
-    workspaces[index] = { ...workspaces[index], name, visibility };
-    return workspaces[index];
-  }
-  return null;
-};
+  // Workspace actions
+  createWorkspace: ({ name, visibility }) => {
+    const newWorkspace = {
+      id: `ws-${nextId++}`,
+      name,
+      visibility,
+      createdAt: Date.now(),
+    };
+    set((state) => ({
+      workspaces: [...state.workspaces, newWorkspace],
+      currentWorkspaceId: newWorkspace.id,
+    }));
+    return newWorkspace;
+  },
 
-export const getWorkspaces = () => {
-  return workspaces;
-};
+  editWorkspace: (id, { name, visibility }) => {
+    set((state) => ({
+      workspaces: state.workspaces.map((ws) =>
+        ws.id === id ? { ...ws, name, visibility } : ws
+      ),
+    }));
+  },
 
-export const createBoard = ({ title, workspaceId, backgroundColor }) => {
-  const board = { 
-    id: `board-${nextId++}`, 
-    title, 
-    workspaceId, 
-    backgroundColor, 
-    createdAt: Date.now(),
-    lists: []
-  };
-  boards.push(board);
-  return board;
-};
+  setCurrentWorkspaceId: (id) => set({ currentWorkspaceId: id }),
 
-export const getBoards = (workspaceId) => {
-  return boards.filter(b => b.workspaceId === workspaceId);
-};
+  // Board actions
+  createBoard: ({ title, workspaceId, backgroundColor }) => {
+    const newBoard = {
+      id: `board-${nextId++}`,
+      title,
+      workspaceId,
+      backgroundColor,
+      createdAt: Date.now(),
+      lists: [],
+    };
+    set((state) => ({
+      boards: [...state.boards, newBoard],
+    }));
+    return newBoard;
+  },
+
+  getBoards: (workspaceId) => {
+    return get().boards.filter((b) => b.workspaceId === workspaceId);
+  },
+
+  // Optional utility function if needed elsewhere
+  getWorkspaces: () => {
+    return get().workspaces;
+  },
+}));

@@ -1,34 +1,26 @@
+// components/Header.js
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import SettingsModal from "./SettingsModal";
-import { getWorkspaces } from "../app/stores/workspaceStore";
-import {Link,useRouter} from "expo-router";
+import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
 const PRIMARY_COLOR = "#0B1F3A";
 
 export default function Header() {
   const navigation = useNavigation();
   const router = useRouter();
-  const { workspaceId } = useLocalSearchParams();
   const [isSettingsVisible, setSettingsVisible] = useState(false);
-  const [workspaceName, setWorkspaceName] = useState("Workspace");
 
-  // Update workspace name based on workspaceId
-  useEffect(() => {
-    const workspaces = getWorkspaces();
-    const selectedWorkspace = workspaceId
-      ? workspaces.find(ws => ws.id === workspaceId) || workspaces[0]
-      : workspaces[0];
-    if (selectedWorkspace) {
-      setWorkspaceName(selectedWorkspace.name);
-      console.log('Header: Updated workspace name to', selectedWorkspace.name, 'for workspaceId', workspaceId);
-    } else {
-      console.log('Header: No workspace found for workspaceId', workspaceId);
-    }
-  }, [workspaceId]);
+  // Zustand store
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const currentWorkspaceId = useWorkspaceStore((state) => state.currentWorkspaceId);
+
+  // Find current workspace
+  const currentWorkspace = workspaces.find((ws) => ws.id === currentWorkspaceId);
+  const workspaceName = currentWorkspace ? currentWorkspace.name : "Workspace";
 
   return (
     <View style={styles.mainpage}>
@@ -43,13 +35,13 @@ export default function Header() {
         </TouchableOpacity>
 
         <View style={styles.rightIcons}>
-          <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.iconButton}
             onPress={() => {
-              router.push({
-                pathname: "/screens/SearchScreen",
-               
-              });
-            }}>
+              router.push({ pathname: "/screens/SearchScreen" });
+            }}
+          >
             <Ionicons name="search" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
@@ -76,29 +68,29 @@ const styles = StyleSheet.create({
   mainpage: {
     backgroundColor: PRIMARY_COLOR,
     paddingTop: 20,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   header: {
     height: 80,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   userContainer: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   headerText: {
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 10
+    marginLeft: 10,
   },
   rightIcons: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   iconButton: {
-    marginLeft: 10
-  }
+    marginLeft: 10,
+  },
 });

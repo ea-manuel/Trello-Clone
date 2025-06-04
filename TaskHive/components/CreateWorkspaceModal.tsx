@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
-import { createWorkspace } from "../app/stores/workspaceStore";
+import { useWorkspaceStore } from "../app/stores/workspaceStore"; // Import the hook
 import { Ionicons } from "@expo/vector-icons";
 
 type CreateWorkspaceModalProps = {
@@ -13,10 +13,12 @@ type CreateWorkspaceModalProps = {
 export default function CreateWorkspaceModal({ visible, onClose, onCreate }: CreateWorkspaceModalProps) {
   const [name, setName] = useState("");
   const [visibility, setVisibility] = useState("Private");
+  const { createWorkspace } = useWorkspaceStore(); // Access createWorkspace via hook
 
   const handleCreate = () => {
     if (!name.trim()) return;
     const workspace = createWorkspace({ name, visibility });
+    console.log('CreateWorkspaceModal: Created workspace:', JSON.stringify(workspace, null, 2)); // Debug log
     onCreate(workspace);
     setName("");
     setVisibility("Private");
@@ -40,7 +42,7 @@ export default function CreateWorkspaceModal({ visible, onClose, onCreate }: Cre
             onPress={() => setVisibility(visibility === "Private" ? "Public" : "Private")}
           >
             <Text style={styles.visibilityText}>{visibility}</Text>
-            <Ionicons name="chevron-down" size={24}/>
+            <Ionicons name="chevron-down" size={24} />
           </TouchableOpacity>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
@@ -87,13 +89,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   visibilityButton: {
-    flexDirection:'row',
+    flexDirection: "row",
     padding: 10,
     borderRadius: 6,
     marginBottom: 10,
     width: 220,
     alignItems: "center",
-    justifyContent:'center',
+    justifyContent: "center",
   },
   visibilityText: {
     color: "#0B1F3A",

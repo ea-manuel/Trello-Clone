@@ -16,7 +16,7 @@ export default function SettingsContent() {
     >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <Ionicons name="person-circle" size={70} color={PRIMARY_COLOR} />
+        <Ionicons name="person-circle" size={90} color={PRIMARY_COLOR} />
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
@@ -103,12 +103,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20
+    // borderTopRightRadius: 20,
+    // borderTopLeftRadius: 20,
+    backgroundColor:'#B6D0E2'
   },
   profileCard: {
     alignItems: "center",
-    marginBottom: 20
+    marginBottom: 20,
+    backgroundColor:'#5B7C99',
+    marginHorizontal:-20,
+    paddingBottom:15,
   },
   profileText: {
     fontWeight: "bold",

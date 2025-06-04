@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end" // Align modal content at the bottom
   },
   fullScreenModal: {
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: '#5B7C99',
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     paddingTop: 20,
