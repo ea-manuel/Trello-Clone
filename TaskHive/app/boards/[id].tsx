@@ -193,6 +193,9 @@ export default function BoardDetails() {
                     <Text style={[styles.cardText, card.completed && styles.completedText]}>
                       {card.text}
                     </Text>
+                    <TouchableOpacity>
+                       <Ionicons name="ellipsis-vertical-sharp" size={30} color='white' style={{left:140}}/>
+                    </TouchableOpacity>
                   </View>
                 )}
               />
@@ -300,10 +303,10 @@ const styles = StyleSheet.create({
   listCard: {
     backgroundColor: "#6F8FAF",
     alignItems: "center",
-    marginLeft: 20,
+    marginLeft: 15,
     width: 270,
     borderRadius: 30,
-    height: 550,
+    height: 400,
     paddingTop: 10,
     marginTop: 20,
     borderColor: "white",

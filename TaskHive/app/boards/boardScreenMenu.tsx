@@ -1,8 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, TextInput } from "react-native";
+import {
+  StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, TextInput,
+  ImageBackground, Alert
+} from "react-native";
 import { BlurView } from "expo-blur";
+import * as ImagePicker from "expo-image-picker"; // Import expo-image-picker
 
 const PRIMARY_COLOR = "#0B1F3A";
 
@@ -12,11 +16,12 @@ export default function BoardScreenMenu() {
   const [showVisibilityModal, setShowVisibilityModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [inviteInput, setInviteInput] = useState("");
+  const [backgroundImage, setBackgroundImage] = useState(null); // State for selected image URI
 
   // Parse the board
   let board = null;
   try {
-    board = params.board ? JSON.parse(params.board as string) : null;
+    board = params.board ? JSON.parse(params.board) : null;
     if (board && !board.backgroundColor) {
       board.backgroundColor = "#ADD8E6";
     }
@@ -32,15 +37,41 @@ export default function BoardScreenMenu() {
     console.log('BoardScreenMenu: Received board:', JSON.stringify(board, null, 2));
   }, [board]);
 
+  // Function to pick an image from gallery
+  const pickImage = async () => {
+    // Request permission to access gallery
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Sorry, we need photo library permissions to select an image.');
+      return;
+    }
+
+    // Open gallery to pick an image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+      console.log('BoardScreenMenu: Selected image URI:', imageUri);
+      setBackgroundImage(imageUri); // Set the selected image URI
+    } else {
+      console.log('BoardScreenMenu: Image selection canceled');
+    }
+  };
+
   if (!board) {
     return <Text>Error: No board data available</Text>;
   }
 
   const navigateBack = () => {
     console.log('BoardScreenMenu: Navigating back to BoardDetails for board:', board.id);
+    const updatedBoard = { ...board, backgroundImage: backgroundImage || board.backgroundColor };
     router.push({
       pathname: "/boards/[id]",
-      params: { id: board.id, board: JSON.stringify(board) }
+      params: { id: board.id, board: JSON.stringify(updatedBoard) }
     });
   };
 
@@ -86,12 +117,13 @@ export default function BoardScreenMenu() {
   ];
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={backgroundImage ? { uri: backgroundImage } : undefined}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={navigateBack}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={navigateBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
         <Text style={styles.title}>Board Screen Menu</Text>
@@ -99,6 +131,9 @@ export default function BoardScreenMenu() {
       <View style={styles.content}>
         <View style={styles.colorSection}>
           <Text style={styles.colorSectionTitle}>Change Board Background</Text>
+          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+            <Text style={styles.imageButtonText}>Pick Image from Gallery</Text>
+          </TouchableOpacity>
           <FlatList
             data={colors}
             keyExtractor={item => item.id}
@@ -111,6 +146,7 @@ export default function BoardScreenMenu() {
                 onPress={() => {
                   const updatedBoard = { ...board, backgroundColor: item.value };
                   console.log('BoardScreenMenu: Selected color:', item.value);
+                  setBackgroundImage(null); // Clear image if color is selected
                   router.push({
                     pathname: "/boards/[id]",
                     params: { id: board.id, board: JSON.stringify(updatedBoard) }
@@ -271,14 +307,14 @@ export default function BoardScreenMenu() {
           </View>
         </Modal>
       )}
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ADD8E6",
+    // backgroundColor removed; handled by ImageBackground
   },
   topBar: {
     height: 110,
@@ -335,6 +371,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 2 },
+  },
+  imageButton: {
+    backgroundColor: "#6F8FAF",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  imageButtonText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
   },
   iconSection: {
     flexDirection: "row",
