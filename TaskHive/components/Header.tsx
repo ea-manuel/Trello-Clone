@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
+import NotificationsModal from "./NotificationModal"; // Import your modal component
 import SettingsModal from "./SettingsModal";
 
 const PRIMARY_COLOR = "#0B1F3A";
@@ -13,6 +14,7 @@ export default function Header() {
   const navigation = useNavigation();
   const router = useRouter();
   const [isSettingsVisible, setSettingsVisible] = useState(false);
+  const [isNotificationsVisible, setNotificationsVisible] = useState(false); // New state for notifications modal
 
   // Zustand store
   const workspaces = useWorkspaceStore((state) => state.workspaces);
@@ -52,7 +54,7 @@ export default function Header() {
             activeOpacity={0.7}
             style={styles.iconButton}
             onPress={() => {
-              router.push({ pathname: "/screens/NotificationScreen" });
+              setNotificationsVisible(true); // Open notifications modal instead of navigating
             }}
           >
             <Ionicons name="notifications-outline" size={24} color="white" />
@@ -70,6 +72,12 @@ export default function Header() {
           />
         </View>
       </View>
+
+      {/* Render NotificationsModal here */}
+      <NotificationsModal
+        visible={isNotificationsVisible}
+        onClose={() => setNotificationsVisible(false)}
+      />
     </View>
   );
 }
