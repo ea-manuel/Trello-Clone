@@ -1,17 +1,8 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import {
-  FlatList,
-  Image,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
-
-const MOSQUITO_IMAGE = require("../assets/images/bee.png");
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Modal from "react-native-modal";
+import NotificationContent from "./NotificationContent";
 
 const NOTIFICATION_TYPES = ["All types", "Me", "Comments", "Join Request"];
 
@@ -38,228 +29,78 @@ export default function NotificationsModal({ visible, onClose }) {
   const [readFilter, setReadFilter] = useState("Unread");
   const [modalVisible, setModalVisible] = useState(false);
 
-  const notifications = SAMPLE_NOTIFICATIONS;
-
-  const filteredNotifications = notifications.filter(
-    (n) =>
-      (typeFilter === "All types" || n.type === typeFilter) &&
-      (readFilter === "All" || !n.read)
-  );
-
-  const clearFilter = () => {
-    setTypeFilter("All types");
-    setReadFilter("All");
-  };
-
-  const openTypeModal = () => setModalVisible(true);
-  const closeTypeModal = () => setModalVisible(false);
-
-  const handleTypeSelect = (type) => {
-    setTypeFilter(type);
-    setModalVisible(false);
-  };
-
   return (
     <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      isVisible={visible}
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={500}
+      animationOutTiming={500}
+      style={styles.modalContainer}
+      useNativeDriver={true}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.modalContainer} onPress={() => {}}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.headerIcon} onPress={onClose}>  
-              <Ionicons name="close" size={28} color="#BFC9D6" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Notifications</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialCommunityIcons
-                name="filter-variant"
-                size={25}
-                color="#BFC9D6"
-                style={{ marginRight: 10 }}
-              />
-              <Ionicons name="ellipsis-vertical" size={23} color="#BFC9D6" />
-            </View>
-          </View>
-
-          {/* Tabs for Filters */}
-          <View style={[styles.tabBar, { marginTop: 8, marginBottom: 16 }]}>
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
-                { flexDirection: "row", alignItems: "center", minWidth: 110 }
-              ]}
-              onPress={openTypeModal}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.tabButtonText}>{typeFilter}</Text>
-              <Ionicons
-                name="chevron-down"
-                size={16}
-                color="#BFC9D6"
-                style={{ marginLeft: 4 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                setReadFilter(readFilter === "Unread" ? "All" : "Unread")
-              }
-              style={[
-                styles.tabButton,
-                readFilter === "Unread" && styles.tabButtonActive,
-                { flexDirection: "row", alignItems: "center" }
-              ]}
-              activeOpacity={0.7}
-            >
-              {readFilter === "Unread" && (
-                <Ionicons
-                  name="checkmark"
-                  size={16}
-                  color="white"
-                  style={{ marginRight: 5 }}
-                />
-              )}
-              <Text
-                style={[
-                  styles.tabButtonText,
-                  readFilter === "Unread" && styles.tabButtonTextActive
-                ]}
-              >
-                Unread
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Modal for Type Filter */}
-          <Modal
-            visible={modalVisible}
-            animationType="slide"
-            transparent
-            onRequestClose={closeTypeModal}
-          >
-            <Pressable style={styles.modalOverlay} onPress={closeTypeModal}>
-              <View style={styles.modalContent}>
-                <FlatList
-                  data={NOTIFICATION_TYPES}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.modalItem}
-                      onPress={() => handleTypeSelect(item)}
-                      activeOpacity={0.7}
-                    >
-                      {typeFilter === item ? (
-                        <Ionicons
-                          name="checkmark"
-                          size={20}
-                          color="#2C8CFF"
-                          style={{ width: 24 }}
-                        />
-                      ) : (
-                        <View style={{ width: 24 }} />
-                      )}
-                      <Text
-                        style={[
-                          styles.modalItemText,
-                          typeFilter === item && {
-                            color: "#2C8CFF",
-                            fontWeight: "bold"
-                          }
-                        ]}
-                      >
-                        {item}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-            </Pressable>
-          </Modal>
-
-          {/* Notifications List or Empty State */}
-          {filteredNotifications.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Image
-                source={MOSQUITO_IMAGE}
-                style={styles.image}
-                resizeMode="contain"
-              />
-              <Text style={styles.emptyText}>
-                You don’t have any notifications that{"\n"}match the selected
-                filters
-              </Text>
-              <TouchableOpacity onPress={clearFilter}>
-                <Text style={styles.clearFilter}>Clear Filter</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <FlatList
-              data={filteredNotifications}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 20
-              }}
-              renderItem={({ item }) => (
-                <View
-                  style={[
-                    styles.notificationItem,
-                    item.read
-                      ? styles.notificationRead
-                      : styles.notificationUnread
-                  ]}
-                >
-                  <Text style={styles.notificationText}>{item.text}</Text>
-                  <Text style={styles.notificationType}>{item.type}</Text>
-                </View>
-              )}
+      <View style={styles.fullScreenModal}>
+        {/* Header */}
+        <View style={styles.sheetHeader}>
+          <TouchableOpacity onPress={onClose}>
+            <Ionicons name="arrow-back" size={30} color={"white"} />
+          </TouchableOpacity>
+          <Text style={styles.sheetTitle}>Notifications</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <MaterialCommunityIcons
+              name="filter-variant"
+              size={25}
+              color="#BFC9D6"
+              style={{ marginRight: 10 }}
             />
-          )}
-        </Pressable>
-      </Pressable>
+            <Ionicons name="ellipsis-vertical" size={23} color="#BFC9D6" />
+          </View>
+        </View>
+        {/* Notification Content */}
+        <NotificationContent
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          readFilter={readFilter}
+          setReadFilter={setReadFilter}
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          NOTIFICATION_TYPES={NOTIFICATION_TYPES}
+          SAMPLE_NOTIFICATIONS={SAMPLE_NOTIFICATIONS}
+          styles={styles}
+        />
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(22,37,58,0.7)",
+  modalContainer: {
+    margin: 0,
     justifyContent: "flex-end"
   },
-  modalContainer: {
+  fullScreenModal: {
     backgroundColor: "#16253A",
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
     paddingTop: 0,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    maxHeight: "100%",
-    minHeight: "90%"
+    height: "100%"
   },
-  header: {
+  sheetHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    height: 60,
-    backgroundColor: "#0B1F3A",
-    justifyContent: "space-between",
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    marginBottom: 10,
+    justifyContent: "space-between"
   },
-  headerIcon: {
-    padding: 4
-  },
-  headerTitle: {
-    color: "#BFC9D6",
-    fontSize: 20,
+  sheetTitle: {
+    fontSize: 22,
     fontWeight: "bold",
-    letterSpacing: 0.5,
-    flex: 1,
-    textAlign: "center",
-    marginLeft: -28
+    color: "white"
   },
+  // ...rest of your styles from previous code...
   tabBar: {
     flexDirection: "row",
     paddingHorizontal: 16
