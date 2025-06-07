@@ -132,6 +132,7 @@ export default function RootLayout() {
             pathname === "/templates" ||
             pathname === "/auth/signup" ||
             pathname === "/screens/SearchScreen" ||
+            pathname === "/screens/NotificationScreen" ||
             pathname.startsWith("/boards")
               ? null
               : <Header />,

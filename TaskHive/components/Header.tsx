@@ -1,11 +1,11 @@
 // components/Header.js
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useRouter } from "expo-router";
-import SettingsModal from "./SettingsModal";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
+import SettingsModal from "./SettingsModal";
 
 const PRIMARY_COLOR = "#0B1F3A";
 
@@ -16,10 +16,14 @@ export default function Header() {
 
   // Zustand store
   const workspaces = useWorkspaceStore((state) => state.workspaces);
-  const currentWorkspaceId = useWorkspaceStore((state) => state.currentWorkspaceId);
+  const currentWorkspaceId = useWorkspaceStore(
+    (state) => state.currentWorkspaceId
+  );
 
   // Find current workspace
-  const currentWorkspace = workspaces.find((ws) => ws.id === currentWorkspaceId);
+  const currentWorkspace = workspaces.find(
+    (ws) => ws.id === currentWorkspaceId
+  );
   const workspaceName = currentWorkspace ? currentWorkspace.name : "Workspace";
 
   return (
@@ -44,7 +48,13 @@ export default function Header() {
           >
             <Ionicons name="search" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} style={styles.iconButton}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.iconButton}
+            onPress={() => {
+              router.push({ pathname: "/screens/NotificationScreen" });
+            }}
+          >
             <Ionicons name="notifications-outline" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -68,29 +78,29 @@ const styles = StyleSheet.create({
   mainpage: {
     backgroundColor: PRIMARY_COLOR,
     paddingTop: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
   header: {
     height: 80,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
   userContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   headerText: {
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 10,
+    marginLeft: 10
   },
   rightIcons: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   iconButton: {
-    marginLeft: 10,
-  },
+    marginLeft: 10
+  }
 });
