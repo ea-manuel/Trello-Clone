@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
-import { editWorkspace } from "../app/stores/workspaceStore";
+import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
 type EditWorkspaceModalProps = {
   visible: boolean;
@@ -13,6 +13,7 @@ type EditWorkspaceModalProps = {
 export default function EditWorkspaceModal({ visible, onClose, workspace, onUpdate }: EditWorkspaceModalProps) {
   const [name, setName] = useState(workspace?.name || "");
   const [visibility, setVisibility] = useState(workspace?.visibility || "Private");
+  const editWorkspace = useWorkspaceStore((state) => state.editWorkspace);
 
   const handleUpdate = () => {
     if (!name.trim()) return;

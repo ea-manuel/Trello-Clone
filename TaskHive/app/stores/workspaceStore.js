@@ -7,12 +7,16 @@ export const useWorkspaceStore = create((set, get) => ({
   workspaces: [
     {
       id: "ws-1",
-      name: "Default Workspace",
+      name: "Default",
       visibility: "Private",
       createdAt: Date.now(),
     },
   ],
   boards: [],
+  updateBoard: (updatedBoard) =>
+    set((state) => ({
+      boards: state.boards.map((b) => (b.id === updatedBoard.id ? updatedBoard : b)),
+    })),
   currentWorkspaceId: "ws-1",
 
   // Workspace actions

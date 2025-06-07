@@ -37,7 +37,7 @@ export default function Header() {
           activeOpacity={0.7}
         >
           <Ionicons name="person-circle" size={35} color="white" />
-          <Text style={styles.headerText}>{workspaceName}</Text>
+          <Text style={styles.headerText}>{workspaceName} Workspace</Text>
         </TouchableOpacity>
 
         <View style={styles.rightIcons}>

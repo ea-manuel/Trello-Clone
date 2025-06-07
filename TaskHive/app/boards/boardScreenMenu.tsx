@@ -7,6 +7,8 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker"; // Import expo-image-picker
+import * as FileSystem from 'expo-file-system';
+import { useWorkspaceStore } from "../stores/workspaceStore";
 
 const PRIMARY_COLOR = "#0B1F3A";
 
@@ -17,7 +19,7 @@ export default function BoardScreenMenu() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [inviteInput, setInviteInput] = useState("");
   const [backgroundImage, setBackgroundImage] = useState(null); // State for selected image URI
-
+  const {updateBoard}=useWorkspaceStore();
   // Parse the board
   let board = null;
   try {
@@ -36,39 +38,62 @@ export default function BoardScreenMenu() {
   useEffect(() => {
     console.log('BoardScreenMenu: Received board:', JSON.stringify(board, null, 2));
   }, [board]);
+   useEffect(() => {
+    console.log('BoardDetails: Received board:', JSON.stringify(board, null, 2));
+  }, [board?.id, board?.backgroundImage]);
+  
 
   // Function to pick an image from gallery
-  const pickImage = async () => {
-    // Request permission to access gallery
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Sorry, we need photo library permissions to select an image.');
+ const pickImage = async () => {
+  try {
+    console.log('BoardScreenMenu: Starting pickImage for board:', board?.id);
+    if (!board?.id) {
+      console.error('BoardScreenMenu: Board ID is missing:', board);
       return;
     }
-
-    // Open gallery to pick an image
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Error', 'Permission denied for media library.');
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       quality: 1,
     });
-
+    console.log('BoardScreenMenu: ImagePicker result:', JSON.stringify(result, null, 2));
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const imageUri = result.assets[0].uri;
       console.log('BoardScreenMenu: Selected image URI:', imageUri);
-      setBackgroundImage(imageUri); // Set the selected image URI
+      // Copy to persistent storage
+      const fileName = imageUri.split('/').pop();
+      const newPath = `${FileSystem.documentDirectory}${fileName}`;
+      await FileSystem.copyAsync({
+        from: imageUri,
+        to: newPath,
+      });
+      console.log('BoardScreenMenu: Copied image to:', newPath);
+      const updatedBoard = { ...board, backgroundImage: newPath, backgroundColor: null };
+      console.log('BoardScreenMenu: Created updatedBoard:', JSON.stringify(updatedBoard, null, 2));
+      updateBoard(updatedBoard);
+      router.replace({
+        pathname: "/boards/[id]",
+        params: { id: board.id, board: JSON.stringify(updatedBoard) }
+      });
     } else {
       console.log('BoardScreenMenu: Image selection canceled');
     }
-  };
-
+  } catch (error) {
+    console.error('BoardScreenMenu: Error picking image:', error);
+  }
+};
   if (!board) {
     return <Text>Error: No board data available</Text>;
   }
 
   const navigateBack = () => {
     console.log('BoardScreenMenu: Navigating back to BoardDetails for board:', board.id);
-    const updatedBoard = { ...board, backgroundImage: backgroundImage || board.backgroundColor };
+    const updatedBoard = { ...board };
     router.push({
       pathname: "/boards/[id]",
       params: { id: board.id, board: JSON.stringify(updatedBoard) }
@@ -117,11 +142,7 @@ export default function BoardScreenMenu() {
   ];
 
   return (
-    <ImageBackground
-      source={backgroundImage ? { uri: backgroundImage } : undefined}
-      style={styles.container}
-      resizeMode="cover"
-    >
+    <View style={styles.container}>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={navigateBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={28} color="white" />
@@ -144,7 +165,7 @@ export default function BoardScreenMenu() {
               <TouchableOpacity
                 style={[styles.colorSwatch, { backgroundColor: item.value }]}
                 onPress={() => {
-                  const updatedBoard = { ...board, backgroundColor: item.value };
+                  const updatedBoard = { ...board, backgroundColor: item.value,backgroundImage:null };
                   console.log('BoardScreenMenu: Selected color:', item.value);
                   setBackgroundImage(null); // Clear image if color is selected
                   router.push({
@@ -307,14 +328,14 @@ export default function BoardScreenMenu() {
           </View>
         </Modal>
       )}
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor removed; handled by ImageBackground
+    backgroundColor:'#ADD8E6',
   },
   topBar: {
     height: 110,
