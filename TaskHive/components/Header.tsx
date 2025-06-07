@@ -1,11 +1,11 @@
-// components/Header.js
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
-import NotificationsModal from "./NotificationModal"; // Import your modal component
+import NotificationsModal from "./NotificationModal";
+import SearchModal from "./SearchModal"; // Import SearchModal
 import SettingsModal from "./SettingsModal";
 
 const PRIMARY_COLOR = "#0B1F3A";
@@ -14,7 +14,8 @@ export default function Header() {
   const navigation = useNavigation();
   const router = useRouter();
   const [isSettingsVisible, setSettingsVisible] = useState(false);
-  const [isNotificationsVisible, setNotificationsVisible] = useState(false); // New state for notifications modal
+  const [isNotificationsVisible, setNotificationsVisible] = useState(false);
+  const [isSearchVisible, setSearchVisible] = useState(false); // Search modal state
 
   // Zustand store
   const workspaces = useWorkspaceStore((state) => state.workspaces);
@@ -22,7 +23,6 @@ export default function Header() {
     (state) => state.currentWorkspaceId
   );
 
-  // Find current workspace
   const currentWorkspace = workspaces.find(
     (ws) => ws.id === currentWorkspaceId
   );
@@ -44,18 +44,14 @@ export default function Header() {
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.iconButton}
-            onPress={() => {
-              router.push({ pathname: "/screens/SearchScreen" });
-            }}
+            onPress={() => setSearchVisible(true)} // Open search modal
           >
             <Ionicons name="search" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.iconButton}
-            onPress={() => {
-              setNotificationsVisible(true); // Open notifications modal instead of navigating
-            }}
+            onPress={() => setNotificationsVisible(true)}
           >
             <Ionicons name="notifications-outline" size={24} color="white" />
           </TouchableOpacity>
@@ -73,10 +69,14 @@ export default function Header() {
         </View>
       </View>
 
-      {/* Render NotificationsModal here */}
+      {/* Modals */}
       <NotificationsModal
         visible={isNotificationsVisible}
         onClose={() => setNotificationsVisible(false)}
+      />
+      <SearchModal
+        visible={isSearchVisible}
+        onClose={() => setSearchVisible(false)}
       />
     </View>
   );
