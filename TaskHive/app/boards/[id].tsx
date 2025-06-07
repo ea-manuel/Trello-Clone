@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 import {
   Animated,
   Dimensions,
@@ -12,7 +13,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  ImageBackground,
+  Alert,
 } from "react-native";
 
 const PRIMARY_COLOR = "#0B1F3A";
@@ -22,6 +25,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 function CardMenuModal({ visible, onClose, card }) {
   const [description, setDescription] = useState(card?.description || "");
   const [comment, setComment] = useState("");
+ 
 
   // Reset description when card changes
   useEffect(() => {
@@ -207,19 +211,26 @@ export default function BoardDetails() {
   // Modal state for card menu
   const [isCardMenuVisible, setCardMenuVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-
   // Parse the board param
   let board = null;
-  try {
-    board = params.board ? JSON.parse(params.board as string) : null;
-    if (board && !board.backgroundColor) {
+try {
+  console.log('BoardDetails: Raw params.board:', params.board);
+  if (typeof params.board === 'string' && params.board) {
+    board = JSON.parse(params.board);
+    if (board && !board.backgroundColor && !board.backgroundImage) {
       board.backgroundColor = "#ADD8E6";
     }
-  } catch (e) {
-    console.error("BoardDetails: Failed to parse board:", e);
+  } else {
+    console.warn('BoardDetails: params.board is invalid:', params.board);
   }
+} catch (e) {
+  console.error("BoardDetails: Failed to parse board:", e);
+}
 
   const [lists, setLists] = useState(board?.lists || []);
+  useEffect(() => {
+  console.log('BoardDetails: Received board:', JSON.stringify(board, null, 2));
+}, [board?.id, board?.backgroundImage]);
 
   useEffect(() => {
     setLists(board?.lists || []);
@@ -251,12 +262,15 @@ export default function BoardDetails() {
   };
 
   return (
-    <View
-      key={board?.id}
-      style={[
-        styles.container,
-        { backgroundColor: board?.backgroundColor || "#ADD8E6" }
-      ]}
+    <ImageBackground
+     key={`${board?.id}-${board?.backgroundImage}`} // Ensure re-render
+  source={board?.backgroundImage ? { uri: board.backgroundImage } : undefined}
+  style={[
+    styles.container,
+    { backgroundColor: board?.backgroundImage ? 'transparent' : (board?.backgroundColor || '#ADD8E6') }
+  ]}
+  resizeMode="cover"
+  onError={(e) => console.error('BoardDetails: ImageBackground error:', e.nativeEvent)}
     >
       {/* Top Bar */}
       <View style={styles.topBar}>
@@ -457,7 +471,7 @@ export default function BoardDetails() {
         onClose={() => setCardMenuVisible(false)}
         card={selectedCard}
       />
-    </View>
+    </ImageBackground>
   );
 }
 
