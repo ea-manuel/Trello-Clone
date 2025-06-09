@@ -152,9 +152,7 @@ export default function BoardScreenMenu() {
       <View style={styles.content}>
         <View style={styles.colorSection}>
           <Text style={styles.colorSectionTitle}>Change Board Background</Text>
-          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-            <Text style={styles.imageButtonText}>Pick Image from Gallery</Text>
-          </TouchableOpacity>
+          
           <FlatList
             data={colors}
             keyExtractor={item => item.id}
@@ -176,6 +174,10 @@ export default function BoardScreenMenu() {
               />
             )}
           />
+          <Text style={{color:'white' ,fontWeight:'bold',alignItems:'center',justifyContent:'center',textAlign:'center'}}>OR</Text>
+          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+            <Text style={styles.imageButtonText}>Pick Image from Gallery</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.iconSection}>
           <TouchableOpacity style={styles.iconButton}>
