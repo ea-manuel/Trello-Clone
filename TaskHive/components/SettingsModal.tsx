@@ -22,10 +22,13 @@ export default function SettingsModal({
       onBackButtonPress={onClose}
       animationIn="slideInUp"
       animationOut="slideOutDown"
-      animationInTiming={500}
-      animationOutTiming={500}
+      animationInTiming={300}
+      animationOutTiming={300}
       style={styles.modalContainer}
       useNativeDriver={true}
+      swipeDirection="down" // Enable swipe down to close
+      onSwipeComplete={onClose} // Close modal on swipe complete
+      swipeThreshold={100} // Optional: adjust swipe distance threshold
     >
       <View style={styles.fullScreenModal}>
         <View style={styles.sheetHeader}>
@@ -48,9 +51,9 @@ const styles = StyleSheet.create({
     elevation:8,
   },
   fullScreenModal: {
-    backgroundColor: '#0B1F3A',
-    borderTopRightRadius: 10,
-    borderTopLeftRadius: 10,
+    backgroundColor: "#5B7C99",
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
     paddingTop: 20,
     height: "100%", // Adjust height as needed, e.g. 90% of screen height
     borderWidth:2,
