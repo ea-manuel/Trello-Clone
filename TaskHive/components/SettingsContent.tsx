@@ -1,13 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-
+import { Touchable } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View,TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 const PRIMARY_COLOR = "#0B1F3A";
 
 export default function SettingsContent() {
-  // Local state for switches; you can lift this up if needed
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((prev) => !prev);
+  const router=useRouter();
+  // State to control individual switches
+  const [switchStates, setSwitchStates] = useState({
+    colorBlindMode: false,
+    enableAnimations: false,
+    showLabelNames: false,
+    showQuickAdd: false
+  });
+
+  // Toggle function for individual switches
+  const toggleSwitch = (key: keyof typeof switchStates) => {
+    setSwitchStates((prev) => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+  const logout = ()=>{
+    router.push({
+      pathname:"/auth/login"
+    })
+  };
 
   return (
     <ScrollView
@@ -16,7 +35,7 @@ export default function SettingsContent() {
     >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <Ionicons name="person-circle" size={90} color={PRIMARY_COLOR} />
+        <Ionicons name="person-circle" size={90} color='#ffffff' />
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
@@ -40,19 +59,19 @@ export default function SettingsContent() {
         <View style={styles.row}>
           <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
           <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            trackColor={{ false: "#767577", true: "#767577" }}
+            thumbColor={switchStates.colorBlindMode ? "#339dff" : "#f4f3f4"}
+            onValueChange={() => toggleSwitch("colorBlindMode")}
+            value={switchStates.colorBlindMode}
           />
         </View>
         <View style={styles.row}>
           <Text style={styles.sectionSubtext}>Enable Animations</Text>
           <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            trackColor={{ false: "#767577", true: "#767577" }}
+            thumbColor={switchStates.enableAnimations ? "#339dff" : "#f4f3f4"}
+            onValueChange={() => toggleSwitch("enableAnimations")}
+            value={switchStates.enableAnimations}
           />
         </View>
         <View style={styles.row}>
@@ -60,10 +79,10 @@ export default function SettingsContent() {
             Show label names on card front
           </Text>
           <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            trackColor={{ false: "#767577", true: "#767577" }}
+            thumbColor={switchStates.showLabelNames ? "#339dff" : "#f4f3f4"}
+            onValueChange={() => toggleSwitch("showLabelNames")}
+            value={switchStates.showLabelNames}
           />
         </View>
       </View>
@@ -82,10 +101,10 @@ export default function SettingsContent() {
         <View style={styles.row}>
           <Text style={styles.sectionSubtext}>Show quick add</Text>
           <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            trackColor={{ false: "#767577", true: "#767577" }}
+            thumbColor={switchStates.showQuickAdd ? "#339dff" : "#f4f3f4"}
+            onValueChange={() => toggleSwitch("showQuickAdd")}
+            value={switchStates.showQuickAdd}
           />
         </View>
         <Text style={styles.sectionSubtext}>Delete account</Text>
@@ -93,7 +112,9 @@ export default function SettingsContent() {
         <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
         <Text style={styles.sectionSubtext}>Contact support</Text>
         <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
+        <TouchableOpacity onPress={logout}>
         <Text style={styles.sectionSubtext}>Log out</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -103,14 +124,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    // borderTopRightRadius: 20,
-    // borderTopLeftRadius: 20,
-    backgroundColor:'#B6D0E2'
+    backgroundColor:'#142f4d'
   },
   profileCard: {
     alignItems: "center",
     marginBottom: 20,
-    backgroundColor:'#5B7C99',
+    backgroundColor:'#0B1F3A',
     marginHorizontal:-20,
     paddingBottom:15,
   },

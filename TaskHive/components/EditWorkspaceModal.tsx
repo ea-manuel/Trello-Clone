@@ -20,8 +20,8 @@ export default function EditWorkspaceModal({ visible, onClose, workspace, onUpda
     const updatedWorkspace = editWorkspace(workspace.id, { name, visibility });
     if (updatedWorkspace) {
       onUpdate(updatedWorkspace);
-      onClose();
     }
+     onClose();
   };
 
   return (

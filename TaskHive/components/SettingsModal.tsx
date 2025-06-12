@@ -44,14 +44,17 @@ export default function SettingsModal({
 const styles = StyleSheet.create({
   modalContainer: {
     margin: 0, // Important to cover full screen without margin
-    justifyContent: "flex-end" // Align modal content at the bottom
+    justifyContent: "flex-end", // Align modal content at the bottom
+    elevation:8,
   },
   fullScreenModal: {
-    backgroundColor: '#5B7C99',
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
+    backgroundColor: '#0B1F3A',
+    borderTopRightRadius: 10,
+    borderTopLeftRadius: 10,
     paddingTop: 20,
-    height: "100%" // Adjust height as needed, e.g. 90% of screen height
+    height: "100%", // Adjust height as needed, e.g. 90% of screen height
+    borderWidth:2,
+    borderTopColor:'white',
   },
   sheetHeader: {
     flexDirection: "row",
