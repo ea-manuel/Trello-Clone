@@ -36,7 +36,7 @@ export default function Header() {
           style={styles.userContainer}
           activeOpacity={0.7}
         >
-          <Ionicons name="person-circle" size={35} color="white" />
+          <Ionicons name="menu-sharp" size={35} color="white" />
           <Text style={styles.headerText}>{workspaceName} Workspace</Text>
         </TouchableOpacity>
 

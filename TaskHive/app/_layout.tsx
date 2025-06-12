@@ -17,6 +17,24 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
+const BADGE_COLORS = [
+  "#2980B9", "#00C6AE", "#007CF0", "#636B2F", "#8E44AD", "#FF7F7F", "#FFA500",
+];
+
+const getRandomColor = () => {
+  const randomIndex = Math.floor(Math.random() * BADGE_COLORS.length);
+  return BADGE_COLORS[randomIndex];
+};
+
+const InitialCircle = ({ text, backgroundColor }) => {
+  const initial = text ? text.charAt(0).toUpperCase() : "?";
+  return (
+    <View style={[styles.initialCircle, { backgroundColor }]}>
+      <Text style={styles.initialText}>{initial}</Text>
+    </View>
+  );
+};
+
 export default function RootLayout() {
   const { workspaces, setCurrentWorkspaceId } = useWorkspaceStore();
   const colorScheme = useColorScheme();
@@ -42,9 +60,11 @@ export default function RootLayout() {
       <Drawer
         drawerContent={(props) => {
           const navState = props.navigation.getState();
+          const params = navState?.routes[navState.index]?.params;
           const workspaceId =
-            navState?.routes[navState.index]?.params?.workspaceId ||
-            (workspaces.length > 0 ? workspaces[0].id : null);
+            params && typeof params === "object" && "workspaceId" in params
+              ? (params as { workspaceId?: string }).workspaceId
+              : (workspaces.length > 0 ? workspaces[0].id : null);
           console.log("Layout: Current workspaceId", workspaceId);
           const [currentWorkspaceId, setCurrentWorkspaceIdLocal] = useState(
             workspaces.length > 0 ? workspaces[0].id : null
@@ -69,7 +89,7 @@ export default function RootLayout() {
                 </LinearGradient>
               </TouchableOpacity>
               <Text style={styles.yourWorkspacesLabel}>Your Workspaces</Text>
-              {workspaces.map((workspace) => (
+              {workspaces.map((workspace: Workspace) => (
                 <TouchableOpacity
                   key={workspace.id}
                   style={[
@@ -98,6 +118,7 @@ export default function RootLayout() {
                       }
                     ]}
                   />
+                  <InitialCircle text={workspace.name} backgroundColor={getRandomColor()} />
                   <Text style={styles.workspaceText}>{workspace.name}</Text>
                 </TouchableOpacity>
               ))}
@@ -125,12 +146,12 @@ export default function RootLayout() {
         }}
         screenOptions={{
           header: () =>
-            // Hide header if either modal is visible or pathname matches exclusions
             createModalVisible || editModalVisible ||
             pathname === "/auth/login" ||
             pathname === "/auth/welcome" ||
             pathname === "/templates" ||
             pathname === "/auth/signup" ||
+            pathname.includes("OfflineBoards") ||
             pathname === "/screens/SearchScreen" ||
             pathname === "/screens/NotificationScreen" ||
             pathname.startsWith("/boards")
@@ -190,6 +211,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#2980B9",
     marginRight: 10
   },
+  initialCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8
+  },
+  initialText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold"
+  },
   workspaceText: {
     color: "white",
     fontSize: 16
@@ -197,5 +231,5 @@ const styles = StyleSheet.create({
   activeWorkspaceItem: {
     backgroundColor: "#1A324F",
     borderRadius: 8
-  },
+  }
 });

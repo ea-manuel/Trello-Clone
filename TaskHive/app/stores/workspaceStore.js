@@ -1,4 +1,3 @@
-// app/stores/workspaceStore.js
 import { create } from "zustand";
 
 let nextId = 2;
@@ -15,11 +14,14 @@ export const useWorkspaceStore = create((set, get) => ({
   boards: [],
   updateBoard: (updatedBoard) =>
     set((state) => ({
-      boards: state.boards.map((b) => (b.id === updatedBoard.id ? updatedBoard : b)),
+      boards: state.boards.map((b) =>
+        b.id === updatedBoard.id && b.workspaceId === updatedBoard.workspaceId
+          ? updatedBoard
+          : b
+      ),
     })),
   currentWorkspaceId: "ws-1",
 
-  // Workspace actions
   createWorkspace: ({ name, visibility }) => {
     const newWorkspace = {
       id: `ws-${nextId++}`,
@@ -44,7 +46,6 @@ export const useWorkspaceStore = create((set, get) => ({
 
   setCurrentWorkspaceId: (id) => set({ currentWorkspaceId: id }),
 
-  // Board actions
   createBoard: ({ title, workspaceId, backgroundColor }) => {
     const newBoard = {
       id: `board-${nextId++}`,
@@ -60,11 +61,16 @@ export const useWorkspaceStore = create((set, get) => ({
     return newBoard;
   },
 
+  deleteBoard: (boardId) => {
+    set((state) => ({
+      boards: state.boards.filter((b) => b.id !== boardId),
+    }));
+  },
+
   getBoards: (workspaceId) => {
     return get().boards.filter((b) => b.workspaceId === workspaceId);
   },
 
-  // Optional utility function if needed elsewhere
   getWorkspaces: () => {
     return get().workspaces;
   },
