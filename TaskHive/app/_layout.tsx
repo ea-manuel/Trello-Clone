@@ -1,6 +1,3 @@
-import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
-import EditWorkspaceModal from "@/components/EditWorkspaceModal";
-import Header from "@/components/Header";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import {
@@ -15,10 +12,20 @@ import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
+import EditWorkspaceModal from "@/components/EditWorkspaceModal";
+import Header from "@/components/Header";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
 const BADGE_COLORS = [
-  "#2980B9", "#00C6AE", "#007CF0", "#636B2F", "#8E44AD", "#FF7F7F", "#FFA500",
+  "#2980B9",
+  "#00C6AE",
+  "#007CF0",
+  "#636B2F",
+  "#8E44AD",
+  "#FF7F7F",
+  "#FFA500"
 ];
 
 const getRandomColor = () => {
@@ -45,27 +52,24 @@ export default function RootLayout() {
   const router = useRouter();
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  type Workspace = {
-    id: string;
-    name: string;
-    visibility: string;
-    createdAt: number;
-  };
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   if (!loaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      {" "}
+      {/* Wrap everything inside here */}
       <Drawer
         drawerContent={(props) => {
           const navState = props.navigation.getState();
           const params = navState?.routes[navState.index]?.params;
           const workspaceId =
             params && typeof params === "object" && "workspaceId" in params
-              ? (params as { workspaceId?: string }).workspaceId
-              : (workspaces.length > 0 ? workspaces[0].id : null);
-          console.log("Layout: Current workspaceId", workspaceId);
+              ? params.workspaceId
+              : workspaces.length > 0
+              ? workspaces[0].id
+              : null;
           const [currentWorkspaceId, setCurrentWorkspaceIdLocal] = useState(
             workspaces.length > 0 ? workspaces[0].id : null
           );
@@ -89,15 +93,15 @@ export default function RootLayout() {
                 </LinearGradient>
               </TouchableOpacity>
               <Text style={styles.yourWorkspacesLabel}>Your Workspaces</Text>
-              {workspaces.map((workspace: Workspace) => (
+              {workspaces.map((workspace) => (
                 <TouchableOpacity
                   key={workspace.id}
                   style={[
                     styles.workspaceItem,
-                    workspace.id === currentWorkspaceId && styles.activeWorkspaceItem
+                    workspace.id === currentWorkspaceId &&
+                      styles.activeWorkspaceItem
                   ]}
                   onPress={() => {
-                    console.log("Layout: Navigating to workspaceId", workspace.id);
                     setCurrentWorkspaceIdLocal(workspace.id);
                     setCurrentWorkspaceId(workspace.id);
                     router.push({
@@ -118,7 +122,10 @@ export default function RootLayout() {
                       }
                     ]}
                   />
-                  <InitialCircle text={workspace.name} backgroundColor={getRandomColor()} />
+                  <InitialCircle
+                    text={workspace.name}
+                    backgroundColor={getRandomColor()}
+                  />
                   <Text style={styles.workspaceText}>{workspace.name}</Text>
                 </TouchableOpacity>
               ))}
@@ -146,7 +153,8 @@ export default function RootLayout() {
         }}
         screenOptions={{
           header: () =>
-            createModalVisible || editModalVisible ||
+            createModalVisible ||
+            editModalVisible ||
             pathname === "/auth/login" ||
             pathname === "/auth/welcome" ||
             pathname === "/templates" ||
@@ -154,9 +162,9 @@ export default function RootLayout() {
             pathname.includes("OfflineBoards") ||
             pathname === "/screens/SearchScreen" ||
             pathname === "/screens/NotificationScreen" ||
-            pathname.startsWith("/boards")
-              ? null
-              : <Header />,
+            pathname.startsWith("/boards") ? null : (
+              <Header />
+            ),
           drawerStyle: {
             backgroundColor: colorScheme === "dark" ? "#0B1F3A" : "#34495e"
           },
