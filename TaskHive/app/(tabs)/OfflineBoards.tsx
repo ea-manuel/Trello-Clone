@@ -1,192 +1,259 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
-import { useWorkspaceStore } from "../stores/workspaceStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
+import SearchModal from "@/components/SearchModal"; // Import your SearchModal
 
-interface Board {
-  id: string;
-  title: string;
-}
+const PRIMARY_COLOR = "#0B1F3A";
+const USER_ID = "134768944"; // Example user ID
+
+const EXAMPLE_BOARDS = [
+  { id: "1", title: "Me" },
+  { id: "2", title: "Meee" },
+  { id: "3", title: "Sb" }
+];
 
 export default function OfflineBoards() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const { workspaces, getBoards } = useWorkspaceStore();
+  const [boards, setBoards] = useState(EXAMPLE_BOARDS);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [isSearchVisible, setSearchVisible] = useState(false);
 
-  const [switchStates, setSwitchStates] = useState<{ [key: string]: boolean }>({});
-
-  const workspaceId = params.workspaceId;
-  const selectedWorkspace = workspaceId
-    ? workspaces.find(ws => ws.id === workspaceId) || workspaces[0]
-    : workspaces[0];
-
-  // Initialize switch states for boards
+  // Load boards from AsyncStorage on mount
   useEffect(() => {
-    if (selectedWorkspace) {
-      const fetchedBoards = getBoards(selectedWorkspace.id);
-      const initialSwitchStates = fetchedBoards.reduce((acc, board) => ({
-        ...acc,
-        [board.id]: false
-      }), {});
-      setSwitchStates(initialSwitchStates);
-      console.log('OfflineBoards: Loaded boards for workspace', selectedWorkspace.id, ':', JSON.stringify(fetchedBoards, null, 2));
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem("offlineBoards");
+        if (stored) setBoards(JSON.parse(stored));
+      } catch {}
+    })();
+  }, []);
+
+  // Save boards to AsyncStorage
+  const saveBoards = async (newBoards) => {
+    setBoards(newBoards);
+    await AsyncStorage.setItem("offlineBoards", JSON.stringify(newBoards));
+  };
+
+  const addBoard = () => {
+    if (!newBoardTitle.trim()) {
+      Alert.alert("Please enter a board title");
+      return;
     }
-  }, [selectedWorkspace, getBoards]);
-
-  const toggleSwitch = (boardId) => {
-    setSwitchStates((prev) => ({
-      ...prev,
-      [boardId]: !prev[boardId]
-    }));
+    const newBoard = {
+      id: Date.now().toString(),
+      title: newBoardTitle.trim()
+    };
+    const updatedBoards = [...boards, newBoard];
+    saveBoards(updatedBoards);
+    setNewBoardTitle("");
+    setModalVisible(false);
   };
 
-  const navigateBack = () => {
-    router.push({
-      pathname: "/(tabs)",
-    });
-  };
+  // Touchable board card
+  const renderBoard = ({ item }) => (
+    <TouchableOpacity
+      style={styles.boardRow}
+      activeOpacity={0.7}
+      onPress={() => Alert.alert("Board pressed", item.title)}
+    >
+      <View style={styles.boardVisual} />
+      <Text style={styles.boardTitle}>{item.title}</Text>
+    </TouchableOpacity>
+  );
 
-  return (
+  // Header matching your main header style
+  const renderHeader = () => (
     <View style={styles.mainpage}>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={navigateBack} style={styles.backButton}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
           <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
-        <Text style={styles.title}>Offline Boards</Text>
-        <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="search-outline" size={28} color="white" />
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.headerText}>Offline Boards</Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.iconButton}
+          onPress={() => setSearchVisible(true)}
+        >
+          <Ionicons name="search" size={24} color="white" />
+        </TouchableOpacity>
       </View>
-      {getBoards(selectedWorkspace.id).length > 0 && (
-        <Text style={styles.headerText}>Boards</Text>
-      )}
-
-      <FlatList
-        contentContainerStyle={styles.scrollContent}
-        data={getBoards(selectedWorkspace.id)}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.boardcard}>
-            <TouchableOpacity
-              onPress={() => {
-                console.log('OfflineBoards: Navigating to board:', item.id);
-                router.push({
-                  pathname: "/boards/[id]",
-                  params: { id: item.id, board: JSON.stringify(item) }
-                });
-              }}
-              style={styles.boardcardTouchable}
-            >
-              <Ionicons name="grid" size={30} color="#34495e" />
-              <Text style={styles.boardcardText}>{item.title}</Text>
-            </TouchableOpacity>
-            <Switch
-              trackColor={{ false: "#767577", true: "#767577" }}
-              thumbColor={switchStates[item.id] ? "#339dff" : "#f4f3f4"}
-              onValueChange={() => toggleSwitch(item.id)}
-              value={switchStates[item.id]}
-            />
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No Boards</Text>
-            <Text style={styles.emptySubText}>No boards available for this workspace</Text>
-          </View>
-        }
+      <SearchModal
+        visible={isSearchVisible}
+        onClose={() => setSearchVisible(false)}
       />
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      {renderHeader()}
+      <Text style={styles.workspaceLabel}>User {USER_ID}'s Workspace</Text>
+      <FlatList
+        data={boards}
+        keyExtractor={(item) => item.id}
+        renderItem={renderBoard}
+        contentContainerStyle={{ paddingTop: 10 }}
+      />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setModalVisible(true)}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
+      {/* Add Board Modal */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>New Board</Text>
+            <TextInput
+              placeholder="Board title"
+              value={newBoardTitle}
+              onChangeText={setNewBoardTitle}
+              style={styles.input}
+              placeholderTextColor="#aaa"
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={addBoard}
+              >
+                <Text style={styles.modalButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff" },
   mainpage: {
-    flex: 1,
-    backgroundColor: "white"
+    backgroundColor: PRIMARY_COLOR,
+    paddingTop: Platform.OS === "ios" ? 40 : 20,
+    paddingHorizontal: 10,
+    paddingBottom: 5
+  },
+  header: {
+    height: 60,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
   },
   headerText: {
-    alignItems: "center",
-    marginTop: 10,
-    marginLeft: 10,
-    fontWeight: "bold",
-    fontSize: 24,
-    color: "gray",
-    marginBottom: 10
-  },
-  topBar: {
-    height: 110,
-    backgroundColor: "#0B1F3A",
-    paddingTop: 40,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 10,
-    bottom: 20
-  },
-  backButton: {
-    padding: 10
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
     color: "white",
-    textAlign: "left"
-  },
-  iconContainer: {
-    flexDirection: "row",
-    position: "absolute",
-    right: -5,
-    top: 50,
-    alignItems: "center"
+    fontSize: 20,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center"
   },
   iconButton: {
-    padding: 10
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    paddingVertical: 20
-  },
-  boardcard: {
-    backgroundColor: "#ffffff",
-    paddingVertical: 10,
-    borderTopColor: "#34495e",
-    borderBottomColor: "#34495e",
-    borderWidth: 0.5,
-    paddingHorizontal: 15,
-    flexDirection: "row",
+    width: 40,
     alignItems: "center",
-    elevation: 8,
-    marginVertical: 5,
-    marginHorizontal: 0
+    justifyContent: "center"
   },
-  boardcardTouchable: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1
-  },
-  boardcardText: {
-    color: "black",
-    fontWeight: "500",
-    fontSize: 22,
-    marginLeft: 15
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: "center"
-  },
-  emptyText: {
-    fontSize: 24,
+  workspaceLabel: {
     fontWeight: "bold",
-    color: "#333"
+    marginTop: 12,
+    marginLeft: 18,
+    fontSize: 15,
+    color: "#111"
   },
-  emptySubText: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: "#808080",
+  boardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 24,
+    marginLeft: 18
+  },
+  boardVisual: {
+    width: 48,
+    height: 32,
+    backgroundColor: "#1783e5",
+    borderRadius: 4,
+    marginRight: 16
+  },
+  boardTitle: {
+    fontSize: 16,
+    color: "#222",
+    fontWeight: "500"
+  },
+  fab: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#007CF0",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    justifyContent: "center",
+    padding: 20
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#0B1F3A",
+    marginBottom: 12
+  },
+  input: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#222",
     marginBottom: 20,
-    textAlign: 'center',
-  }
+    fontSize: 16
+  },
+  modalButtons: { flexDirection: "row", justifyContent: "flex-end" },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 10
+  },
+  cancelButton: { backgroundColor: "#555" },
+  saveButton: { backgroundColor: "#007CF0" },
+  modalButtonText: { color: "white", fontWeight: "bold" }
 });
