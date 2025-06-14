@@ -1,5 +1,14 @@
 import { create } from "zustand";
 
+const BADGE_COLORS = [
+  "#2980B9", "#00C6AE", "#007CF0", "#636B2F", "#8E44AD", "#FF7F7F", "#FFA500",
+];
+
+const getRandomColor = () => {
+  const randomIndex = Math.floor(Math.random() * BADGE_COLORS.length);
+  return BADGE_COLORS[randomIndex];
+};
+
 let nextId = 2;
 
 export const useWorkspaceStore = create((set, get) => ({
@@ -9,6 +18,7 @@ export const useWorkspaceStore = create((set, get) => ({
       name: "Default",
       visibility: "Private",
       createdAt: Date.now(),
+      badgeColor: "#2980B9", // Assign fixed color for default workspace
     },
   ],
   boards: [],
@@ -28,6 +38,7 @@ export const useWorkspaceStore = create((set, get) => ({
       name,
       visibility,
       createdAt: Date.now(),
+      badgeColor: getRandomColor(), // Assign random color for new workspaces
     };
     set((state) => ({
       workspaces: [...state.workspaces, newWorkspace],
@@ -36,10 +47,10 @@ export const useWorkspaceStore = create((set, get) => ({
     return newWorkspace;
   },
 
-  editWorkspace: (id, { name, visibility }) => {
+  editWorkspace: (id, { name, visibility, badgeColor }) => {
     set((state) => ({
       workspaces: state.workspaces.map((ws) =>
-        ws.id === id ? { ...ws, name, visibility } : ws
+        ws.id === id ? { ...ws, name, visibility, badgeColor: badgeColor ?? ws.badgeColor } : ws
       ),
     }));
   },

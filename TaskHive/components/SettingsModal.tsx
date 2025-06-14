@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     elevation:8,
   },
   fullScreenModal: {
-    backgroundColor: "#5B7C99",
+    backgroundColor: "#0B1F3A",
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     paddingTop: 20,

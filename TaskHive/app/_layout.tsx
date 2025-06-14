@@ -17,15 +17,6 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
-const BADGE_COLORS = [
-  "#2980B9", "#00C6AE", "#007CF0", "#636B2F", "#8E44AD", "#FF7F7F", "#FFA500",
-];
-
-const getRandomColor = () => {
-  const randomIndex = Math.floor(Math.random() * BADGE_COLORS.length);
-  return BADGE_COLORS[randomIndex];
-};
-
 const InitialCircle = ({ text, backgroundColor }) => {
   const initial = text ? text.charAt(0).toUpperCase() : "?";
   return (
@@ -50,6 +41,7 @@ export default function RootLayout() {
     name: string;
     visibility: string;
     createdAt: number;
+    badgeColor: string; // New property
   };
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
 
@@ -118,7 +110,7 @@ export default function RootLayout() {
                       }
                     ]}
                   />
-                  <InitialCircle text={workspace.name} backgroundColor={getRandomColor()} />
+                  <InitialCircle text={workspace.name} backgroundColor={workspace.badgeColor} />
                   <Text style={styles.workspaceText}>{workspace.name}</Text>
                 </TouchableOpacity>
               ))}

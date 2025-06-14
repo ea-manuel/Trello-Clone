@@ -1,6 +1,7 @@
 {
   "expo": {
-    "name": "",
+    "name": "TaskHive",
+    "slug": "taskhive",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/taskhive-splash-screen.jpg",
@@ -31,9 +32,11 @@
         "resizeMode": "contain"
       },
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.emmayak.taskhive"
     },
     "web": {
       "bundler": "metro",
@@ -50,10 +53,16 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-image-picker" 
+      "expo-image-picker"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "200a6968-3712-48a6-ab02-8ea36d26cc0e"
+      }
     }
   }
 }
