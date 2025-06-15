@@ -11,11 +11,17 @@ import { usePathname, useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
 import EditWorkspaceModal from "@/components/EditWorkspaceModal";
 import Header from "@/components/Header";
+import WorkspaceMenuModal from "@/components/WorkspaceMenuModal"; // Import the new modal
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 
 const BADGE_COLORS = [
@@ -60,13 +66,18 @@ export default function RootLayout() {
     badgeColor: string; // New property
   };
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
+  const [menuModalVisible, setMenuModalVisible] = useState(false);
+  const [menuWorkspace, setMenuWorkspace] = useState(null);
+
+  // Assume you have a user object or username from your auth system
+  // For demo, hardcoding username:
+  const username = "JohnDoe";
 
   if (!loaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      {" "}
-      {/* Wrap everything inside here */}
       <Drawer
         drawerContent={(props) => {
           const navState = props.navigation.getState();
@@ -80,6 +91,23 @@ export default function RootLayout() {
           const [currentWorkspaceId, setCurrentWorkspaceIdLocal] = useState(
             workspaces.length > 0 ? workspaces[0].id : null
           );
+
+          // Override default workspace name with username + " workspace"
+          const modifiedWorkspaces = workspaces.map((ws, idx) => {
+            if (idx === 0) {
+              return {
+                ...ws,
+                name: `${username} workspace`
+              };
+            }
+            return ws;
+          });
+
+          const openMenuForWorkspace = (workspace) => {
+            props.navigation.closeDrawer();
+            setMenuWorkspace(workspace);
+            setMenuModalVisible(true);
+          };
 
           return (
             <DrawerContentScrollView
@@ -100,38 +128,50 @@ export default function RootLayout() {
                 </LinearGradient>
               </TouchableOpacity>
               <Text style={styles.yourWorkspacesLabel}>Your Workspaces</Text>
-              {workspaces.map((workspace) => (
-                <TouchableOpacity
-                  key={workspace.id}
-                  style={[
-                    styles.workspaceItem,
-                    workspace.id === currentWorkspaceId &&
-                      styles.activeWorkspaceItem
-                  ]}
-                  onPress={() => {
-                    setCurrentWorkspaceIdLocal(workspace.id);
-                    setCurrentWorkspaceId(workspace.id);
-                    router.push({
-                      pathname: "/(tabs)",
-                      params: { workspaceId: workspace.id }
-                    });
-                  }}
-                  onLongPress={() => {
-                    setSelectedWorkspace(workspace);
-                    setEditModalVisible(true);
-                  }}
-                >
-                  <View
+              {modifiedWorkspaces.map((workspace) => (
+                <View key={workspace.id} style={styles.workspaceRow}>
+                  <TouchableOpacity
                     style={[
-                      styles.workspaceIndicator,
-                      workspace.id !== currentWorkspaceId && {
-                        backgroundColor: "transparent"
-                      }
+                      styles.workspaceItem,
+                      workspace.id === currentWorkspaceId &&
+                        styles.activeWorkspaceItem
                     ]}
-                  />
-                  <InitialCircle text={workspace.name} backgroundColor={workspace.badgeColor} />
-                  <Text style={styles.workspaceText}>{workspace.name}</Text>
-                </TouchableOpacity>
+                    onPress={() => {
+                      setCurrentWorkspaceIdLocal(workspace.id);
+                      setCurrentWorkspaceId(workspace.id);
+                      router.push({
+                        pathname: "/(tabs)",
+                        params: { workspaceId: workspace.id }
+                      });
+                    }}
+                    onLongPress={() => {
+                      setSelectedWorkspace(workspace);
+                      setEditModalVisible(true);
+                    }}
+                  >
+                    <View
+                      style={[
+                        styles.workspaceIndicator,
+                        workspace.id !== currentWorkspaceId && {
+                          backgroundColor: "transparent"
+                        }
+                      ]}
+                    />
+                    <InitialCircle
+                      text={workspace.name}
+                      backgroundColor={getRandomColor()}
+                    />
+                    <Text style={styles.workspaceText}>{workspace.name}</Text>
+                  </TouchableOpacity>
+                  {/* 3 dots button */}
+                  <TouchableOpacity
+                    onPress={() => openMenuForWorkspace(workspace)}
+                    style={styles.menuButton}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Text style={styles.menuButtonText}>⋯</Text>
+                  </TouchableOpacity>
+                </View>
               ))}
               <CreateWorkspaceModal
                 visible={createModalVisible}
@@ -152,6 +192,31 @@ export default function RootLayout() {
                   }}
                 />
               )}
+              <WorkspaceMenuModal
+                visible={menuModalVisible}
+                onClose={() => setMenuModalVisible(false)}
+                workspace={menuWorkspace}
+                onRename={() => {
+                  setMenuModalVisible(false);
+                  setSelectedWorkspace(menuWorkspace);
+                  setEditModalVisible(true);
+                }}
+                onSettings={() => {
+                  setMenuModalVisible(false);
+                  // Navigate to settings screen or handle accordingly
+                  router.push({
+                    pathname: "/workspace-settings",
+                    params: { workspaceId: menuWorkspace?.id }
+                  });
+                }}
+                onDelete={() => {
+                  setMenuModalVisible(false);
+                  // Implement delete logic here or open a confirmation modal
+                  alert(
+                    `Delete workspace: ${menuWorkspace?.name} (implement delete logic)`
+                  );
+                }}
+              />
             </DrawerContentScrollView>
           );
         }}
@@ -210,11 +275,18 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     marginBottom: 8
   },
+  workspaceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 8
+  },
   workspaceItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
+    flex: 1
   },
   workspaceIndicator: {
     width: 8,
@@ -243,5 +315,15 @@ const styles = StyleSheet.create({
   activeWorkspaceItem: {
     backgroundColor: "#1A324F",
     borderRadius: 8
+  },
+  menuButton: {
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  menuButtonText: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold"
   }
 });
