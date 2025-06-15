@@ -1,14 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Touchable } from "react-native";
-import { ScrollView, StyleSheet, Switch, Text, View,TouchableOpacity,Modal,Button } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View, TouchableOpacity, Modal, Button, FlatList } from "react-native";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 const PRIMARY_COLOR = "#0B1F3A";
 
 export default function SettingsContent() {
-  const router=useRouter();
-  // State to control individual switches
+  const router = useRouter();
   const [switchStates, setSwitchStates] = useState({
     colorBlindMode: false,
     enableAnimations: false,
@@ -16,17 +14,16 @@ export default function SettingsContent() {
     showQuickAdd: false
   });
 
-  // Toggle function for individual switches
   const toggleSwitch = (key: keyof typeof switchStates) => {
     setSwitchStates((prev) => ({
       ...prev,
       [key]: !prev[key]
     }));
   };
-  const logout = ()=>{
+  const logout = () => {
     router.push({
-      pathname:"/auth/login"
-    })
+      pathname: "/auth/login"
+    });
   };
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -44,111 +41,113 @@ export default function SettingsContent() {
       </View>
 
       {showLogoutModal && (
-              <Modal visible={showLogoutModal} transparent animationType="fade">
-                <View style={styles.modalBackground}>
-                  <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
-                  <View style={styles.modalView}>
-                    <Text style={styles.modalTitle}>Logout</Text>
-                    <Text style={styles.modalText}>
-                      Are you sure you want to Logout?
-                    </Text>
-                    <View style={styles.modalButtons}>
-                      <View style={styles.deleteConfirmButton}>
-                        <Button
-                          title="Logout"
-                          onPress={logout}
-                          color="red"
-                        />
-                      </View>
-                      <View style={styles.cancelButton}>
-                        <Button
-                          title="Cancel"
-                          onPress={() => {
-                            setShowLogoutModal(false);
-                          }}
-                          color="#ADD8E6"
-                        />
-                      </View>
-                    </View>
-                  </View>
+        <Modal visible={showLogoutModal} transparent animationType="fade">
+          <View style={styles.modalBackground}>
+            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Logout</Text>
+              <Text style={styles.modalText}>
+                Are you sure you want to Logout?
+              </Text>
+              <View style={styles.modalButtons}>
+                <View style={styles.deleteConfirmButton}>
+                  <Button
+                    title="Logout"
+                    onPress={logout}
+                    color="red"
+                  />
                 </View>
-              </Modal>
-            )}
+                <View style={styles.cancelButton}>
+                  <Button
+                    title="Cancel"
+                    onPress={() => {
+                      setShowLogoutModal(false);
+                    }}
+                    color="#ADD8E6"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {/* Notifications Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Notifications</Text>
-        <Text style={styles.sectionSubtext}>Open system settings</Text>
-      </View>
-
-      {/* Application Theme Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Application Theme</Text>
-        <Text style={styles.sectionSubtext}>Select Theme</Text>
-      </View>
-
-      {/* Accessibility Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Accessibility</Text>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#767577" }}
-            thumbColor={switchStates.colorBlindMode ? "#339dff" : "#f4f3f4"}
-            onValueChange={() => toggleSwitch("colorBlindMode")}
-            value={switchStates.colorBlindMode}
-          />
+      <View>
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Notifications</Text>
+          <Text style={styles.sectionSubtext}>Open system settings</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Enable Animations</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#767577" }}
-            thumbColor={switchStates.enableAnimations ? "#339dff" : "#f4f3f4"}
-            onValueChange={() => toggleSwitch("enableAnimations")}
-            value={switchStates.enableAnimations}
-          />
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>
-            Show label names on card front
-          </Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#767577" }}
-            thumbColor={switchStates.showLabelNames ? "#339dff" : "#f4f3f4"}
-            onValueChange={() => toggleSwitch("showLabelNames")}
-            value={switchStates.showLabelNames}
-          />
-        </View>
-      </View>
 
-      {/* Sync Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Sync</Text>
-        <Text style={styles.sectionSubtext}>Sync queue</Text>
-      </View>
-
-      {/* General Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>General</Text>
-        <Text style={styles.sectionSubtext}>Profile and visibility</Text>
-        <Text style={styles.sectionSubtext}>Set app language</Text>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Show quick add</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#767577" }}
-            thumbColor={switchStates.showQuickAdd ? "#339dff" : "#f4f3f4"}
-            onValueChange={() => toggleSwitch("showQuickAdd")}
-            value={switchStates.showQuickAdd}
-          />
+        {/* Application Theme Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Application Theme</Text>
+          <Text style={styles.sectionSubtext}>Select Theme</Text>
         </View>
-        <Text style={styles.sectionSubtext}>Delete account</Text>
-        <Text style={styles.sectionSubtext}>About Trello</Text>
-        <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
-        <Text style={styles.sectionSubtext}>Contact support</Text>
-        <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
-        <TouchableOpacity  onPress={() => setShowLogoutModal(true)}>
-        <Text style={styles.sectionSubtext}>Log out</Text>
-        </TouchableOpacity>
+
+        {/* Accessibility Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Accessibility</Text>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.colorBlindMode ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("colorBlindMode")}
+              value={switchStates.colorBlindMode}
+            />
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Enable Animations</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.enableAnimations ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("enableAnimations")}
+              value={switchStates.enableAnimations}
+            />
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>
+              Show label names on card front
+            </Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.showLabelNames ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("showLabelNames")}
+              value={switchStates.showLabelNames}
+            />
+          </View>
+        </View>
+
+        {/* Sync Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Sync</Text>
+          <Text style={styles.sectionSubtext}>Sync queue</Text>
+        </View>
+
+        {/* General Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>General</Text>
+          <Text style={styles.sectionSubtext}>Profile and visibility</Text>
+          <Text style={styles.sectionSubtext}>Set app language</Text>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Show quick add</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.showQuickAdd ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("showQuickAdd")}
+              value={switchStates.showQuickAdd}
+            />
+          </View>
+          <Text style={styles.sectionSubtext}>Delete account</Text>
+          <Text style={styles.sectionSubtext}>About Trello</Text>
+          <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
+          <Text style={styles.sectionSubtext}>Contact support</Text>
+          <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
+          <TouchableOpacity onPress={() => setShowLogoutModal(true)}>
+            <Text style={styles.sectionSubtext}>Log out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -158,14 +157,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor:'#142f4d'
+    backgroundColor: '#142f4d'
   },
   profileCard: {
     alignItems: "center",
     marginBottom: 20,
-    backgroundColor:'#0B1F3A',
-    marginHorizontal:-20,
-    paddingBottom:15,
+    backgroundColor: '#0B1F3A',
+    marginHorizontal: -20,
+    paddingBottom: 15,
   },
   profileText: {
     fontWeight: "bold",
