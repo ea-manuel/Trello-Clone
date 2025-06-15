@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Touchable } from "react-native";
-import { ScrollView, StyleSheet, Switch, Text, View,TouchableOpacity } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View,TouchableOpacity,Modal,Button } from "react-native";
 import { useRouter } from "expo-router";
+import { BlurView } from "expo-blur";
 const PRIMARY_COLOR = "#0B1F3A";
 
 export default function SettingsContent() {
@@ -27,6 +28,7 @@ export default function SettingsContent() {
       pathname:"/auth/login"
     })
   };
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
     <ScrollView
@@ -40,6 +42,38 @@ export default function SettingsContent() {
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
       </View>
+
+      {showLogoutModal && (
+              <Modal visible={showLogoutModal} transparent animationType="fade">
+                <View style={styles.modalBackground}>
+                  <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+                  <View style={styles.modalView}>
+                    <Text style={styles.modalTitle}>Logout</Text>
+                    <Text style={styles.modalText}>
+                      Are you sure you want to Logout?
+                    </Text>
+                    <View style={styles.modalButtons}>
+                      <View style={styles.deleteConfirmButton}>
+                        <Button
+                          title="Logout"
+                          onPress={logout}
+                          color="red"
+                        />
+                      </View>
+                      <View style={styles.cancelButton}>
+                        <Button
+                          title="Cancel"
+                          onPress={() => {
+                            setShowLogoutModal(false);
+                          }}
+                          color="#ADD8E6"
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
+            )}
 
       {/* Notifications Section */}
       <View style={styles.section}>
@@ -112,7 +146,7 @@ export default function SettingsContent() {
         <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
         <Text style={styles.sectionSubtext}>Contact support</Text>
         <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
-        <TouchableOpacity onPress={logout}>
+        <TouchableOpacity  onPress={() => setShowLogoutModal(true)}>
         <Text style={styles.sectionSubtext}>Log out</Text>
         </TouchableOpacity>
       </View>
@@ -160,5 +194,48 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10
-  }
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    padding: 40,
+    margin: 30,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    minWidth: 300,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#333",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  deleteConfirmButton: {
+    backgroundColor: "#e74c3c",
+    borderRadius: 6,
+    margin: 5,
+  },
+  cancelButton: {
+    borderRadius: 6,
+    margin: 5,
+  },
 });

@@ -65,7 +65,7 @@ export default function RootLayout() {
     createdAt: number;
     badgeColor: string; // New property
   };
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  // const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
   const [selectedWorkspace, setSelectedWorkspace] = useState(null);
   const [menuModalVisible, setMenuModalVisible] = useState(false);
   const [menuWorkspace, setMenuWorkspace] = useState(null);
