@@ -1,13 +1,31 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-
+import { ScrollView, StyleSheet, Switch, Text, View, TouchableOpacity, Modal, Button, FlatList } from "react-native";
+import { useRouter } from "expo-router";
+import { BlurView } from "expo-blur";
 const PRIMARY_COLOR = "#0B1F3A";
 
 export default function SettingsContent() {
-  // Local state for switches; you can lift this up if needed
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((prev) => !prev);
+  const router = useRouter();
+  const [switchStates, setSwitchStates] = useState({
+    colorBlindMode: false,
+    enableAnimations: false,
+    showLabelNames: false,
+    showQuickAdd: false
+  });
+
+  const toggleSwitch = (key: keyof typeof switchStates) => {
+    setSwitchStates((prev) => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+  const logout = () => {
+    router.push({
+      pathname: "/auth/login"
+    });
+  };
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
     <ScrollView
@@ -16,84 +34,120 @@ export default function SettingsContent() {
     >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <Ionicons name="person-circle" size={70} color={PRIMARY_COLOR} />
+        <Ionicons name="person-circle" size={90} color='#ffffff' />
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
       </View>
 
+      {showLogoutModal && (
+        <Modal visible={showLogoutModal} transparent animationType="fade">
+          <View style={styles.modalBackground}>
+            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Logout</Text>
+              <Text style={styles.modalText}>
+                Are you sure you want to Logout?
+              </Text>
+              <View style={styles.modalButtons}>
+                <View style={styles.deleteConfirmButton}>
+                  <Button
+                    title="Logout"
+                    onPress={logout}
+                    color="red"
+                  />
+                </View>
+                <View style={styles.cancelButton}>
+                  <Button
+                    title="Cancel"
+                    onPress={() => {
+                      setShowLogoutModal(false);
+                    }}
+                    color="#ADD8E6"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       {/* Notifications Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Notifications</Text>
-        <Text style={styles.sectionSubtext}>Open system settings</Text>
-      </View>
-
-      {/* Application Theme Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Application Theme</Text>
-        <Text style={styles.sectionSubtext}>Select Theme</Text>
-      </View>
-
-      {/* Accessibility Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Accessibility</Text>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
+      <View>
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Notifications</Text>
+          <Text style={styles.sectionSubtext}>Open system settings</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Enable Animations</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>
-            Show label names on card front
-          </Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
-        </View>
-      </View>
 
-      {/* Sync Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Sync</Text>
-        <Text style={styles.sectionSubtext}>Sync queue</Text>
-      </View>
-
-      {/* General Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>General</Text>
-        <Text style={styles.sectionSubtext}>Profile and visibility</Text>
-        <Text style={styles.sectionSubtext}>Set app language</Text>
-        <View style={styles.row}>
-          <Text style={styles.sectionSubtext}>Show quick add</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#636B2F" }}
-            thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
+        {/* Application Theme Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Application Theme</Text>
+          <Text style={styles.sectionSubtext}>Select Theme</Text>
         </View>
-        <Text style={styles.sectionSubtext}>Delete account</Text>
-        <Text style={styles.sectionSubtext}>About Trello</Text>
-        <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
-        <Text style={styles.sectionSubtext}>Contact support</Text>
-        <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
-        <Text style={styles.sectionSubtext}>Log out</Text>
+
+        {/* Accessibility Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Accessibility</Text>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.colorBlindMode ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("colorBlindMode")}
+              value={switchStates.colorBlindMode}
+            />
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Enable Animations</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.enableAnimations ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("enableAnimations")}
+              value={switchStates.enableAnimations}
+            />
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>
+              Show label names on card front
+            </Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.showLabelNames ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("showLabelNames")}
+              value={switchStates.showLabelNames}
+            />
+          </View>
+        </View>
+
+        {/* Sync Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Sync</Text>
+          <Text style={styles.sectionSubtext}>Sync queue</Text>
+        </View>
+
+        {/* General Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>General</Text>
+          <Text style={styles.sectionSubtext}>Profile and visibility</Text>
+          <Text style={styles.sectionSubtext}>Set app language</Text>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Show quick add</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#767577" }}
+              thumbColor={switchStates.showQuickAdd ? "#339dff" : "#f4f3f4"}
+              onValueChange={() => toggleSwitch("showQuickAdd")}
+              value={switchStates.showQuickAdd}
+            />
+          </View>
+          <Text style={styles.sectionSubtext}>Delete account</Text>
+          <Text style={styles.sectionSubtext}>About Trello</Text>
+          <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
+          <Text style={styles.sectionSubtext}>Contact support</Text>
+          <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
+          <TouchableOpacity onPress={() => setShowLogoutModal(true)}>
+            <Text style={styles.sectionSubtext}>Log out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -103,12 +157,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20
+    backgroundColor: '#142f4d'
   },
   profileCard: {
     alignItems: "center",
-    marginBottom: 20
+    marginBottom: 20,
+    backgroundColor: '#0B1F3A',
+    marginHorizontal: -20,
+    paddingBottom: 15,
   },
   profileText: {
     fontWeight: "bold",
@@ -137,5 +193,48 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10
-  }
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    padding: 40,
+    margin: 30,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    minWidth: 300,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#333",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  deleteConfirmButton: {
+    backgroundColor: "#e74c3c",
+    borderRadius: 6,
+    margin: 5,
+  },
+  cancelButton: {
+    borderRadius: 6,
+    margin: 5,
+  },
 });
