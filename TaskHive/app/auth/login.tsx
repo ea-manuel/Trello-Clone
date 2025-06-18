@@ -11,14 +11,11 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 const PRIMARY_COLOR = "#1F80E0";
 
 export default function Login() {
   const [email, setEmail] = useState("");
-  const [password,setPassword]=useState("");
-  const [hidepassword, setHidepassword] = useState(false);
   const router = useRouter();
 
   const handleLogin = () => {
@@ -37,43 +34,22 @@ export default function Login() {
       <Text style={styles.title}>Login to continue</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter your email or uysername"
+        placeholder="Enter your email"
         placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
-        <TextInput
-          style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
-          placeholder="Enter your password"
-          placeholderTextColor="#888"
-          value={password}
-          onChangeText={setPassword}
-          keyboardType="default"
-          secureTextEntry={hidepassword}
-          autoCapitalize="none"
-        />
-        <TouchableOpacity
-          onPress={() => setHidepassword(!hidepassword)}
-          style={{
-            position: "absolute",
-            right: 12,
-            top: 0,
-            height: "100%",
-            justifyContent: "center"
-          }}
-        >
-          {hidepassword ? (
-            <Ionicons name="eye" size={22} color="#888" />
-          ) : (
-            <Ionicons name="eye-off" size={22} color="#888" />
-          )}
-        </TouchableOpacity>
-      </View>
-      
-      
+       <TextInput
+        style={styles.input}
+        placeholder="Enter your password"
+        placeholderTextColor="#888"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
       <Text style={styles.terms}>
         By signing up, you agree to our{" "}
         <Text style={styles.link}>Terms of service</Text> and the{" "}

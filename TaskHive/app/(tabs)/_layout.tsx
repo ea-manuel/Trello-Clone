@@ -1,31 +1,29 @@
+// (tabs)/_layout.tsx
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Tabs } from "expo-router";
-import { Platform, View } from "react-native";
+import { Platform } from "react-native";
+import { View } from "react-native";
 
 export default function TabsLayout() {
   return (
-    <Tabs
+     
+      <Tabs
       screenOptions={{
         headerShown: false,
         tabBarBackground() {
-          return (
-            <View style={{ backgroundColor: "#0B1F3A" }}>
-              <TabBarBackground />
-            </View>
-          );
+          return <View style={{backgroundColor: "#0B1F3A"}} ><TabBarBackground /></View>;
         },
-        tabBarActiveTintColor: "#2EC",
-        tabBarInactiveTintColor: "white",
+        tabBarActiveTintColor: "#2EC", // or any color you want for active tab
+        tabBarInactiveTintColor: "white", // inactive tabs will be white
         tabBarStyle: Platform.select({
           ios: {
             position: "absolute",
             backgroundColor: "transparent",
-            height: 60,
-            paddingTop: 5
+            height: 60, paddingTop: 5 
           },
           default: { backgroundColor: "#0B1F3A", height: 60, paddingTop: 5 }
-        })
+        }), 
       }}
     >
       <Tabs.Screen
@@ -64,6 +62,8 @@ export default function TabsLayout() {
           )
         }}
       />
-    </Tabs>
+      
+      </Tabs>
+    
   );
 }

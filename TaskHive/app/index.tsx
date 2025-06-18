@@ -7,7 +7,7 @@ export default function Index() {
 
   useEffect(() => {
     // Redirect to login page on app launch
-    router.replace("/auth/welcome");
+    router.replace("/auth/login");
   }, []);
 
   return null; // or a loading spinner if you want

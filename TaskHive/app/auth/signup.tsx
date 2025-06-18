@@ -10,15 +10,13 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 const PRIMARY_COLOR = "#1F80E0";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [password,setPassword]=useState("");
-  const [hidepassword, setHidepassword] = useState(false);
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
@@ -50,62 +48,24 @@ export default function Signup() {
         onChangeText={setUsername}
         autoCapitalize="none"
       />
-        <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
-             <TextInput
-               style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
-               placeholder="Enter your password"
-               placeholderTextColor="#888"
-               value={password}
-               onChangeText={setPassword}
-               keyboardType="default"
-               secureTextEntry={hidepassword}
-               autoCapitalize="none"
-             />
-             <TouchableOpacity
-               onPress={() => setHidepassword(!hidepassword)}
-               style={{
-                 position: "absolute",
-                 right: 12,
-                 top: 0,
-                 height: "100%",
-                 justifyContent: "center"
-               }}
-             >
-               {hidepassword ? (
-                 <Ionicons name="eye" size={22} color="#888" />
-               ) : (
-                 <Ionicons name="eye-off" size={22} color="#888" />
-               )}
-             </TouchableOpacity>
-           </View>
-      <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
-             <TextInput
-               style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
-               placeholder="Confirm your password"
-               placeholderTextColor="#888"
-               value={password}
-               onChangeText={setPassword}
-               keyboardType="default"
-               secureTextEntry={hidepassword}
-               autoCapitalize="none"
-             />
-             <TouchableOpacity
-               onPress={() => setHidepassword(!hidepassword)}
-               style={{
-                 position: "absolute",
-                 right: 12,
-                 top: 0,
-                 height: "100%",
-                 justifyContent: "center"
-               }}
-             >
-               {hidepassword ? (
-                 <Ionicons name="eye" size={22} color="#888" />
-               ) : (
-                 <Ionicons name="eye-off" size={22} color="#888" />
-               )}
-             </TouchableOpacity>
-           </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your password"
+        placeholderTextColor="#888"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm password"
+        placeholderTextColor="#888"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        autoCapitalize="none"
+      />
 
       {/* Terms text */}
       <Text style={styles.terms}>
@@ -125,8 +85,8 @@ export default function Signup() {
       {/* Social buttons */}
       <View style={styles.socialButtonsContainer}>
         <TouchableOpacity style={styles.socialButton}>
-          <Ionicons
-            name="logo-google"
+          <AntDesign
+            name="google"
             size={24}
             color="#EA4335"
             style={{ marginRight: 10 }}

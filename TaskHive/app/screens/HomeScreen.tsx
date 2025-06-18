@@ -91,7 +91,7 @@ export default function HomeScreen() {
       />
 
       {showModal && (
-        <Modal visible={showModal} transparent animationType="slide" >
+        <Modal visible={showModal} transparent animationType="slide">
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
             style={styles.modalBackground}

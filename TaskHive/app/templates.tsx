@@ -1,7 +1,7 @@
-// app/(tabs)/templates.tsx
-import React from "react";
-import TemplatesComponent from "./(tabs)/templates";
+import TemplatesComponent from '@/app/(tabs)/templates'
 
-export default function TemplatesScreen() {
-  return <TemplatesComponent />;
+export default function Templates(){
+    return(
+        <TemplatesComponent/>
+    );
 }

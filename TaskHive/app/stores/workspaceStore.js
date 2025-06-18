@@ -1,88 +1,49 @@
-import { create } from "zustand";
+let workspaces = [];
+let boards = [];
+let nextId = 1;
 
-const BADGE_COLORS = [
-  "#2980B9", "#00C6AE", "#007CF0", "#636B2F", "#8E44AD", "#FF7F7F", "#FFA500",
-];
+// Create default workspace if none exist
+if (workspaces.length === 0) {
+  workspaces.push({
+    id: `ws-${nextId++}`,
+    name: "Default Workspace",
+    visibility: "Private",
+    createdAt: Date.now()
+  });
+}
 
-const getRandomColor = () => {
-  const randomIndex = Math.floor(Math.random() * BADGE_COLORS.length);
-  return BADGE_COLORS[randomIndex];
+export const createWorkspace = ({ name, visibility }) => {
+  const workspace = { id: `ws-${nextId++}`, name, visibility, createdAt: Date.now() };
+  workspaces.push(workspace);
+  return workspace;
 };
 
-let nextId = 2;
+export const editWorkspace = (id, { name, visibility }) => {
+  const index = workspaces.findIndex(ws => ws.id === id);
+  if (index !== -1) {
+    workspaces[index] = { ...workspaces[index], name, visibility };
+    return workspaces[index];
+  }
+  return null;
+};
 
-export const useWorkspaceStore = create((set, get) => ({
-  workspaces: [
-    {
-      id: "ws-1",
-      name: "Default",
-      visibility: "Private",
-      createdAt: Date.now(),
-      badgeColor: "#2980B9", // Assign fixed color for default workspace
-    },
-  ],
-  boards: [],
-  updateBoard: (updatedBoard) =>
-    set((state) => ({
-      boards: state.boards.map((b) =>
-        b.id === updatedBoard.id && b.workspaceId === updatedBoard.workspaceId
-          ? updatedBoard
-          : b
-      ),
-    })),
-  currentWorkspaceId: "ws-1",
+export const getWorkspaces = () => {
+  return workspaces;
+};
 
-  createWorkspace: ({ name, visibility }) => {
-    const newWorkspace = {
-      id: `ws-${nextId++}`,
-      name,
-      visibility,
-      createdAt: Date.now(),
-      badgeColor: getRandomColor(), // Assign random color for new workspaces
-    };
-    set((state) => ({
-      workspaces: [...state.workspaces, newWorkspace],
-      currentWorkspaceId: newWorkspace.id,
-    }));
-    return newWorkspace;
-  },
+export const createBoard = ({ title, workspaceId, backgroundColor }) => {
+  const board = { 
+    id: `board-${nextId++}`, 
+    title, 
+    workspaceId, 
+    backgroundColor, 
+    createdAt: Date.now(),
+    lists: []
+  };
+  boards.push(board);
+  return board;
+};
 
-  editWorkspace: (id, { name, visibility, badgeColor }) => {
-    set((state) => ({
-      workspaces: state.workspaces.map((ws) =>
-        ws.id === id ? { ...ws, name, visibility, badgeColor: badgeColor ?? ws.badgeColor } : ws
-      ),
-    }));
-  },
-
-  setCurrentWorkspaceId: (id) => set({ currentWorkspaceId: id }),
-
-  createBoard: ({ title, workspaceId, backgroundColor }) => {
-    const newBoard = {
-      id: `board-${nextId++}`,
-      title,
-      workspaceId,
-      backgroundColor,
-      createdAt: Date.now(),
-      lists: [],
-    };
-    set((state) => ({
-      boards: [...state.boards, newBoard],
-    }));
-    return newBoard;
-  },
-
-  deleteBoard: (boardId) => {
-    set((state) => ({
-      boards: state.boards.filter((b) => b.id !== boardId),
-    }));
-  },
-
-  getBoards: (workspaceId) => {
-    return get().boards.filter((b) => b.workspaceId === workspaceId);
-  },
-
-  getWorkspaces: () => {
-    return get().workspaces;
-  },
-}));
+export const getBoards = (workspaceId) => {
+  return boards.filter(b => b.workspaceId === workspaceId);
+};
