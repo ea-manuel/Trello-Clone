@@ -26,18 +26,22 @@ export default function CreateWorkspaceModal({
   const [visibility, setVisibility] = useState("Private");
   const { createWorkspace } = useWorkspaceStore(); // Access createWorkspace via hook
 
-  const handleCreate = () => {
-    if (!name.trim()) return;
-    const workspace = createWorkspace({ name, visibility });
-    console.log(
-      "CreateWorkspaceModal: Created workspace:",
-      JSON.stringify(workspace, null, 2)
-    ); // Debug log
+  const handleCreate = async () => {
+  if (!name.trim()) return;
+
+  try {
+    const workspace = await createWorkspace({ name, visibility });
+
+    console.log("CreateWorkspaceModal: Created workspace:", workspace);
     onCreate(workspace);
     setName("");
     setVisibility("Private");
     onClose();
-  };
+  } catch (error) {
+    console.error("Error creating workspace from modal:", error);
+    alert("Failed to create workspace. Please try again.");
+  }
+};
 
   return (
     <Modal visible={visible} transparent animationType="fade">

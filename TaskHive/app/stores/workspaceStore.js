@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import axiosClient from "../../src/api/axiosClient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BADGE_COLORS = [
   "#2980B9", "#00C6AE", "#007CF0", "#636B2F", "#8E44AD", "#FF7F7F", "#FFA500",
@@ -32,20 +34,46 @@ export const useWorkspaceStore = create((set, get) => ({
     })),
   currentWorkspaceId: "ws-1",
 
-  createWorkspace: ({ name, visibility }) => {
-    const newWorkspace = {
-      id: `ws-${nextId++}`,
-      name,
-      visibility,
-      createdAt: Date.now(),
-      badgeColor: getRandomColor(), // Assign random color for new workspaces
-    };
+ createWorkspace: async ({ name, visibility }) => {
+  try {
+    const token = await AsyncStorage.getItem("authToken"); // Get token
+
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await axiosClient.post(
+      "/workspaces",
+      { name, visibility },
+      {
+        headers: {
+          Authorization: `Bearer ${token}` // Attach token here
+        }
+      }
+    );
+
+    const newWorkspaceFromBackend = response.data;
+
     set((state) => ({
-      workspaces: [...state.workspaces, newWorkspace],
-      currentWorkspaceId: newWorkspace.id,
+      workspaces: [...state.workspaces, newWorkspaceFromBackend],
+      currentWorkspaceId: newWorkspaceFromBackend.id,
     }));
-    return newWorkspace;
-  },
+
+    return newWorkspaceFromBackend;
+  } catch (error) {
+    console.error("Failed to create workspace:", error.response?.data || error.message);
+    throw error;
+  }
+},
+getUserWorkspaces: async () => {
+  try {
+    const response = await axiosClient.get("/workspaces");
+    set({ workspaces: response.data });
+  } catch (error) {
+    console.error("Failed to fetch workspaces:", error);
+  }
+},
+
 
   editWorkspace: (id, { name, visibility, badgeColor }) => {
     set((state) => ({

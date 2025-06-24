@@ -1,6 +1,7 @@
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import axios from 'axios';
 import {
   Image,
   ScrollView,
@@ -8,7 +9,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  Alert
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -21,6 +23,38 @@ export default function Signup() {
   const [hidepassword, setHidepassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
+
+
+
+const handleSignup = async () => {
+  if (!email || !username || !password || !confirmPassword) {
+    Alert.alert("Error", "Please fill all fields.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    Alert.alert("Error", "Passwords do not match.");
+    return;
+  }
+
+  try {
+    const response = await axios.post("http://localhost:8080/api/auth/register", {
+      email,
+      username,
+      password,
+    });
+
+    Alert.alert("Success", response.data);
+    router.push("/auth/login");
+  } catch (error: any) {
+    const message =
+      error?.response?.data || "Something went wrong. Please try again.";
+    Alert.alert("Signup Failed", message);
+  }
+};
+
+
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -80,15 +114,16 @@ export default function Signup() {
            </View>
       <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
              <TextInput
-               style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
-               placeholder="Confirm your password"
-               placeholderTextColor="#888"
-               value={password}
-               onChangeText={setPassword}
-               keyboardType="default"
-               secureTextEntry={hidepassword}
-               autoCapitalize="none"
+                  style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
+                  placeholder="Confirm your password"
+                  placeholderTextColor="#888"
+                  value={confirmPassword}       
+                  onChangeText={setConfirmPassword}  
+                  keyboardType="default"
+                  secureTextEntry={hidepassword}
+                  autoCapitalize="none"
              />
+
              <TouchableOpacity
                onPress={() => setHidepassword(!hidepassword)}
                style={{
@@ -115,9 +150,10 @@ export default function Signup() {
       </Text>
 
       {/* Sign up button */}
-      <TouchableOpacity style={styles.signupButton}>
-        <Text style={styles.signupButtonText}>Sign up</Text>
+      <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+          <Text style={styles.signupButtonText}>Sign up</Text>
       </TouchableOpacity>
+
 
       {/* Or continue with */}
       <Text style={styles.orText}>Or continue with:</Text>

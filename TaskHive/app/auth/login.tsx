@@ -12,6 +12,10 @@ import {
   View
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import axios from 'axios';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const PRIMARY_COLOR = "#1F80E0";
 
@@ -21,9 +25,36 @@ export default function Login() {
   const [hidepassword, setHidepassword] = useState(false);
   const router = useRouter();
 
-  const handleLogin = () => {
-    router.replace("/(tabs)");
-  };
+
+  const handleLogin = async () => {
+  if (!email || !password) {
+    Alert.alert("Error", "Please enter both email and password.");
+    return;
+  }
+
+  try {
+    const response = await axios.post("http://localhost:8080/api/auth/login", {
+      email,
+      password,
+    });
+
+    const token = response.data.token;
+
+    // Save token locally
+    await AsyncStorage.setItem("authToken", token);
+    
+    console.log("Stored Token:", token);
+
+
+    Alert.alert("Login Success", "You're now logged in.");
+    router.replace("/(tabs)"); 
+  } catch (error: any) {
+    const message =
+      error?.response?.data || "Login failed. Please check your credentials.";
+    Alert.alert("Login Failed", message);
+  }
+};
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -84,7 +115,7 @@ export default function Login() {
       </TouchableOpacity>
       <Text style={styles.orText}>Or continue with:</Text>
       <View style={styles.socialButtonsContainer}>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton}>
           <AntDesign
             name="google"
             size={24}
@@ -93,7 +124,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Google</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity  style={styles.socialButton}>
           <FontAwesome
             name="windows"
             size={24}
@@ -102,7 +133,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Microsoft</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity  style={styles.socialButton}>
           <AntDesign
             name="apple1"
             size={24}
@@ -111,7 +142,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Apple</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity  style={styles.socialButton}>
           <FontAwesome5
             name="slack"
             size={24}

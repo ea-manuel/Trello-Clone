@@ -39,6 +39,16 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Board> boards = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<Workspace> workspaces = new ArrayList<>();
+
+    public List<Workspace> getWorkspaces() {
+    return this.workspaces;
+}
+
+public void setWorkspaces(List<Workspace> workspaces) {
+    this.workspaces = workspaces;
+}
 
     public User() {}
 

@@ -15,7 +15,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Alert
 } from "react-native";
 
 import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
@@ -23,6 +24,7 @@ import EditWorkspaceModal from "@/components/EditWorkspaceModal";
 import Header from "@/components/Header";
 import WorkspaceMenuModal from "@/components/WorkspaceMenuModal"; // Import the new modal
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
+import axios from "axios";
 
 const BADGE_COLORS = [
   "#2980B9",
@@ -173,11 +175,19 @@ export default function RootLayout() {
                   </TouchableOpacity>
                 </View>
               ))}
-              <CreateWorkspaceModal
-                visible={createModalVisible}
-                onClose={() => setCreateModalVisible(false)}
-                onCreate={() => setCreateModalVisible(false)}
-              />
+             <CreateWorkspaceModal
+  visible={createModalVisible}
+  onClose={() => setCreateModalVisible(false)}
+  onCreate={async (workspaceData) => {
+    try {
+      await useWorkspaceStore.getState().createWorkspace(workspaceData);
+      setCreateModalVisible(false);
+    } catch (error) {
+      Alert.alert("Error", "Failed to create workspace");
+    }
+  }}
+/>
+
               {selectedWorkspace && (
                 <EditWorkspaceModal
                   visible={editModalVisible}
