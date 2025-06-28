@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from 'axios';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from "react-native";
 
 
 const PRIMARY_COLOR = "#1F80E0";
@@ -23,6 +24,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password,setPassword]=useState("");
   const [hidepassword, setHidepassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
 
@@ -33,6 +36,7 @@ export default function Login() {
   }
 
   try {
+    setLoading(true);
     const response = await axios.post("http://localhost:8080/api/auth/login", {
       email,
       password,
@@ -52,6 +56,8 @@ export default function Login() {
     const message =
       error?.response?.data || "Login failed. Please check your credentials.";
     Alert.alert("Login Failed", message);
+  } finally{
+    setLoading(false);
   }
 };
 
@@ -67,17 +73,18 @@ export default function Login() {
 
       <Text style={styles.title}>Login to continue</Text>
       <TextInput
-        style={styles.input}
-        placeholder="Enter your email or uysername"
+        style={[styles.input,loading && {opacity:0.6}]}
+        placeholder="Enter your email or username"
         placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        editable={!loading}
       />
       <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
         <TextInput
-          style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
+          style={[styles.input, { paddingRight: 40, marginBottom: 0 },loading && {opacity:0.6}]}
           placeholder="Enter your password"
           placeholderTextColor="#888"
           value={password}
@@ -85,6 +92,7 @@ export default function Login() {
           keyboardType="default"
           secureTextEntry={hidepassword}
           autoCapitalize="none"
+          editable={!loading}
         />
         <TouchableOpacity
           onPress={() => setHidepassword(!hidepassword)}
@@ -110,9 +118,13 @@ export default function Login() {
         <Text style={styles.link}>Terms of service</Text> and the{" "}
         <Text style={styles.link}>Privacy Policy</Text>
       </Text>
+      {loading ? (
+         <ActivityIndicator size="large" color="#007CF0" style={{ marginTop: 20 }} />
+        ) : (
       <TouchableOpacity onPress={handleLogin} style={styles.signupButton}>
         <Text style={styles.signupButtonText}>Login</Text>
       </TouchableOpacity>
+        )}
       <Text style={styles.orText}>Or continue with:</Text>
       <View style={styles.socialButtonsContainer}>
         <TouchableOpacity style={styles.socialButton}>
