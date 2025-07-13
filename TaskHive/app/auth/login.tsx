@@ -28,7 +28,11 @@ export default function Login() {
 
   const router = useRouter();
 
-
+// const handleLogin =() =>{
+//   router.push({
+//       pathname: "/(tabs)"
+// });
+//   };
   const handleLogin = async () => {
   if (!email || !password) {
     Alert.alert("Error", "Please enter both email and password.");
@@ -37,7 +41,7 @@ export default function Login() {
 
   try {
     setLoading(true);
-    const response = await axios.post("http://localhost:8080/api/auth/login", {
+    const response = await axios.post("http:// 100.112.29.53:8080/api/auth/login", {
       email,
       password,
     });
