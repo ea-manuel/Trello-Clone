@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080/api", // adjust port if needed
+  baseURL: "http://192.168.32.48:8080/api", // adjust port if needed
 });
 
 axiosClient.interceptors.request.use(

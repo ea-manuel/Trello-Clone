@@ -23,7 +23,7 @@ const PRIMARY_COLOR = "#1F80E0";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password,setPassword]=useState("");
-  const [hidepassword, setHidepassword] = useState(false);
+  const [hidepassword, setHidepassword] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function Login() {
 //       pathname: "/(tabs)"
 // });
 //   };
-  const handleLogin = async () => {
+ const handleLogin = async () => {
   if (!email || !password) {
     Alert.alert("Error", "Please enter both email and password.");
     return;
@@ -41,26 +41,31 @@ export default function Login() {
 
   try {
     setLoading(true);
-    const response = await axios.post("http:// 100.112.29.53:8080/api/auth/login", {
+
+    const response = await axios.post("http://192.168.32.48:8080/api/auth/login", {
       email,
       password,
     });
 
     const token = response.data.token;
+    if (!token) throw new Error("Token not found in response.");
 
-    // Save token locally
     await AsyncStorage.setItem("authToken", token);
-    
     console.log("Stored Token:", token);
 
-
     Alert.alert("Login Success", "You're now logged in.");
-    router.replace("/(tabs)"); 
+    router.replace("/(tabs)");
+
   } catch (error: any) {
+    console.error("Login Error:", error.response?.data || error.message);
+    
     const message =
-      error?.response?.data || "Login failed. Please check your credentials.";
-    Alert.alert("Login Failed", message);
-  } finally{
+      error?.response?.data?.message || // typical for Spring error structure
+      error?.response?.data || 
+      "Login failed. Please check your credentials.";
+
+    Alert.alert("Login Failed", typeof message === "string" ? message : "Unknown error.");
+  } finally {
     setLoading(false);
   }
 };

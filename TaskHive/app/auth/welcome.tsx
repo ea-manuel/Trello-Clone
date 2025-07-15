@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
       {/* Illustration Section */}
       <View style={styles.illustrationContainer}>
         <Image
-          source={require("../../assets/images/welcomeIllustration.png")}
+          source={require("../../assets/images/welcomeimage.png")}
           style={styles.illustration}
           resizeMode="contain"
         />

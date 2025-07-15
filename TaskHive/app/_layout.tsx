@@ -74,7 +74,7 @@ export default function RootLayout() {
 
   // Assume you have a user object or username from your auth system
   // For demo, hardcoding username:
-  const username = "JohnDoe";
+  //const username = "JohnDoe";
 
   if (!loaded) return null;
 
@@ -99,7 +99,7 @@ export default function RootLayout() {
             if (idx === 0) {
               return {
                 ...ws,
-                name: `${username} workspace`
+                name: `Default workspace`
               };
             }
             return ws;
