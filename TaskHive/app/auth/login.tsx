@@ -11,16 +11,65 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import axios from 'axios';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from "react-native";
+
 
 const PRIMARY_COLOR = "#1F80E0";
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const [password,setPassword]=useState("");
+  const [hidepassword, setHidepassword] = useState(true);
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
-  const handleLogin = () => {
+// const handleLogin =() =>{
+//   router.push({
+//       pathname: "/(tabs)"
+// });
+//   };
+ const handleLogin = async () => {
+  if (!email || !password) {
+    Alert.alert("Error", "Please enter both email and password.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await axios.post("http://192.168.32.48:8080/api/auth/login", {
+      email,
+      password,
+    });
+
+    const token = response.data.token;
+    if (!token) throw new Error("Token not found in response.");
+
+    await AsyncStorage.setItem("authToken", token);
+    console.log("Stored Token:", token);
+
+    Alert.alert("Login Success", "You're now logged in.");
     router.replace("/(tabs)");
-  };
+
+  } catch (error: any) {
+    console.error("Login Error:", error.response?.data || error.message);
+    
+    const message =
+      error?.response?.data?.message || // typical for Spring error structure
+      error?.response?.data || 
+      "Login failed. Please check your credentials.";
+
+    Alert.alert("Login Failed", typeof message === "string" ? message : "Unknown error.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -33,34 +82,61 @@ export default function Login() {
 
       <Text style={styles.title}>Login to continue</Text>
       <TextInput
-        style={styles.input}
-        placeholder="Enter your email"
+        style={[styles.input,loading && {opacity:0.6}]}
+        placeholder="Enter your email or username"
         placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        editable={!loading}
       />
-       <TextInput
-        style={styles.input}
-        placeholder="Enter your password"
-        placeholderTextColor="#888"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
+        <TextInput
+          style={[styles.input, { paddingRight: 40, marginBottom: 0 },loading && {opacity:0.6}]}
+          placeholder="Enter your password"
+          placeholderTextColor="#888"
+          value={password}
+          onChangeText={setPassword}
+          keyboardType="default"
+          secureTextEntry={hidepassword}
+          autoCapitalize="none"
+          editable={!loading}
+        />
+        <TouchableOpacity
+          onPress={() => setHidepassword(!hidepassword)}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: 0,
+            height: "100%",
+            justifyContent: "center"
+          }}
+        >
+          {hidepassword ? (
+            <Ionicons name="eye" size={22} color="#888" />
+          ) : (
+            <Ionicons name="eye-off" size={22} color="#888" />
+          )}
+        </TouchableOpacity>
+      </View>
+      
+      
       <Text style={styles.terms}>
         By signing up, you agree to our{" "}
         <Text style={styles.link}>Terms of service</Text> and the{" "}
         <Text style={styles.link}>Privacy Policy</Text>
       </Text>
+      {loading ? (
+         <ActivityIndicator size="large" color="#007CF0" style={{ marginTop: 20 }} />
+        ) : (
       <TouchableOpacity onPress={handleLogin} style={styles.signupButton}>
         <Text style={styles.signupButtonText}>Login</Text>
       </TouchableOpacity>
+        )}
       <Text style={styles.orText}>Or continue with:</Text>
       <View style={styles.socialButtonsContainer}>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton}>
           <AntDesign
             name="google"
             size={24}
@@ -69,7 +145,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Google</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity  style={styles.socialButton}>
           <FontAwesome
             name="windows"
             size={24}
@@ -78,7 +154,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Microsoft</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity  style={styles.socialButton}>
           <AntDesign
             name="apple1"
             size={24}
@@ -87,7 +163,7 @@ export default function Login() {
           />
           <Text style={styles.socialButtonText}>Apple</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogin} style={styles.socialButton}>
+        <TouchableOpacity  style={styles.socialButton}>
           <FontAwesome5
             name="slack"
             size={24}

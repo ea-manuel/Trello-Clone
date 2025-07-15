@@ -1,6 +1,7 @@
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import axios from 'axios';
 import {
   Image,
   ScrollView,
@@ -8,17 +9,52 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  Alert
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const PRIMARY_COLOR = "#1F80E0";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [password,setPassword]=useState("");
+  const [hidepassword, setHidepassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
+
+
+
+const handleSignup = async () => {
+  if (!email || !username || !password || !confirmPassword) {
+    Alert.alert("Error", "Please fill all fields.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    Alert.alert("Error", "Passwords do not match.");
+    return;
+  }
+
+  try {
+    const response = await axios.post("http://192.168.32.48:8080/api/auth/register", {
+      email,
+      username,
+      password,
+    });
+
+    Alert.alert("Success", response.data);
+    router.push("/auth/login");
+  } catch (error: any) {
+    const message =
+      error?.response?.data || "Something went wrong. Please try again.";
+    Alert.alert("Signup Failed", message);
+  }
+};
+
+
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -48,24 +84,63 @@ export default function Signup() {
         onChangeText={setUsername}
         autoCapitalize="none"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your password"
-        placeholderTextColor="#888"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm password"
-        placeholderTextColor="#888"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
+        <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
+             <TextInput
+               style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
+               placeholder="Enter your password"
+               placeholderTextColor="#888"
+               value={password}
+               onChangeText={setPassword}
+               keyboardType="default"
+               secureTextEntry={hidepassword}
+               autoCapitalize="none"
+             />
+             <TouchableOpacity
+               onPress={() => setHidepassword(!hidepassword)}
+               style={{
+                 position: "absolute",
+                 right: 12,
+                 top: 0,
+                 height: "100%",
+                 justifyContent: "center"
+               }}
+             >
+               {hidepassword ? (
+                 <Ionicons name="eye" size={22} color="#888" />
+               ) : (
+                 <Ionicons name="eye-off" size={22} color="#888" />
+               )}
+             </TouchableOpacity>
+           </View>
+      <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
+             <TextInput
+                  style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
+                  placeholder="Confirm your password"
+                  placeholderTextColor="#888"
+                  value={confirmPassword}       
+                  onChangeText={setConfirmPassword}  
+                  keyboardType="default"
+                  secureTextEntry={hidepassword}
+                  autoCapitalize="none"
+             />
+
+             <TouchableOpacity
+               onPress={() => setHidepassword(!hidepassword)}
+               style={{
+                 position: "absolute",
+                 right: 12,
+                 top: 0,
+                 height: "100%",
+                 justifyContent: "center"
+               }}
+             >
+               {hidepassword ? (
+                 <Ionicons name="eye" size={22} color="#888" />
+               ) : (
+                 <Ionicons name="eye-off" size={22} color="#888" />
+               )}
+             </TouchableOpacity>
+           </View>
 
       {/* Terms text */}
       <Text style={styles.terms}>
@@ -75,9 +150,10 @@ export default function Signup() {
       </Text>
 
       {/* Sign up button */}
-      <TouchableOpacity style={styles.signupButton}>
-        <Text style={styles.signupButtonText}>Sign up</Text>
+      <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+          <Text style={styles.signupButtonText}>Sign up</Text>
       </TouchableOpacity>
+
 
       {/* Or continue with */}
       <Text style={styles.orText}>Or continue with:</Text>
@@ -85,8 +161,8 @@ export default function Signup() {
       {/* Social buttons */}
       <View style={styles.socialButtonsContainer}>
         <TouchableOpacity style={styles.socialButton}>
-          <AntDesign
-            name="google"
+          <Ionicons
+            name="logo-google"
             size={24}
             color="#EA4335"
             style={{ marginRight: 10 }}

@@ -14,32 +14,34 @@ import {
   View,
   Image
 } from "react-native";
-import { getWorkspaces, getBoards, createBoard } from '../stores/workspaceStore';
-
-const PRIMARY_COLOR = "#34495e";
+import { useWorkspaceStore } from '../stores/workspaceStore'; // Import the hook
 
 export default function HomeScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [showModal, setShowModal] = useState(false);
-  const [boards, setBoards] = useState<{
+  type Board = {
     id: string;
     title: string;
     workspaceId: string;
     backgroundColor: string;
-    createdAt: number;
-    lists: { id: string; title: string; cards: { text: string; completed: boolean }[]; editingTitle: boolean; newCardText: string }[];
-  }[]>([]);
+    lists: any[]; // Replace 'any' with your actual list type if available
+  };
+  
+  const [boards, setBoards] = useState<Board[]>([]);
   const [boardTitle, setBoardTitle] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
   const [longPressedBoardId, setLongPressedBoardId] = useState<string | null>(null);
 
+  // Access store methods and state via the hook
+  const { workspaces, getBoards, createBoard } = useWorkspaceStore();
+
   // Get selected workspace based on params or default to first workspace
   const workspaceId = params.workspaceId as string;
   const selectedWorkspace = workspaceId
-    ? getWorkspaces().find(ws => ws.id === workspaceId) || getWorkspaces()[0]
-    : getWorkspaces()[0];
+    ? workspaces.find(ws => ws.id === workspaceId) || workspaces[0]
+    : workspaces[0];
 
   // Load boards for selected workspace
   useEffect(() => {
@@ -82,10 +84,11 @@ export default function HomeScreen() {
     setBoardTitle("");
     console.log('HomeScreen: Created new board:', JSON.stringify(newBoard, null, 2));
     router.push({
-      pathname: `/boards/${newBoard.id}`,
-      params: { board: JSON.stringify(newBoard) }
+      k: "/boards/[id]",
+      params: { id: newBoard.id, board: JSON.stringify(newBoard) }
     });
   };
+
 
   const handleLongPress = (boardId: string) => {
     setLongPressedBoardId(boardId);
@@ -325,20 +328,20 @@ const styles = StyleSheet.create({
   },
   modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalView: {
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
-    padding: 40,
+    backgroundColor: "rgb(243, 242, 242)",
+    padding: 30,
     margin: 30,
     borderRadius: 20,
     elevation: 8,
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 10,
-    minWidth: 300,
+    width: 350,
     alignItems: "center",
   },
   modalTitle: {
@@ -358,8 +361,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
     marginBottom: 10,
-    width: 220,
-    backgroundColor: "#f8f8f8",
+    width: 300,
+    backgroundColor: "#778899",
   },
   modalButtons: {
     flexDirection: "row",

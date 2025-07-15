@@ -20,9 +20,21 @@ export default function Settings() {
 
   // State to control bottom sheet visibility
   const [isSheetVisible, setSheetVisible] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
+  // State to control individual switches
+  const [switchStates, setSwitchStates] = useState({
+    colorBlindMode: false,
+    enableAnimations: false,
+    showLabelNames: false,
+    showQuickAdd: false
+  });
 
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  // Toggle function for individual switches
+  const toggleSwitch = (key: keyof typeof switchStates) => {
+    setSwitchStates((prev) => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   // Set header with settings icon that opens bottom sheet
   useEffect(() => {
@@ -105,18 +117,18 @@ export default function Settings() {
                   </Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
+                    thumbColor={switchStates.colorBlindMode ? "#006400" : "#f4f3f4"}
+                    onValueChange={() => toggleSwitch("colorBlindMode")}
+                    value={switchStates.colorBlindMode}
                   />
                 </View>
                 <View style={styles.row}>
                   <Text style={styles.sectionSubtext}>Enable Animations</Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
+                    thumbColor={switchStates.enableAnimations ? "#006400" : "#f4f3f4"}
+                    onValueChange={() => toggleSwitch("enableAnimations")}
+                    value={switchStates.enableAnimations}
                   />
                 </View>
                 <View style={styles.row}>
@@ -125,9 +137,9 @@ export default function Settings() {
                   </Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
+                    thumbColor={switchStates.showLabelNames ? "#006400" : "#f4f3f4"}
+                    onValueChange={() => toggleSwitch("showLabelNames")}
+                    value={switchStates.showLabelNames}
                   />
                 </View>
               </View>
@@ -147,9 +159,9 @@ export default function Settings() {
                   <Text style={styles.sectionSubtext}>Show quick add</Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={isEnabled ? "#006400" : "#f4f3f4"}
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
+                    thumbColor={switchStates.showQuickAdd ? "#006400" : "#f4f3f4"}
+                    onValueChange={() => toggleSwitch("showQuickAdd")}
+                    value={switchStates.showQuickAdd}
                   />
                 </View>
                 <Text style={styles.sectionSubtext}>Delete account</Text>

@@ -22,10 +22,13 @@ export default function SettingsModal({
       onBackButtonPress={onClose}
       animationIn="slideInUp"
       animationOut="slideOutDown"
-      animationInTiming={500}
-      animationOutTiming={500}
+      animationInTiming={300}
+      animationOutTiming={300}
       style={styles.modalContainer}
       useNativeDriver={true}
+      swipeDirection="down" // Enable swipe down to close
+      onSwipeComplete={onClose} // Close modal on swipe complete
+      swipeThreshold={100} // Optional: adjust swipe distance threshold
     >
       <View style={styles.fullScreenModal}>
         <View style={styles.sheetHeader}>
@@ -44,14 +47,17 @@ export default function SettingsModal({
 const styles = StyleSheet.create({
   modalContainer: {
     margin: 0, // Important to cover full screen without margin
-    justifyContent: "flex-end" // Align modal content at the bottom
+    justifyContent: "flex-end", // Align modal content at the bottom
+    elevation:8,
   },
   fullScreenModal: {
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: "#0B1F3A",
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     paddingTop: 20,
-    height: "100%" // Adjust height as needed, e.g. 90% of screen height
+    height: "100%", // Adjust height as needed, e.g. 90% of screen height
+    borderWidth:2,
+    borderTopColor:'white',
   },
   sheetHeader: {
     flexDirection: "row",
