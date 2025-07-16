@@ -1,12 +1,27 @@
 import React, { useState } from "react";
-import { StyleSheet, TextInput, Text, View, TouchableOpacity, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  TextInput,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
 
 const QUICK_SEARCHES = [
   { title: "My cards", description: "@me", key: "my-cards" },
-  { title: "My cards due today", description: "@me due:day", key: "my-cards-due-today" },
-  { title: "My cards overdue", description: "@me due:overdue", key: "my-cards-overdue" },
+  {
+    title: "My cards due today",
+    description: "@me due:day",
+    key: "my-cards-due-today",
+  },
+  {
+    title: "My cards overdue",
+    description: "@me due:overdue",
+    key: "my-cards-overdue",
+  },
 ];
 
 export default function SearchModal({ visible, onClose }) {
@@ -15,7 +30,7 @@ export default function SearchModal({ visible, onClose }) {
   const handleClear = () => setSearchText("");
 
   const filteredSearches = QUICK_SEARCHES.filter(
-    item =>
+    (item) =>
       item.title.toLowerCase().includes(searchText.toLowerCase()) ||
       item.description.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -47,7 +62,12 @@ export default function SearchModal({ visible, onClose }) {
           />
           {searchText.length > 0 && (
             <TouchableOpacity onPress={handleClear}>
-              <Ionicons name="close" size={28} color="white" style={{ top: 3 }} />
+              <Ionicons
+                name="close"
+                size={28}
+                color="white"
+                style={{ top: 3 }}
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -56,7 +76,7 @@ export default function SearchModal({ visible, onClose }) {
             <Text style={styles.quickSearchHeader}>Quick searches</Text>
             <View style={styles.divider} />
             {filteredSearches.length > 0 ? (
-              filteredSearches.map(item => (
+              filteredSearches.map((item) => (
                 <TouchableOpacity
                   key={item.key}
                   style={styles.quickSearchItem}
@@ -110,7 +130,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   quickSearchContainer: {
-    marginTop: 30,
     paddingHorizontal: 20,
   },
   quickSearchHeader: {

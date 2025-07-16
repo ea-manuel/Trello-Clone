@@ -9,7 +9,7 @@ import {
   Switch,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 const PRIMARY_COLOR = "#0B1F3A";
@@ -18,31 +18,28 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 export default function Settings() {
   const navigation = useNavigation();
 
-  // State to control bottom sheet visibility
   const [isSheetVisible, setSheetVisible] = useState(false);
-  // State to control individual switches
   const [switchStates, setSwitchStates] = useState({
     colorBlindMode: false,
     enableAnimations: false,
     showLabelNames: false,
-    showQuickAdd: false
+    showQuickAdd: false,
   });
 
-  // Toggle function for individual switches
   const toggleSwitch = (key: keyof typeof switchStates) => {
     setSwitchStates((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
-  // Set header with settings icon that opens bottom sheet
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
           onPress={() => setSheetVisible(true)}
           style={{ marginRight: 15 }}
+          accessibilityLabel="Open settings"
         >
           <Ionicons name="settings-sharp" size={24} color="white" />
         </TouchableOpacity>
@@ -51,23 +48,23 @@ export default function Settings() {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{ marginLeft: 15 }}
+          accessibilityLabel="Go back"
         >
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
       ),
       title: "Settings",
       headerStyle: {
-        backgroundColor: PRIMARY_COLOR
+        backgroundColor: PRIMARY_COLOR,
       },
-      headerTintColor: "#fff"
+      headerTintColor: "#fff",
     });
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      {/* Main content can be empty or summary */}
       <Text style={styles.mainText}>Settings Summary or Placeholder</Text>
-      {/* Bottom Sheet Modal */}
+
       <Modal
         visible={isSheetVisible}
         animationType="slide"
@@ -76,16 +73,23 @@ export default function Settings() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.bottomSheet}>
-            {/* Header of Bottom Sheet */}
+            {/* Bottom Sheet Header */}
             <View style={styles.sheetHeader}>
-              <TouchableOpacity onPress={() => setSheetVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setSheetVisible(false)}
+                accessibilityLabel="Close settings"
+              >
                 <Ionicons name="arrow-down" size={30} color={PRIMARY_COLOR} />
               </TouchableOpacity>
               <Text style={styles.sheetTitle}>Settings</Text>
-              <View style={{ width: 30 }} /> {/* Spacer for alignment */}
+              <View style={{ width: 30 }} /> {/* Spacer */}
             </View>
 
-            <ScrollView style={{ flex: 1 }}>
+            {/* Scrollable content */}
+            <ScrollView
+              contentContainerStyle={styles.scrollContentContainer}
+              showsVerticalScrollIndicator={false}
+            >
               {/* Profile Card */}
               <View style={styles.profileCard}>
                 <Ionicons
@@ -98,7 +102,7 @@ export default function Settings() {
                 <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
               </View>
 
-              {/* Settings Sections */}
+              {/* Sections */}
               <View style={styles.section}>
                 <Text style={styles.sectionHeader}>Notifications</Text>
                 <Text style={styles.sectionSubtext}>Open system settings</Text>
@@ -117,7 +121,9 @@ export default function Settings() {
                   </Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={switchStates.colorBlindMode ? "#006400" : "#f4f3f4"}
+                    thumbColor={
+                      switchStates.colorBlindMode ? "#006400" : "#f4f3f4"
+                    }
                     onValueChange={() => toggleSwitch("colorBlindMode")}
                     value={switchStates.colorBlindMode}
                   />
@@ -126,7 +132,9 @@ export default function Settings() {
                   <Text style={styles.sectionSubtext}>Enable Animations</Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={switchStates.enableAnimations ? "#006400" : "#f4f3f4"}
+                    thumbColor={
+                      switchStates.enableAnimations ? "#006400" : "#f4f3f4"
+                    }
                     onValueChange={() => toggleSwitch("enableAnimations")}
                     value={switchStates.enableAnimations}
                   />
@@ -137,7 +145,9 @@ export default function Settings() {
                   </Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={switchStates.showLabelNames ? "#006400" : "#f4f3f4"}
+                    thumbColor={
+                      switchStates.showLabelNames ? "#006400" : "#f4f3f4"
+                    }
                     onValueChange={() => toggleSwitch("showLabelNames")}
                     value={switchStates.showLabelNames}
                   />
@@ -159,7 +169,9 @@ export default function Settings() {
                   <Text style={styles.sectionSubtext}>Show quick add</Text>
                   <Switch
                     trackColor={{ false: "#767577", true: "#636B2F" }}
-                    thumbColor={switchStates.showQuickAdd ? "#006400" : "#f4f3f4"}
+                    thumbColor={
+                      switchStates.showQuickAdd ? "#006400" : "#f4f3f4"
+                    }
                     onValueChange={() => toggleSwitch("showQuickAdd")}
                     value={switchStates.showQuickAdd}
                   />
@@ -186,65 +198,69 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#36393e",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   mainText: {
     color: "white",
-    fontSize: 20
+    fontSize: 20,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
   },
   bottomSheet: {
-    height: SCREEN_HEIGHT * 0.85,
     backgroundColor: "white",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     paddingHorizontal: 20,
-    paddingTop: 15
+    paddingTop: 15,
+    maxHeight: SCREEN_HEIGHT * 0.85,
+    // Use flexGrow to allow ScrollView to fill available space
+  },
+  scrollContentContainer: {
+    paddingBottom: 30,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10
+    marginBottom: 10,
   },
   sheetTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: PRIMARY_COLOR
+    color: PRIMARY_COLOR,
   },
   profileCard: {
     alignItems: "center",
-    marginBottom: 20
+    marginBottom: 20,
   },
   profileText: {
     fontWeight: "bold",
     fontSize: 16,
-    color: PRIMARY_COLOR
+    color: PRIMARY_COLOR,
   },
   section: {
     borderBottomColor: "#ccc",
     borderBottomWidth: 0.5,
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   sectionHeader: {
     fontWeight: "bold",
     fontSize: 16,
     color: PRIMARY_COLOR,
-    marginBottom: 5
+    marginBottom: 5,
   },
   sectionSubtext: {
     fontSize: 14,
     color: "#333",
-    marginBottom: 5
+    marginBottom: 5,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10
-  }
+    marginBottom: 10,
+  },
 });
