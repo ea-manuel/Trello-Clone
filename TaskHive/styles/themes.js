@@ -252,15 +252,21 @@ quickActionsSubheading: {
     marginLeft: 10
   },
 settings: {
-  containerBg: '#142f4d',
+  containerBg: '#0B1F3A',
   profileCardBg: '#0B1F3A',
   sectionBorderColor: 'white',
   sectionHeaderColor: 'white',
   sectionSubtextColor: 'white',
   modalBackground: 'rgba(0, 0, 0, 0.5)',
   modalViewBg: 'rgba(255, 255, 255, 0.85)',
-  modalTextColor: '#333',
+  modalTextColor: 'white',
 },
+settingsModal: {
+  backgroundColor: "#0B1F3A",
+  headerTextColor: "white",
+  borderTopColor: "#0B1F3A",
+},
+
 
 });
 export const darkTheme = StyleSheet.create({
@@ -522,6 +528,11 @@ quickActionsSubheading: {
   modalBackground: 'rgba(0, 0, 0, 0.5)',
   modalViewBg: '#141627',
   modalTextColor: '#EAEFFF',
+},
+settingsModal: {
+  backgroundColor: "#0B1F3A",
+  headerTextColor: "white",
+  borderTopColor: "white",
 },
 
 });

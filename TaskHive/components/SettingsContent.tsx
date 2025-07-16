@@ -40,7 +40,7 @@ export default function SettingsContent() {
     >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <Ionicons name="person-circle" size={90} color={theme === "dark" ? "#ffffff" : "#0B1F3A"} />
+        <Ionicons name="person-circle" size={90} color={theme === "dark" ? "#ffffff" : "white"} />
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
@@ -171,7 +171,7 @@ const getSettingsStyles = (theme) =>
     container: {
       flex: 1,
       paddingHorizontal: 20,
-      backgroundColor: theme.mainpage.backgroundColor,
+      backgroundColor: theme.settings.backgroundColor,
     },
     profileCard: {
       alignItems: "center",
@@ -183,23 +183,23 @@ const getSettingsStyles = (theme) =>
     profileText: {
       fontWeight: "bold",
       fontSize: 16,
-      color: theme.quickActionText.color,
+      color: theme.settings.modalTextColor,
       marginTop: 4,
     },
     section: {
-      borderBottomColor: theme.quickActionText.color,
+      borderBottomColor: theme.settings.sectionBorderColor,
       borderBottomWidth: 0.5,
       paddingVertical: 10,
     },
     sectionHeader: {
       fontWeight: "bold",
       fontSize: 16,
-      color: theme.quickActionText.color,
+      color: theme.settings.sectionHeaderColor,
       marginBottom: 5,
     },
     sectionSubtext: {
       fontSize: 14,
-      color: theme.quickActionText.color,
+      color: theme.settings.modalTextColor,
       marginBottom: 5,
     },
     row: {
