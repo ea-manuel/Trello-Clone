@@ -3,21 +3,23 @@ import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient"; // ✅ Add this
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 import NotificationsModal from "./NotificationModal";
-import SearchModal from "./SearchModal"; // Import SearchModal
+import SearchModal from "./SearchModal";
 import SettingsModal from "./SettingsModal";
-
-const PRIMARY_COLOR = "#0B1F3A";
+import { useTheme } from "../ThemeContext";
+import { lightTheme, darkTheme } from "../styles/themes";
 
 export default function Header() {
   const navigation = useNavigation();
   const router = useRouter();
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isNotificationsVisible, setNotificationsVisible] = useState(false);
-  const [isSearchVisible, setSearchVisible] = useState(false); // Search modal state
+  const [isSearchVisible, setSearchVisible] = useState(false);
+  const { theme } = useTheme();
+  const styles = theme === "dark" ? darkTheme : lightTheme;
 
-  // Zustand store
   const workspaces = useWorkspaceStore((state) => state.workspaces);
   const currentWorkspaceId = useWorkspaceStore(
     (state) => state.currentWorkspaceId
@@ -28,46 +30,63 @@ export default function Header() {
   );
   const workspaceName = currentWorkspace ? currentWorkspace.name : "Workspace";
 
-  return (
-    <View style={styles.mainpage}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          style={styles.userContainer}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="menu-sharp" size={35} color="white" />
-          <Text style={styles.headerText}>{workspaceName} Workspace</Text>
-        </TouchableOpacity>
+  const HeaderContent = () => (
+    <View style={styles.header}>
+      <TouchableOpacity
+        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        style={styles.userContainer}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="menu-sharp" size={35} color="white" />
+        <Text style={styles.headerText}>{workspaceName} Workspace</Text>
+      </TouchableOpacity>
 
-        <View style={styles.rightIcons}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.iconButton}
-            onPress={() => setSearchVisible(true)} // Open search modal
-          >
-            <Ionicons name="search" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.iconButton}
-            onPress={() => setNotificationsVisible(true)}
-          >
-            <Ionicons name="notifications-outline" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.iconButton}
-            onPress={() => setSettingsVisible(true)}
-          >
-            <Ionicons name="settings-outline" size={24} color="white" />
-          </TouchableOpacity>
-          <SettingsModal
-            visible={isSettingsVisible}
-            onClose={() => setSettingsVisible(false)}
-          />
-        </View>
+      <View style={styles.rightIcons}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.iconButton}
+          onPress={() => setSearchVisible(true)}
+        >
+          <Ionicons name="search" size={24} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.iconButton}
+          onPress={() => setNotificationsVisible(true)}
+        >
+          <Ionicons name="notifications-outline" size={24} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.iconButton}
+          onPress={() => setSettingsVisible(true)}
+        >
+          <Ionicons name="settings-outline" size={24} color="white" />
+        </TouchableOpacity>
+        <SettingsModal
+          visible={isSettingsVisible}
+          onClose={() => setSettingsVisible(false)}
+        />
       </View>
+    </View>
+  );
+
+  return (
+    <View>
+      {theme === "dark" ? (
+        <LinearGradient
+          colors={["#05080B", "#375071"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.3, y: 2.9 }} // 70% blend then full blue
+          style={styles.Headermainpage}
+        >
+          <HeaderContent />
+        </LinearGradient>
+      ) : (
+        <View style={styles.Headermainpage}>
+          <HeaderContent />
+        </View>
+      )}
 
       {/* Modals */}
       <NotificationsModal
@@ -81,34 +100,3 @@ export default function Header() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  mainpage: {
-    backgroundColor: PRIMARY_COLOR,
-    paddingTop: 20,
-    paddingHorizontal: 10
-  },
-  header: {
-    height: 80,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
-  userContainer: {
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  headerText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 10
-  },
-  rightIcons: {
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  iconButton: {
-    marginLeft: 10
-  }
-});

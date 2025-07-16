@@ -1,12 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View, TouchableOpacity, Modal, Button, FlatList } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View, TouchableOpacity, Modal, Button } from "react-native";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
-const PRIMARY_COLOR = "#0B1F3A";
+import { useTheme } from "../ThemeContext"; // your custom theme hook
+import { lightTheme, darkTheme } from "../styles/themes"; // import your themes
 
 export default function SettingsContent() {
   const router = useRouter();
+
+  const { theme, toggleTheme } = useTheme();
+  const themeColors = theme === "dark" ? darkTheme : lightTheme;
+  const styles = getSettingsStyles(themeColors);
+
   const [switchStates, setSwitchStates] = useState({
     colorBlindMode: false,
     enableAnimations: false,
@@ -20,11 +26,11 @@ export default function SettingsContent() {
       [key]: !prev[key]
     }));
   };
+
   const logout = () => {
-    router.push({
-      pathname: "/auth/login"
-    });
+    router.push({ pathname: "/auth/login" });
   };
+
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
@@ -34,16 +40,17 @@ export default function SettingsContent() {
     >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <Ionicons name="person-circle" size={90} color='#ffffff' />
+        <Ionicons name="person-circle" size={90} color={theme === "dark" ? "#ffffff" : "#0B1F3A"} />
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
       </View>
 
+      {/* Logout Modal */}
       {showLogoutModal && (
         <Modal visible={showLogoutModal} transparent animationType="fade">
           <View style={styles.modalBackground}>
-            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint={theme === "dark" ? "dark" : "light"} />
             <View style={styles.modalView}>
               <Text style={styles.modalTitle}>Logout</Text>
               <Text style={styles.modalText}>
@@ -60,9 +67,7 @@ export default function SettingsContent() {
                 <View style={styles.cancelButton}>
                   <Button
                     title="Cancel"
-                    onPress={() => {
-                      setShowLogoutModal(false);
-                    }}
+                    onPress={() => setShowLogoutModal(false)}
                     color="#ADD8E6"
                   />
                 </View>
@@ -83,6 +88,15 @@ export default function SettingsContent() {
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>Application Theme</Text>
           <Text style={styles.sectionSubtext}>Select Theme</Text>
+          <View style={styles.row}>
+            <Text style={styles.sectionSubtext}>Dark Mode</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#339dff" }}
+              thumbColor={theme === "dark" ? "#339dff" : "#f4f3f4"}
+              onValueChange={toggleTheme}
+              value={theme === "dark"}
+            />
+          </View>
         </View>
 
         {/* Accessibility Section */}
@@ -107,9 +121,7 @@ export default function SettingsContent() {
             />
           </View>
           <View style={styles.row}>
-            <Text style={styles.sectionSubtext}>
-              Show label names on card front
-            </Text>
+            <Text style={styles.sectionSubtext}>Show label names on card front</Text>
             <Switch
               trackColor={{ false: "#767577", true: "#767577" }}
               thumbColor={switchStates.showLabelNames ? "#339dff" : "#f4f3f4"}
@@ -153,88 +165,90 @@ export default function SettingsContent() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    backgroundColor: '#142f4d'
-  },
-  profileCard: {
-    alignItems: "center",
-    marginBottom: 20,
-    backgroundColor: '#0B1F3A',
-    marginHorizontal: -20,
-    paddingBottom: 15,
-  },
-  profileText: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "white",
-    marginTop: 4
-  },
-  section: {
-    borderBottomColor: "white",
-    borderBottomWidth: 0.5,
-    paddingVertical: 10
-  },
-  sectionHeader: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "white",
-    marginBottom: 5
-  },
-  sectionSubtext: {
-    fontSize: 14,
-    color: "white",
-    marginBottom: 5
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalView: {
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
-    padding: 40,
-    margin: 30,
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    minWidth: 300,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  deleteConfirmButton: {
-    backgroundColor: "#e74c3c",
-    borderRadius: 6,
-    margin: 5,
-  },
-  cancelButton: {
-    borderRadius: 6,
-    margin: 5,
-  },
-});
+// 🔁 Theme-aware styles
+const getSettingsStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 20,
+      backgroundColor: theme.mainpage.backgroundColor,
+    },
+    profileCard: {
+      alignItems: "center",
+      marginBottom: 20,
+      backgroundColor: theme.button.backgroundColor,
+      marginHorizontal: -20,
+      paddingBottom: 15,
+    },
+    profileText: {
+      fontWeight: "bold",
+      fontSize: 16,
+      color: theme.quickActionText.color,
+      marginTop: 4,
+    },
+    section: {
+      borderBottomColor: theme.quickActionText.color,
+      borderBottomWidth: 0.5,
+      paddingVertical: 10,
+    },
+    sectionHeader: {
+      fontWeight: "bold",
+      fontSize: 16,
+      color: theme.quickActionText.color,
+      marginBottom: 5,
+    },
+    sectionSubtext: {
+      fontSize: 14,
+      color: theme.quickActionText.color,
+      marginBottom: 5,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    modalBackground: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalView: {
+      backgroundColor: "rgba(255, 255, 255, 0.85)",
+      padding: 40,
+      margin: 30,
+      borderRadius: 20,
+      elevation: 8,
+      shadowColor: "#000",
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      minWidth: 300,
+      alignItems: "center",
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      marginBottom: 10,
+    },
+    modalText: {
+      fontSize: 16,
+      textAlign: "center",
+      marginBottom: 20,
+      color: "#333",
+    },
+    modalButtons: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    deleteConfirmButton: {
+      backgroundColor: "#e74c3c",
+      borderRadius: 6,
+      margin: 5,
+    },
+    cancelButton: {
+      borderRadius: 6,
+      margin: 5,
+    },
+  });

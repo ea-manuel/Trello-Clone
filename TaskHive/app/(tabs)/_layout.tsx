@@ -2,15 +2,21 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Tabs } from "expo-router";
 import { Platform, View } from "react-native";
+import { useTheme } from "../../ThemeContext";
 
 export default function TabsLayout() {
+const { theme } = useTheme();
+
+const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
+
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarBackground() {
           return (
-            <View style={{ backgroundColor: "#0B1F3A" }}>
+            <View style={{ backgroundColor}}>
               <TabBarBackground />
             </View>
           );
@@ -24,7 +30,8 @@ export default function TabsLayout() {
             height: 60,
             paddingTop: 5
           },
-          default: { backgroundColor: "#0B1F3A", height: 60, paddingTop: 5 }
+         default: { backgroundColor, height: 60, paddingTop: 5 }
+
         })
       }}
     >

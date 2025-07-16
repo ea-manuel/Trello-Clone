@@ -15,8 +15,11 @@ import {
   Image
 } from "react-native";
 import { useWorkspaceStore } from '../stores/workspaceStore'; // Import the hook
-
+import { useTheme } from "../../ThemeContext";
+import {lightTheme,darkTheme} from "../../styles/themes";
 export default function HomeScreen() {
+  const {theme,toggleTheme}=useTheme();
+  const styles = theme === "dark" ? darkTheme : lightTheme;
   const router = useRouter();
   const params = useLocalSearchParams();
   const [showModal, setShowModal] = useState(false);
@@ -112,64 +115,141 @@ export default function HomeScreen() {
       setLongPressedBoardId(null);
     }
   };
+  const quickActions = [
+  {
+    id: "createBoard",
+    title: "Create Board",
+    icon: "add-circle-outline",
+    onPress: () => setShowModal(true),
+  },
+  {
+    id: "favorites",
+    title: "Favorites",
+    icon: "heart-outline",
+    onPress: () => console.log("Favorites pressed"),
+  },
+  {
+    id: "recent",
+    title: "Recent",
+    icon: "time-outline",
+    onPress: () => console.log("Recent pressed"),
+  },
+  {
+    id: "settings",
+    title: "Settings",
+    icon: "settings-outline",
+    onPress: () => router.push("/settings"),
+  },
+];
+
 
   return (
-    <View style={styles.mainpage}>
-      {boards.length > 0 && (
-        <Text
-          style={{
-            alignItems: "center",
-            marginTop: 10,
-            marginLeft: 10,
-            fontWeight: "bold",
-            fontSize: 24,
-            color: "gray",
-            marginBottom: -80
-          }}
-        >
-          Boards
-        </Text>
-      )}
+  <View style={styles.mainpage}>
 
-      <FlatList
-        contentContainerStyle={styles.scrollContent}
-        data={boards}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.boardcard}>
+    {/* Quick Actions Container */}
+    <View style={styles.quickActionsWrapper}>
+  <Text style={styles.quickActionsHeading}>
+    Welcome back 👋
+  </Text>
+  <Text style={styles.quickActionsSubheading}>
+    What do you want to do today?
+  </Text>
+
+  <View style={styles.quickActionsGrid}>
+
+        {quickActions.map((action) => {
+          // Optional: Add border styles by action.id if you want different border colors
+          let borderStyle = {};
+          switch (action.id) {
+            case "createBoard":
+              borderStyle = styles.borderCreateBoard;
+              break;
+            case "favorites":
+              borderStyle = styles.borderFavorites;
+              break;
+            case "recent":
+              borderStyle = styles.borderRecent;
+              break;
+            case "settings":
+              borderStyle = styles.borderSettings;
+              break;
+          }
+          return (
             <TouchableOpacity
-              onPress={() => {
-                console.log('HomeScreen: Navigating to board:', item.id);
-                setLongPressedBoardId(null); // Reset long press state on tap
-                router.push({
-                  pathname: `/boards/${item.id}`,
-                  params: { board: JSON.stringify(item) }
-                });
-              }}
-              onLongPress={() => handleLongPress(item.id)}
-              style={styles.boardcardTouchable}
+              key={action.id}
+              onPress={action.onPress}
+              style={[styles.quickActionCard, borderStyle]}
+              activeOpacity={0.85}
             >
-              <Ionicons name="grid" size={30} color="#34495e" />
-              <Text style={styles.boardcardText}>{item.title}</Text>
+              <Ionicons
+                name={action.icon}
+                size={36}
+                color={theme === "dark" ? "white" : "#0B1F3A"} // or any color that contrasts well with light bg
+              />
+
+              <Text style={styles.quickActionText}>{action.title}</Text>
             </TouchableOpacity>
-            {longPressedBoardId === item.id && (
-              <TouchableOpacity
-                onPress={() => handleDeleteBoard(item.id)}
-                style={styles.deleteButton}
-              >
-                <Ionicons name="trash-outline" size={24} color="#e74c3c" />
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Image source={bee} style={{ width: 300, height: 300 }} />
-            <Text style={styles.emptyText}>No Boards</Text>
-            <Text style={styles.emptySubText}>Create Your First Task Board</Text>
-          </View>
-        }
-      />
+          );
+        })}
+      </View>
+    </View>
+
+    {/* Boards Title */}
+{boards.length > 0 && (
+  <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
+    <Text
+      style={{
+        fontWeight: "bold",
+        fontSize: 24,
+        color: theme === "dark" ? "white" : "#333",
+      }}
+    >
+      Boards
+    </Text>
+  </View>
+)}
+
+
+    {/* Boards List */}
+    <FlatList
+      contentContainerStyle={styles.scrollContent}
+      data={boards}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <View style={styles.boardcard}>
+          <TouchableOpacity
+            onPress={() => {
+              console.log('HomeScreen: Navigating to board:', item.id);
+              setLongPressedBoardId(null); // Reset long press state on tap
+              router.push({
+                pathname: `/boards/${item.id}`,
+                params: { board: JSON.stringify(item) }
+              });
+            }}
+            onLongPress={() => handleLongPress(item.id)}
+            style={styles.boardcardTouchable}
+          >
+            <Ionicons name="grid" size={30} color="#34495e" />
+            <Text style={styles.boardcardText}>{item.title}</Text>
+          </TouchableOpacity>
+          {longPressedBoardId === item.id && (
+            <TouchableOpacity
+              onPress={() => handleDeleteBoard(item.id)}
+              style={styles.deleteButton}
+            >
+              <Ionicons name="trash-outline" size={24} color="#e74c3c" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          {/* <Image source={bee} style={{ width: 300, height: 300 }} /> */}
+          <Text style={styles.emptyText}>No Boards</Text>
+          <Text style={styles.emptySubText}>Create Your First Task Board</Text>
+        </View>
+      }
+    />
 
       {showModal && (
         <Modal visible={showModal} transparent animationType="slide">
@@ -237,7 +317,7 @@ export default function HomeScreen() {
         </Modal>
       )}
 
-      <View style={styles.createBoardButton}>
+      {/* <View style={styles.createBoardButton}>
         <TouchableOpacity
           onPress={() => setShowModal(true)}
           style={styles.button}
@@ -248,142 +328,8 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>Create Board</Text>
           </View>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  mainpage: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    paddingVertical: 20,
-    marginTop: 80,
-  },
-  boardcard: {
-    backgroundColor: "#ffffff",
-    paddingVertical: 15,
-    borderColor: "#34495e",
-    borderWidth: 0,
-    borderRadius:10,
-    paddingHorizontal: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    elevation: 5,
-    marginVertical: 5,
-    margin:8,
-  },
-  boardcardTouchable: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  boardcardText: {
-    color: "black",
-    fontWeight: "500",
-    fontSize: 22,
-    marginLeft: 15,
-  },
-  deleteButton: {
-    padding: 10,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  emptySubText: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: "#808080",
-    marginBottom: 20,
-  },
-  createBoardButton: {
-    width: 170,
-    alignSelf: "flex-end",
-    marginRight: 20,
-    marginBottom: 10,
-  },
-  button: {
-    backgroundColor: "#0B1F3A",
-    paddingVertical: 14,
-    elevation: 5,
-    borderRadius: 8,
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalView: {
-    backgroundColor: "rgb(243, 242, 242)",
-    padding: 30,
-    margin: 30,
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    width: 350,
-    alignItems: "center",
-    justifyContent:'center'
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 10,
-    width: 300,
-    backgroundColor: "#f0f0f0",
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent:"space-evenly",
-    width: "100%",
-  },
-  createButton: {
-    backgroundColor: "#0B1F3A",
-    borderRadius: 6,
-    margin: 5,
-  },
-  deleteConfirmButton: {
-    backgroundColor: "#e74c3c",
-    borderRadius: 6,
-    margin: 5,
-  },
-  cancelButton: {
-    borderRadius: 6,
-    margin: 5,
-  },
-});
+ 

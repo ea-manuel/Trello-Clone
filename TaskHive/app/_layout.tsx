@@ -3,7 +3,6 @@ import { DrawerContentScrollView } from "@react-navigation/drawer";
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,7 +17,7 @@ import {
   View,
   Alert
 } from "react-native";
-
+import {ThemeProvider} from "../ThemeContext";
 import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
 import EditWorkspaceModal from "@/components/EditWorkspaceModal";
 import Header from "@/components/Header";
@@ -79,7 +78,7 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider>
       <Drawer
         drawerContent={(props) => {
           const navState = props.navigation.getState();

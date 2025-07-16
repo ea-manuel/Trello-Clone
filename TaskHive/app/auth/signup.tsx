@@ -38,7 +38,7 @@ const handleSignup = async () => {
   }
 
   try {
-    const response = await axios.post("http://10.40.32.243:8080/api/auth/register", {
+    const response = await axios.post("http://192.168.32.193:8080/api/auth/register", {
       email,
       username,
       password,
