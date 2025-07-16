@@ -33,22 +33,19 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // 🔒 Use internal name "passwordHash", but map it to password_hash column
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Board> boards = new ArrayList<>();
+
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<Workspace> workspaces = new ArrayList<>();
-
-    public List<Workspace> getWorkspaces() {
-    return this.workspaces;
-}
-
-public void setWorkspaces(List<Workspace> workspaces) {
-    this.workspaces = workspaces;
-}
+    private List<Workspace> workspaces = new ArrayList<>();
 
     public User() {}
 
@@ -94,7 +91,24 @@ public void setWorkspaces(List<Workspace> workspaces) {
         this.boards = boards;
     }
 
-    // Required by Spring Security
+    public List<Workspace> getWorkspaces() {
+        return this.workspaces;
+    }
+
+    public void setWorkspaces(List<Workspace> workspaces) {
+        this.workspaces = workspaces;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
+    }
+
+    // Spring Security methods
+
     @JsonIgnore
     @Override
     public String getPassword() {

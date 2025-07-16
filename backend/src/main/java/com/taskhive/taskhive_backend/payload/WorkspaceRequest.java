@@ -16,4 +16,9 @@ public class WorkspaceRequest {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Object getVisibility() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getVisibility'");
+    }
 }

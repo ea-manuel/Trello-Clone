@@ -20,71 +20,95 @@ export const useWorkspaceStore = create((set, get) => ({
       name: "Default",
       visibility: "Private",
       createdAt: Date.now(),
-      badgeColor: "#2980B9", // Assign fixed color for default workspace
+      badgeColor: "#2980B9",
     },
   ],
   boards: [],
-  updateBoard: (updatedBoard) =>
-    set((state) => ({
-      boards: state.boards.map((b) =>
-        b.id === updatedBoard.id && b.workspaceId === updatedBoard.workspaceId
-          ? updatedBoard
-          : b
-      ),
-    })),
   currentWorkspaceId: "ws-1",
 
- createWorkspace: async ({ name, visibility }) => {
-  try {
-    const token = await AsyncStorage.getItem("authToken"); // Get token
+  // ✅ CREATE WORKSPACE (Updated)
+  createWorkspace: async ({ name, visibility }) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
 
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    const response = await axiosClient.post(
-      "/workspaces",
-      { name, visibility },
-      {
-        headers: {
-          Authorization: `Bearer ${token}` // Attach token here
-        }
+      if (!token) {
+        throw new Error("No authentication token found");
       }
-    );
 
-    const newWorkspaceFromBackend = response.data;
+      const response = await axiosClient.post(
+        "/workspaces",
+        { name }, // visibility is not required by backend
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    set((state) => ({
-      workspaces: [...state.workspaces, newWorkspaceFromBackend],
-      currentWorkspaceId: newWorkspaceFromBackend.id,
-    }));
+      const newWorkspace = {
+        ...response.data,
+        visibility: visibility || "Private",
+        badgeColor: getRandomColor(),
+      };
 
-    return newWorkspaceFromBackend;
-  } catch (error) {
-    console.error("Failed to create workspace:", error.response?.data || error.message);
-    throw error;
-  }
-},
-getUserWorkspaces: async () => {
-  try {
-    const response = await axiosClient.get("/workspaces");
-    set({ workspaces: response.data });
-  } catch (error) {
-    console.error("Failed to fetch workspaces:", error);
-  }
-},
+      set((state) => ({
+        workspaces: [...state.workspaces, newWorkspace],
+        currentWorkspaceId: newWorkspace.id,
+      }));
 
+      return newWorkspace;
+    } catch (error) {
+      console.error(
+        "Failed to create workspace:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  },
 
+  // ✅ FETCH USER WORKSPACES
+  getUserWorkspaces: async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) throw new Error("Token missing");
+
+      const response = await axiosClient.get("/workspaces", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Add badgeColor to each workspace
+      const workspacesWithColor = response.data.map((ws) => ({
+        ...ws,
+        badgeColor: getRandomColor(),
+      }));
+
+      set({ workspaces: workspacesWithColor });
+    } catch (error) {
+      console.error("Failed to fetch workspaces:", error.response?.data || error.message);
+    }
+  },
+
+  // ✅ UPDATE WORKSPACE LOCALLY
   editWorkspace: (id, { name, visibility, badgeColor }) => {
     set((state) => ({
       workspaces: state.workspaces.map((ws) =>
-        ws.id === id ? { ...ws, name, visibility, badgeColor: badgeColor ?? ws.badgeColor } : ws
+        ws.id === id
+          ? {
+              ...ws,
+              name,
+              visibility,
+              badgeColor: badgeColor ?? ws.badgeColor,
+            }
+          : ws
       ),
     }));
   },
 
   setCurrentWorkspaceId: (id) => set({ currentWorkspaceId: id }),
 
+  // ✅ CREATE BOARD LOCALLY
   createBoard: ({ title, workspaceId, backgroundColor }) => {
     const newBoard = {
       id: `board-${nextId++}`,

@@ -48,4 +48,14 @@ public class UserService implements UserDetailsService {
     public boolean checkPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+    // ✅ Needed to update user fields (like profile picture)
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
 }

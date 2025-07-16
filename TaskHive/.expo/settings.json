@@ -1,3 +1,6 @@
 {
-  "urlRandomness": "tZ-_fSY"
+  "urlRandomness": "tZ-_fSY",
+  "dev": true,
+  "minify": false,
+  "https": false
 }

@@ -268,12 +268,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     paddingVertical: 15,
     borderColor: "#34495e",
-    borderWidth: 0.5,
+    borderWidth: 0,
+    borderRadius:10,
     paddingHorizontal: 15,
     flexDirection: "row",
     alignItems: "center",
-    elevation: 8,
+    elevation: 5,
     marginVertical: 5,
+    margin:8,
   },
   boardcardTouchable: {
     flexDirection: "row",
@@ -343,6 +345,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     width: 350,
     alignItems: "center",
+    justifyContent:'center'
   },
   modalTitle: {
     fontSize: 18,
@@ -362,11 +365,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 10,
     width: 300,
-    backgroundColor: "#778899",
+    backgroundColor: "#f0f0f0",
   },
   modalButtons: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent:"space-evenly",
     width: "100%",
   },
   createButton: {
