@@ -58,4 +58,18 @@ public class UserService implements UserDetailsService {
     public User saveUser(User user) {
         return userRepository.save(user);
     }
+    public void processOAuthPostLogin(String email, String name) {
+    Optional<User> existUser = userRepository.findByEmail(email);
+
+    if (existUser.isEmpty()) {
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setUsername(name != null ? name : email); // fallback to email if name is null
+        // You can set a default password or leave it null if you don't allow password login for OAuth users
+        newUser.setPassword(""); // or null if your model allows
+        // Set any default roles if you have a roles system
+        userRepository.save(newUser);
+    }
+}
+
 }

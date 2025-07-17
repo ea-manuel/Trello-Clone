@@ -2,6 +2,7 @@
   "expo": {
     "name": "TaskHive",
     "slug": "taskhive",
+    "owner":"emmayak",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/taskhive-splash-screen.jpg",
@@ -17,7 +18,11 @@
       },
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select a background image."
-      }
+      },
+      "ios": {
+  "bundleIdentifier": "com.emmayak.taskhive"
+}
+
     },
     "android": {
       "adaptiveIcon": {
@@ -53,7 +58,8 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-image-picker"
+      "expo-image-picker",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

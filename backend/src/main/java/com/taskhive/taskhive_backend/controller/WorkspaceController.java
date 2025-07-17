@@ -31,7 +31,7 @@ public class WorkspaceController {
 
         Workspace workspace = new Workspace();
         workspace.setName(request.getName());
-        workspace.setVisibility(request.getVisibility());
+        // workspace.setVisibility(request.getVisibility());
         workspace.setUser(user);
 
         Workspace savedWorkspace = workspaceService.createWorkspace(workspace);

@@ -1,5 +1,7 @@
 package com.taskhive.taskhive_backend.config;
 
+import com.taskhive.taskhive_backend.security.JwtAuthenticationFilter;
+import com.taskhive.taskhive_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.taskhive.taskhive_backend.security.JwtAuthenticationFilter;
-import com.taskhive.taskhive_backend.service.UserService;
-
 @Configuration
 public class SecurityConfig {
 
@@ -25,21 +24,29 @@ public class SecurityConfig {
     @Lazy
     private JwtAuthenticationFilter jwtAuthFilter;
 
-    // 🔥 Removed direct field injection of UserService to break circular dependency
+   @Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authProvider) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+                "/api/auth/**", 
+                "/oauth2/**", 
+                "/login/**" 
+            ).permitAll()
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authProvider)
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .oauth2Login(oauth2 -> oauth2
+            .defaultSuccessUrl("/api/auth/oauth2/success", true)
+            .failureUrl("/api/auth/oauth2/failure")
+        );
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authProvider) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+}
 
-        return http.build();
-    }
 
     @Bean
     public AuthenticationProvider authenticationProvider(UserService userService) {

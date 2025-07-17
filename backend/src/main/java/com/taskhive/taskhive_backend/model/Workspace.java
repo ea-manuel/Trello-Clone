@@ -64,4 +64,14 @@ public class Workspace {
     public void setBoards(List<Board> boards) {
         this.boards = boards;
     }
+//     private String visibility;
+
+// public String getVisibility() {
+//     return visibility;
+// }
+
+// public void setVisibility(String visibility) {
+//     this.visibility = visibility;
+// }
+
 }

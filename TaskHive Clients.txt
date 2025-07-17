@@ -1,0 +1,15 @@
+ExpoClient:
+Client Id;446088618650-ln9468vbrhs00gv8s20pe5uu9qst0a0t.apps.googleusercontent.com
+Client Secret;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
+
+Web Client
+ID;446088618650-a9i9akf872soauef7r78lbdr61h8vblr.apps.googleusercontent.com
+Secret;
+
+Android Client
+ID;446088618650-123aprvhu993jhpr44fvnb365sab8kfl.apps.googleusercontent.com
+Secret:
+
+IOS
+Client:
+Secret
