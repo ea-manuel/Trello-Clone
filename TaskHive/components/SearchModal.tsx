@@ -9,31 +9,33 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
-
-const QUICK_SEARCHES = [
-  { title: "My cards", description: "@me", key: "my-cards" },
-  {
-    title: "My cards due today",
-    description: "@me due:day",
-    key: "my-cards-due-today",
-  },
-  {
-    title: "My cards overdue",
-    description: "@me due:overdue",
-    key: "my-cards-overdue",
-  },
-];
+import { useWorkspaceStore } from "../app/stores/workspaceStore";
+import { useRouter } from "expo-router";
 
 export default function SearchModal({ visible, onClose }) {
   const [searchText, setSearchText] = useState("");
+  const boards = useWorkspaceStore((state) => state.boards);
+  const currentWorkspaceId = useWorkspaceStore((state) => state.currentWorkspaceId);
+  const router = useRouter();
 
   const handleClear = () => setSearchText("");
 
-  const filteredSearches = QUICK_SEARCHES.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchText.toLowerCase())
+  // Filter boards in current workspace by title matching searchText
+  const filteredBoards = boards.filter(
+    (board) =>
+      board.workspaceId === currentWorkspaceId &&
+      board.title.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  const handleBoardSelect = (board) => {
+    onClose(); // close the modal
+    setSearchText(""); // clear search text
+    // Navigate to board detail page with board data
+    router.push({
+      pathname: `/boards/${board.id}`,
+      params: { board: JSON.stringify(board) },
+    });
+  };
 
   return (
     <Modal
@@ -54,7 +56,7 @@ export default function SearchModal({ visible, onClose }) {
           </TouchableOpacity>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search..."
+            placeholder="Search boards..."
             placeholderTextColor="gray"
             value={searchText}
             onChangeText={setSearchText}
@@ -73,22 +75,24 @@ export default function SearchModal({ visible, onClose }) {
         </View>
         <ScrollView>
           <View style={styles.quickSearchContainer}>
-            <Text style={styles.quickSearchHeader}>Quick searches</Text>
+            <Text style={styles.quickSearchHeader}>Boards</Text>
             <View style={styles.divider} />
-            {filteredSearches.length > 0 ? (
-              filteredSearches.map((item) => (
+            {filteredBoards.length > 0 ? (
+              filteredBoards.map((board) => (
                 <TouchableOpacity
-                  key={item.key}
+                  key={board.id}
                   style={styles.quickSearchItem}
                   activeOpacity={0.7}
-                  // Add your onPress navigation or actions here
+                  onPress={() => handleBoardSelect(board)}
                 >
-                  <Text style={styles.quickSearchTitle}>{item.title}</Text>
-                  <Text style={styles.quickSearchDesc}>{item.description}</Text>
+                  <Text style={styles.quickSearchTitle}>{board.title}</Text>
+                  <Text style={styles.quickSearchDesc}>
+                    Created: {new Date(board.createdAt).toLocaleDateString()}
+                  </Text>
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={styles.noResults}>No results found</Text>
+              <Text style={styles.noResults}>No boards found</Text>
             )}
           </View>
         </ScrollView>
@@ -164,3 +168,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+// Use your existing styles from your SearchModal (no change needed)

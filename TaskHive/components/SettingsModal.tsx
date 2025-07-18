@@ -32,20 +32,14 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
       swipeThreshold={100}
     >
       <View style={styles.fullScreenModal}>
-        <View style={styles.sheetHeader}>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="arrow-back" size={30} color={themeStyles.headerText.color} />
-          </TouchableOpacity>
-          <Text style={styles.sheetTitle}>Settings</Text>
-          <View style={{ width: 30 }} /> {/* Spacer */}
-        </View>
+        
 
         {/* Make content scrollable inside modal */}
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <SettingsContent />
+          <SettingsContent visible={visible} onClose={onClose} />
         </ScrollView>
       </View>
     </Modal>
@@ -65,22 +59,10 @@ const getSettingsModalStyles = (theme: any) =>
 
       borderTopRightRadius: 20,
       borderTopLeftRadius: 20,
-      paddingTop: 20,
+      paddingTop: 0,
       height: "100%",
       borderTopWidth: 2,
       
     },
-    sheetHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 20,
-      marginBottom: 10,
-      justifyContent: "space-between",
-    },
-    sheetTitle: {
-      fontSize: 22,
-      fontWeight: "bold",
-     color: theme.settingsModal.headerTextColor,
-
-    },
+    
   });

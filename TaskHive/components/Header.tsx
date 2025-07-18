@@ -75,8 +75,8 @@ export default function Header() {
     <View>
       {theme === "dark" ? (
         <LinearGradient
-          colors={["#05080B", "#375071"]}
-          start={{ x: 0, y: 0 }}
+          colors={["#05080B", "#09034E"]}
+          start={{ x: 0, y: 1.0 }}
           end={{ x: 0.3, y: 2.9 }} // 70% blend then full blue
           style={styles.Headermainpage}
         >

@@ -1,12 +1,26 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View, TouchableOpacity, Modal, Button } from "react-native";
+import React, { useState, useMemo } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+  TouchableOpacity,
+  Modal,
+  Button,
+  TextInput,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 import { useTheme } from "../ThemeContext"; // your custom theme hook
 import { lightTheme, darkTheme } from "../styles/themes"; // import your themes
 
-export default function SettingsContent() {
+interface SettingsModalProps {
+  visible: boolean;
+  onClose: () => void;
+}
+export default function SettingsContent({ visible, onClose }: SettingsModalProps) {
   const router = useRouter();
 
   const { theme, toggleTheme } = useTheme();
@@ -17,13 +31,15 @@ export default function SettingsContent() {
     colorBlindMode: false,
     enableAnimations: false,
     showLabelNames: false,
-    showQuickAdd: false
+    showQuickAdd: false,
   });
+
+  const [searchText, setSearchText] = useState("");
 
   const toggleSwitch = (key: keyof typeof switchStates) => {
     setSwitchStates((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
@@ -33,36 +49,156 @@ export default function SettingsContent() {
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  // Settings data structure for filtering and rendering
+  const settingsData = [
+    {
+      section: "Notifications",
+      items: [{ label: "Open system settings", type: "text" }],
+    },
+    {
+      section: "Application Theme",
+      items: [
+        {
+          label: "Dark Mode",
+          type: "switch",
+          value: theme === "dark",
+          onToggle: toggleTheme,
+        },
+      ],
+    },
+    {
+      section: "Accessibility",
+      items: [
+        {
+          label: "Color blind friendly mode",
+          type: "switch",
+          value: switchStates.colorBlindMode,
+          onToggle: () => toggleSwitch("colorBlindMode"),
+        },
+        {
+          label: "Enable Animations",
+          type: "switch",
+          value: switchStates.enableAnimations,
+          onToggle: () => toggleSwitch("enableAnimations"),
+        },
+        {
+          label: "Show label names on card front",
+          type: "switch",
+          value: switchStates.showLabelNames,
+          onToggle: () => toggleSwitch("showLabelNames"),
+        },
+      ],
+    },
+    {
+      section: "Sync",
+      items: [{ label: "Sync queue", type: "text" }],
+    },
+    {
+      section: "General",
+      items: [
+        { label: "Profile and visibility", type: "text" },
+        { label: "Set app language", type: "text" },
+        {
+          label: "Show quick add",
+          type: "switch",
+          value: switchStates.showQuickAdd,
+          onToggle: () => toggleSwitch("showQuickAdd"),
+        },
+        { label: "Delete account", type: "text" },
+        { label: "About Trello", type: "text" },
+        { label: "More Atlassian apps", type: "text" },
+        { label: "Contact support", type: "text" },
+        { label: "Manage accounts on browser", type: "text" },
+        {
+          label: "Log out",
+          type: "action",
+          onPress: () => setShowLogoutModal(true),
+        },
+      ],
+    },
+  ];
+
+  // Filter sections and items by search text
+  const filteredSettings = useMemo(() => {
+    if (!searchText.trim()) return settingsData;
+
+    const lowerSearch = searchText.toLowerCase();
+
+    return settingsData
+      .map((section) => {
+        const matchedItems = section.items.filter((item) =>
+          item.label.toLowerCase().includes(lowerSearch)
+        );
+
+        // Include section if its title matches or any of its items match
+        if (matchedItems.length > 0 || section.section.toLowerCase().includes(lowerSearch)) {
+          return {
+            ...section,
+            items: matchedItems.length > 0 ? matchedItems : section.items,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean) as typeof settingsData;
+  }, [searchText]);
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
-    >
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <Ionicons name="person-circle" size={90} color={theme === "dark" ? "#ffffff" : "white"} />
+        <View style={styles.sheetHeader}>
+          <TouchableOpacity onPress={onClose}>
+            <Ionicons name="arrow-back" size={30} color={styles.headerText.color} />
+          </TouchableOpacity>
+          <Text style={styles.sheetTitle}>Settings</Text>
+          <View style={{ width: 30 }} /> {/* Spacer */}
+        </View>
+        <Ionicons
+          name="person-circle"
+          size={90}
+          color={theme === "dark" ? "#ffffff" : "white"}
+        />
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
+      </View>
+
+      {/* Search Input */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBox}>
+          <Ionicons name="search" size={20} color={theme === "dark" ? "white" : "#555"} />
+          <TextInput
+            placeholder="Search settings..."
+            placeholderTextColor={theme === "dark" ? "#aaa" : "#888"}
+            value={searchText}
+            onChangeText={setSearchText}
+            style={styles.searchInput}
+            clearButtonMode="while-editing"
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchText("")}>
+              <Ionicons name="close-circle" size={20} color={theme === "dark" ? "white" : "#555"} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Logout Modal */}
       {showLogoutModal && (
         <Modal visible={showLogoutModal} transparent animationType="fade">
           <View style={styles.modalBackground}>
-            <BlurView style={StyleSheet.absoluteFill} intensity={100} tint={theme === "dark" ? "dark" : "light"} />
+            <BlurView
+              style={StyleSheet.absoluteFill}
+              intensity={100}
+              tint={theme === "dark" ? "dark" : "light"}
+            />
             <View style={styles.modalView}>
               <Text style={styles.modalTitle}>Logout</Text>
-              <Text style={styles.modalText}>
-                Are you sure you want to Logout?
-              </Text>
+              <Text style={styles.modalText}>Are you sure you want to Logout?</Text>
               <View style={styles.modalButtons}>
                 <View style={styles.deleteConfirmButton}>
-                  <Button
-                    title="Logout"
-                    onPress={logout}
-                    color="red"
-                  />
+                  <Button title="Logout" onPress={logout} color="red" />
                 </View>
                 <View style={styles.cancelButton}>
                   <Button
@@ -77,108 +213,56 @@ export default function SettingsContent() {
         </Modal>
       )}
 
-      {/* Notifications Section */}
-      <View>
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Notifications</Text>
-          <Text style={styles.sectionSubtext}>Open system settings</Text>
+      {/* Render filtered settings sections */}
+      {filteredSettings.map((section, i) => (
+        <View key={i} style={styles.section}>
+          <Text style={styles.sectionHeader}>{section.section}</Text>
+          {section.items.map((item, idx) => (
+            <View key={idx} style={styles.row}>
+              <Text style={styles.sectionSubtext}>{item.label}</Text>
+              {item.type === "switch" && (
+                <Switch
+                  trackColor={{ false: "#767577", true: "#339dff" }}
+                  thumbColor={item.value ? "#339dff" : "#f4f3f4"}
+                  onValueChange={item.onToggle}
+                  value={item.value}
+                />
+              )}
+              {item.type === "action" && (
+                <TouchableOpacity onPress={item.onPress}>
+                  <Ionicons
+                    name="chevron-forward-outline"
+                    size={20}
+                    color={theme === "dark" ? "white" : "#555"}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
         </View>
-
-        {/* Application Theme Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Application Theme</Text>
-          <Text style={styles.sectionSubtext}>Select Theme</Text>
-          <View style={styles.row}>
-            <Text style={styles.sectionSubtext}>Dark Mode</Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#339dff" }}
-              thumbColor={theme === "dark" ? "#339dff" : "#f4f3f4"}
-              onValueChange={toggleTheme}
-              value={theme === "dark"}
-            />
-          </View>
-        </View>
-
-        {/* Accessibility Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Accessibility</Text>
-          <View style={styles.row}>
-            <Text style={styles.sectionSubtext}>Color blind friendly mode</Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#767577" }}
-              thumbColor={switchStates.colorBlindMode ? "#339dff" : "#f4f3f4"}
-              onValueChange={() => toggleSwitch("colorBlindMode")}
-              value={switchStates.colorBlindMode}
-            />
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.sectionSubtext}>Enable Animations</Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#767577" }}
-              thumbColor={switchStates.enableAnimations ? "#339dff" : "#f4f3f4"}
-              onValueChange={() => toggleSwitch("enableAnimations")}
-              value={switchStates.enableAnimations}
-            />
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.sectionSubtext}>Show label names on card front</Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#767577" }}
-              thumbColor={switchStates.showLabelNames ? "#339dff" : "#f4f3f4"}
-              onValueChange={() => toggleSwitch("showLabelNames")}
-              value={switchStates.showLabelNames}
-            />
-          </View>
-        </View>
-
-        {/* Sync Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Sync</Text>
-          <Text style={styles.sectionSubtext}>Sync queue</Text>
-        </View>
-
-        {/* General Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>General</Text>
-          <Text style={styles.sectionSubtext}>Profile and visibility</Text>
-          <Text style={styles.sectionSubtext}>Set app language</Text>
-          <View style={styles.row}>
-            <Text style={styles.sectionSubtext}>Show quick add</Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#767577" }}
-              thumbColor={switchStates.showQuickAdd ? "#339dff" : "#f4f3f4"}
-              onValueChange={() => toggleSwitch("showQuickAdd")}
-              value={switchStates.showQuickAdd}
-            />
-          </View>
-          <Text style={styles.sectionSubtext}>Delete account</Text>
-          <Text style={styles.sectionSubtext}>About Trello</Text>
-          <Text style={styles.sectionSubtext}>More Atlassian apps</Text>
-          <Text style={styles.sectionSubtext}>Contact support</Text>
-          <Text style={styles.sectionSubtext}>Manage accounts on browser</Text>
-          <TouchableOpacity onPress={() => setShowLogoutModal(true)}>
-            <Text style={styles.sectionSubtext}>Log out</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      ))}
     </ScrollView>
   );
 }
 
 // 🔁 Theme-aware styles
-const getSettingsStyles = (theme) =>
+const getSettingsStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
       paddingHorizontal: 20,
       backgroundColor: theme.settings.backgroundColor,
     },
+    headerText: {
+      color: theme.settings.headerTextColor,
+    },
     profileCard: {
       alignItems: "center",
       marginBottom: 20,
-      backgroundColor: theme.button.backgroundColor,
+      backgroundColor: theme.settings.profileCardBg,
       marginHorizontal: -20,
       paddingBottom: 15,
+      paddingTop: 25,
     },
     profileText: {
       fontWeight: "bold",
@@ -250,5 +334,41 @@ const getSettingsStyles = (theme) =>
     cancelButton: {
       borderRadius: 6,
       margin: 5,
+    },
+    sheetHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      marginBottom: 10,
+      justifyContent: "space-between",
+    },
+    sheetTitle: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: theme.settingsModal.headerTextColor,
+    },
+
+    // New styles for search input container & box
+    searchContainer: {
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      marginBottom: 10,
+    },
+    searchBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.settings.searchBackground || "#f0f0f0",
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      height: 50,
+      borderColor:theme.settings.searchBorderColor,
+      borderWidth:2,
+    },
+    searchInput: {
+      flex: 1,
+      color: theme.settings.searchTextColor || "#000",
+      marginLeft: 8,
+      fontSize: 16,
+      height: "100%",
     },
   });
