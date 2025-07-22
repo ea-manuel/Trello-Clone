@@ -16,6 +16,7 @@ import {
   View,
   ImageBackground,
   Alert,
+  TextStyle,
 } from "react-native";
 import { useTheme } from "../../ThemeContext";
 import { lightTheme, darkTheme } from "../../styles/themes";
@@ -204,6 +205,7 @@ export default function BoardDetails() {
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [cardToDelete, setCardToDelete] = useState<{ listId: string; cardIndex: number } | null>(null);
   const { theme } = useTheme();
+  const isDark = theme === "dark";
   const styles = theme === "dark" ? darkTheme : lightTheme;
 
   // Modal state for card menu
@@ -267,7 +269,7 @@ try {
   setLongPressedListId(null);
 };
 
-const handleDeleteCard = (listIndex, cardIndex) => {
+const handleDeleteCard = (listIndex: number, cardIndex: number) => {
   const updated = [...lists];
   updated[listIndex].cards.splice(cardIndex, 1);
   setLists(updated);
@@ -331,7 +333,7 @@ const handleDeleteCard = (listIndex, cardIndex) => {
                 {
                   id: Date.now().toString(),
                   title: "",
-                  cards: [],
+                  cards: [{ text: "Enter card name here...", completed: false, isInput: true }],
                   editingTitle: true,
                   newCardText: ""
                 }
@@ -400,84 +402,174 @@ const handleDeleteCard = (listIndex, cardIndex) => {
       <FlatList
         data={list.cards}
         keyExtractor={(card, i) => i.toString()}
-        renderItem={({ item: card, index: cardIndex }) => (
-          <TouchableOpacity
-            onLongPress={() => setLongPressedCardId({ listId: list.id, cardIndex })}
-            onPress={() => {
-              const updated = [...lists];
-              updated[listIndex].cards[cardIndex].completed =
-                !updated[listIndex].cards[cardIndex].completed;
-              setLists(updated);
-              setLongPressedCardId(null);
-            }}
-            style={styles.BoardDetailscard}
-          >
-            {card.completed ? (
-              <Ionicons
-                name="checkmark-circle"
-                size={24}
-                color="#2ecc71"
-              />
-            ) : (
-              <Ionicons
-                name="ellipse-outline"
-                size={24}
-                color="#555"
-              />
-            )}
-
-            <Text
-              style={[
-                styles.BoardDetailscardText,
-                card.completed && styles.BoardDetailscompletedText,
-              ]}
-            >
-              {card.text}
-            </Text>
-
-            {longPressedCardId?.listId === list.id && longPressedCardId?.cardIndex === cardIndex ? (
-  <TouchableOpacity
-    onPress={() => handleDeleteCard(listIndex, cardIndex)}
-    style={{ marginLeft: "auto" }}
-  >
-    <Ionicons name="trash-outline" size={24} color="red" />
-  </TouchableOpacity>
-) : (
-  <TouchableOpacity
-    onPress={() => {
-      setSelectedCard(card);
-      setCardMenuVisible(true);
-    }}
-    style={{ marginLeft: "auto" }}
-  >
-    <Ionicons name="ellipsis-vertical-sharp" size={30} color="white" />
-  </TouchableOpacity>
-)}
-
-          </TouchableOpacity>
-        )}
-      />
-
-      <TextInput
-        placeholder="+ Add a card..."
-        placeholderTextColor="gray"
-        style={styles.BoardDetailscardInput}
-        value={list.newCardText}
-        onChangeText={(text) => {
-          const updated = [...lists];
-          updated[listIndex].newCardText = text;
-          setLists(updated);
-        }}
-        onSubmitEditing={() => {
-          const updated = [...lists];
-          const text = updated[listIndex].newCardText.trim();
-          if (text) {
-            updated[listIndex].cards.push({ text, completed: false });
-            updated[listIndex].newCardText = "";
-            setLists(updated);
+        renderItem={({ item: card, index: cardIndex }: { item: any; index: number }) => {
+          if (card.isInput) {
+            // Show as a normal card with placeholder text, turn into input on tap
+            if (!card.editing) {
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    const updated = [...lists];
+                    updated[listIndex].cards[cardIndex].editing = true;
+                    setLists(updated);
+                  }}
+                  style={styles.BoardDetailscard}
+                >
+                  <Ionicons name="ellipse-outline" size={24} color="#555" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: '#888', fontSize: styles.BoardDetailscardText.fontSize, fontWeight: styles.BoardDetailscardText.fontWeight }}>{'Enter card name here...'}</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedCard(card);
+                      setCardMenuVisible(true);
+                    }}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    <Ionicons name="ellipsis-vertical-sharp" size={30} color="white" />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              );
+            } else {
+              // Show styled input for editing
+              return (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: isDark ? '#23253A' : '#f4f6fa',
+                    borderRadius: 12,
+                    paddingVertical: 10,
+                    paddingHorizontal: 14,
+                    marginBottom: 10,
+                    borderWidth: 1,
+                    borderColor: isDark ? '#2C8CFF' : '#B3B3B3',
+                    shadowColor: isDark ? '#000' : '#ccc',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <Ionicons name="ellipse-outline" size={22} color={isDark ? '#BFC9D6' : '#888'} style={{ marginRight: 8 }} />
+                  <TextInput
+                    placeholder="Enter card name here..."
+                    placeholderTextColor={isDark ? '#BFC9D6' : '#888'}
+                    style={{
+                      flex: 1,
+                      fontSize: 16,
+                      color: isDark ? '#fff' : '#22345A',
+                      paddingVertical: 0,
+                      backgroundColor: 'transparent',
+                    }}
+                    value={card.text === "Enter card name here..." ? "" : card.text}
+                    autoFocus
+                    onChangeText={(text) => {
+                      const updated = [...lists];
+                      updated[listIndex].cards[cardIndex].text = text;
+                      setLists(updated);
+                    }}
+                    onSubmitEditing={() => {
+                      const updated = [...lists];
+                      const text = updated[listIndex].cards[cardIndex].text.trim();
+                      if (text) {
+                        updated[listIndex].cards[cardIndex].isInput = false;
+                        updated[listIndex].cards[cardIndex].editing = false;
+                        // Add a new input card at the end
+                        updated[listIndex].cards.push({ text: "Enter card name here...", completed: false, isInput: true });
+                        setLists(updated);
+                      }
+                    }}
+                    onBlur={() => {
+                      const updated = [...lists];
+                      updated[listIndex].cards[cardIndex].editing = false;
+                      setLists(updated);
+                    }}
+                    returnKeyType="done"
+                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      const updated = [...lists];
+                      const text = updated[listIndex].cards[cardIndex].text.trim();
+                      if (text) {
+                        updated[listIndex].cards[cardIndex].isInput = false;
+                        updated[listIndex].cards[cardIndex].editing = false;
+                        updated[listIndex].cards.push({ text: "Enter card name here...", completed: false, isInput: true });
+                        setLists(updated);
+                      }
+                    }}
+                    style={{ marginLeft: 8, backgroundColor: isDark ? '#2C8CFF' : PRIMARY_COLOR, borderRadius: 6, padding: 6 }}
+                  >
+                    <Ionicons name="add" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              );
+            }
+          } else {
+            // Normal card
+            return (
+              <TouchableOpacity
+                onLongPress={() => setLongPressedCardId({ listId: list.id, cardIndex })}
+                onPress={() => {
+                  const updated = [...lists];
+                  updated[listIndex].cards[cardIndex].completed =
+                    !updated[listIndex].cards[cardIndex].completed;
+                  setLists(updated);
+                  setLongPressedCardId(null);
+                }}
+                style={styles.BoardDetailscard}
+              >
+                {card.completed ? (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={24}
+                    color="#2ecc71"
+                  />
+                ) : (
+                  <Ionicons
+                    name="ellipse-outline"
+                    size={24}
+                    color="#555"
+                  />
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      color: styles.BoardDetailscardText.color,
+                      fontSize: styles.BoardDetailscardText.fontSize,
+                      fontWeight: styles.BoardDetailscardText.fontWeight,
+                      ...(card.completed ? {
+                        color: styles.BoardDetailscompletedText.color,
+                        textDecorationLine: styles.BoardDetailscompletedText.textDecorationLine,
+                      } : {}),
+                    }}
+                  >
+                    {card.text}
+                  </Text>
+                </View>
+                {longPressedCardId?.listId === list.id && longPressedCardId?.cardIndex === cardIndex ? (
+                  <TouchableOpacity
+                    onPress={() => handleDeleteCard(listIndex, cardIndex)}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    <Ionicons name="trash-outline" size={24} color="red" />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedCard(card);
+                      setCardMenuVisible(true);
+                    }}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    <Ionicons name="ellipsis-vertical-sharp" size={30} color="white" />
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+            );
           }
         }}
       />
+
     </TouchableOpacity>
   )}
 />
