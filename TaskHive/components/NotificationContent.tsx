@@ -1,22 +1,28 @@
-// components/NotificationContent.js
-import React from "react";
-import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View, Pressable } from "react-native";
+import React, { useState } from "react";
+import {
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Pressable,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNotificationStore } from "../app/stores/notificationsStore";
 
 const MOSQUITO_IMAGE = require("../assets/images/bee.png");
 
-export default function NotificationContent({
-  typeFilter,
-  setTypeFilter,
-  readFilter,
-  setReadFilter,
-  modalVisible,
-  setModalVisible,
-  NOTIFICATION_TYPES,
-  SAMPLE_NOTIFICATIONS,
-  styles
-}) {
-  const notifications = SAMPLE_NOTIFICATIONS;
+const NOTIFICATION_TYPES = ["All types", "info", "warning", "error", "success"];
+
+export default function NotificationContent({ modalVisible, setModalVisible, styles }) {
+  // Subscribe to Zustand notifications store
+  const { notifications, markAsRead, clearAll } = useNotificationStore();
+
+  // Filters states inside this component
+  const [typeFilter, setTypeFilter] = useState("All types");
+  const [readFilter, setReadFilter] = useState("All");
 
   const filteredNotifications = notifications.filter(
     (n) =>
@@ -32,10 +38,25 @@ export default function NotificationContent({
   const openTypeModal = () => setModalVisible(true);
   const closeTypeModal = () => setModalVisible(false);
 
-  const handleTypeSelect = (type) => {
+  interface Notification {
+    id: string;
+    text: string;
+    type: string;
+    read: boolean;
+  }
+
+  interface NotificationContentProps {
+    modalVisible: boolean;
+    setModalVisible: (visible: boolean) => void;
+    styles: any;
+  }
+
+  const handleTypeSelect = (type: string): void => {
     setTypeFilter(type);
     setModalVisible(false);
   };
+  // Removed duplicate notifications declaration
+
 
   return (
     <>
@@ -44,7 +65,7 @@ export default function NotificationContent({
         <TouchableOpacity
           style={[
             styles.tabButton,
-            { flexDirection: "row", alignItems: "center", minWidth: 110 }
+            { flexDirection: "row", alignItems: "center", minWidth: 110 },
           ]}
           onPress={openTypeModal}
           activeOpacity={0.7}
@@ -64,7 +85,7 @@ export default function NotificationContent({
           style={[
             styles.tabButton,
             readFilter === "Unread" && styles.tabButtonActive,
-            { flexDirection: "row", alignItems: "center" }
+            { flexDirection: "row", alignItems: "center" },
           ]}
           activeOpacity={0.7}
         >
@@ -79,7 +100,7 @@ export default function NotificationContent({
           <Text
             style={[
               styles.tabButtonText,
-              readFilter === "Unread" && styles.tabButtonTextActive
+              readFilter === "Unread" && styles.tabButtonTextActive,
             ]}
           >
             Unread
@@ -120,8 +141,8 @@ export default function NotificationContent({
                       styles.modalItemText,
                       typeFilter === item && {
                         color: "#2C8CFF",
-                        fontWeight: "bold"
-                      }
+                        fontWeight: "bold",
+                      },
                     ]}
                   >
                     {item}
@@ -155,20 +176,21 @@ export default function NotificationContent({
           keyExtractor={(item) => item.id}
           contentContainerStyle={{
             paddingHorizontal: 16,
-            paddingBottom: 20
+            paddingBottom: 20,
           }}
           renderItem={({ item }) => (
-            <View
+            <TouchableOpacity
               style={[
                 styles.notificationItem,
                 item.read
                   ? styles.notificationRead
-                  : styles.notificationUnread
+                  : styles.notificationUnread,
               ]}
+              onPress={() => markAsRead(item.id)}
             >
               <Text style={styles.notificationText}>{item.text}</Text>
               <Text style={styles.notificationType}>{item.type}</Text>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}

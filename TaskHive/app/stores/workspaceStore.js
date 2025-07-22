@@ -137,4 +137,13 @@ export const useWorkspaceStore = create((set, get) => ({
   getWorkspaces: () => {
     return get().workspaces;
   },
+
+  // Add updateBoard function
+  updateBoard: (updatedBoard) => {
+    set((state) => ({
+      boards: state.boards.map((b) =>
+        b.id === updatedBoard.id ? { ...b, ...updatedBoard } : b
+      ),
+    }));
+  },
 }));

@@ -1,5 +1,9 @@
 // styles/themes.js
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform, Dimensions } from "react-native";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+export const PRIMARY_COLOR = "#0B1F3A";
 
 export const lightTheme = StyleSheet.create({
   mainpage: {
@@ -14,7 +18,6 @@ export const lightTheme = StyleSheet.create({
   },
    boardcard: {
   backgroundColor: "white", // Deep blue-gray
- 
   borderRadius: 10,
   paddingVertical: 15,
   paddingHorizontal: 15,
@@ -25,7 +28,8 @@ export const lightTheme = StyleSheet.create({
   shadowOpacity: 0.3,
   shadowRadius: 6,
   marginVertical: 5,
-  margin: 8,
+  margin: 10,
+ 
 },
 boardcardText: {
   color: "black", // Soft off-white
@@ -268,8 +272,585 @@ settingsModal: {
   headerTextColor: "white",
   borderTopColor: "#0B1F3A",
 },
+favouritemodalView: {
+    flexGrow:1,
+    backgroundColor:"#1A2F4D",
+    padding: 0,
+    paddingTop: 0,
+    margin: 30,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    width: '100%',
+    alignItems: "center",
+    justifyContent:'flex-start',
+    height:'100%'
+  },
+    favouritemodalTitle: {
+    fontSize: 25,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color:'white',
+    paddingLeft:20,
+  
+  },
+    favouriteemptyText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color:"#6C92C4",
+    alignSelf: "center",
+    justifyContent:'center',
+  },
+   favouriteheader: {
+    height: 90,
+    width:'100%',
+    backgroundColor: "#0B1F3A",
+    paddingTop: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 10,
+    bottom: 20,
+    alignItems: "center",
+    
+  },
+  favouriteicon: {
+    position: "absolute",
+    right:0,
+  },
+ OfflineBoardscontainer: { flex: 1, backgroundColor: "#fff" },
+  OfflineBoardsmainpage: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingTop: Platform.OS === "ios" ? 40 : 20,
+    paddingHorizontal: 10,
+    paddingBottom: 5
+  },
+  OfflineBoardsheader: {
+    height: 75,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  OfflineBoardsheaderText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center"
+  },
+  OfflineBoardsiconButton: {
+    width: 40,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  OfflineBoardsworkspaceLabel: {
+    fontWeight: "bold",
+    marginTop: 12,
+    marginLeft: 18,
+    fontSize: 15,
+    color: "#111"
+  },
+  OfflineBoardsboardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 24,
+    marginLeft: 18
+  },
+  OfflineBoardsboardVisual: {
+    width: 48,
+    height: 32,
+    backgroundColor: "#1783e5",
+    borderRadius: 4,
+    marginRight: 16
+  },
+  OfflineBoardsboardTitle: {
+    fontSize: 16,
+    color: "#222",
+    fontWeight: "500"
+  },
+  OfflineBoardsfab: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#007CF0",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5
+  },
+  // Modal styles
+  OfflineBoardsmodalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    justifyContent: "center",
+    padding: 20
+  },
+  OfflineBoardsmodalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20
+  },
+  OfflineBoardsmodalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#0B1F3A",
+    marginBottom: 12
+  },
+  OfflineBoardsinput: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#222",
+    marginBottom: 20,
+    fontSize: 16
+  },
+  OfflineBoardsmodalButtons: { flexDirection: "row", justifyContent: "flex-end" },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 10
+  },
+  OfflineBoardscancelButton: { backgroundColor: "#555" },
+  OfflineBoardssaveButton: { backgroundColor: "#007CF0" },
+  OfflineBoardsmodalButtonText: { color: "white", fontWeight: "bold" },
+// templates styles
+  templatesContainer: {
+    flex: 1,
+    backgroundColor: "#f7f7f7" // light background
+  },
+  templatesHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0B1F3A",
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 16
+  },
+  templatesHeaderTitle: {
+    color: "#0B1F3A",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 12
+  },
+  templatesFilterBar: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    paddingBottom: 50
+  },
+  templatesFilterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "gray",
+    marginRight: 10,
+    height: 35
+  },
+  templatesFilterButtonActive: {
+    backgroundColor: "#e0e0e0",
+    borderColor: "#0B1F3A"
+  },
+  templatesFilterText: {
+    color: "#0B1F3A",
+    fontWeight: "600"
+  },
+  templatesFilterTextActive: {
+    color: "#0B1F3A"
+  },
+  templatesList: {
+    padding: 16
+  },
+  templatesCardWrapper: {
+    marginBottom: 24
+  },
+  templatesCard: {
+    width: "100%",
+    height: 220,
+    borderRadius: 16,
+    marginBottom: 12,
+    position: "relative",
+    overflow: "hidden",
+    justifyContent: "flex-start"
+  },
+  templatesRect: {
+    position: "absolute",
+    borderRadius: 8
+  },
+  templatesCardTitle: {
+    color: "#0B1F3A",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 8
+  },
+  templatesCardDescRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8
+  },
+  templatesCardDesc: {
+    color: "#555",
+    fontSize: 14
+  },
+  //Board details styles
+  BoardDetailscontainer: {
+    flex: 1,
+    color: "black"
+  },
+  BoardDetailstopBar: {
+    height: 110,
+    backgroundColor: PRIMARY_COLOR,
+    paddingTop: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 10,
+    bottom: 20
+  },
+  BoardDetailsbackButton: {
+    padding: 10
+  },
+  BoardDetailstitleContainer: {
+    flex: 1,
+    maxWidth: SCREEN_WIDTH * 0.4,
+    marginHorizontal: 10,
+    justifyContent: "center"
+  },
+  BoardDetailstitle: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "left"
+  },
+  BoardDetailsiconContainer: {
+    flexDirection: "row",
+    position: "absolute",
+    right: -5,
+    top: 50,
+    alignItems: "center"
+  },
+  BoardDetailsiconButton: {
+    padding: 10
+  },
+  BoardDetailscontent: {
+    flex: 1,
+    alignItems: "center"
+  },
+  BoardDetailscreatelist: {
+    backgroundColor: "#09143c",
+    width: 160,
+    height: 45,
+    flexDirection: "row",
+    borderRadius: 25,
+    borderColor: "#722f37",
+    borderWidth: 1.5,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    elevation: 8,
+    marginVertical: 10
+  },
+  BoardDetailslistCard: {
+    backgroundColor: "#6F8FAF",
+    alignItems: "center",
+    marginLeft: 15,
+    width: 270,
+    borderRadius: 30,
+    height: 400,
+    paddingTop: 10,
+    marginTop: 20,
+    borderColor: "white",
+    borderWidth: 2
+  },
+  BoardDetailslistTitleInput: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20
+  },
+  BoardDetailslistTitle: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 15
+  },
+  BoardDetailscard: {
+    backgroundColor: "#0e1d3e",
+    marginHorizontal: 10,
+    textAlign: "left",
+    width: 250,
+    height: 50,
+    marginVertical: 5,
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    color: "white",
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  BoardDetailscardInput: {
+    borderColor: "white",
+    borderWidth: 1,
+    width: 270,
+    alignItems: "center",
+    textAlign: "center",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    color: "white",
+    paddingVertical: 6
+  },
+  BoardDetailscardText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "500",
+    paddingLeft: 10
+  },
+  BoardDetailscompletedText: {
+    textDecorationLine: "line-through",
+    color: "#888"
+  },
+  BoardDetailsmodalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  BoardDetailsmodalView: {
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    padding: 20,
+    margin: 30,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    minWidth: 300,
+    alignItems: "center"
+  },
+  BoardDetailsmodalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10
+  },
+  BoardDetailsmodalText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center"
+  },
+  BoardDetailsmodalButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6
+  },
+  BoardDetailsmodalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16
+  },
 
-
+  // CardMenuModal styles
+  CardMenuModalmenuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end"
+  },
+  CardMenuModalmenuContainer: {
+    backgroundColor: "#181A20",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 10,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+    minHeight: "85%",
+    maxHeight: "95%",
+    elevation: 12
+  },
+  CardMenuModalmenuTopBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12
+  },
+  CardMenuModalcoverButton: {
+    backgroundColor: "#23263A",
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginBottom: 14
+  },
+  CardMenuModalcoverButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModalsection: {
+    backgroundColor: "#22242d",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 18
+  },
+  CardMenuModalactivitiesRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10
+  },
+  CardMenuModalactivitiesTitle: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 20
+  },
+  CardMenuModaltodoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    marginBottom: 4
+  },
+  CardMenuModaltodoBadge: {
+    width: 32,
+    height: 24,
+    backgroundColor: "#3CD6FF",
+    borderRadius: 6,
+    marginRight: 10
+  },
+  CardMenuModaltodoTitle: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16
+  },
+  CardMenuModaltodoSubtitle: {
+    color: "#aaa",
+    fontSize: 13
+  },
+  CardMenuModalmoveText: {
+    color: "#3CD6FF",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModalquickActionsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8
+  },
+  CardMenuModalquickActionsTitle: {
+    color: "#aaa",
+    fontWeight: "bold",
+    fontSize: 14,
+    flex: 1
+  },
+  CardMenuModalquickActionsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    marginBottom: 8
+  },
+  CardMenuModalquickActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 10
+  },
+  CardMenuModalquickActionText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 8,
+    fontSize: 15
+  },
+  CardMenuModaldescriptionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6
+  },
+  CardMenuModaldescriptionTitle: {
+    color: "#aaa",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModaldescriptionInput: {
+    color: "#fff",
+    backgroundColor: "#23263A",
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 6,
+    fontSize: 15,
+    minHeight: 48
+  },
+  CardMenuModalmenuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#23263A"
+  },
+  CardMenuModalmenuRowText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500"
+  },
+  CardMenuModalcommentSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+    backgroundColor: "#23263A",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8
+  },
+  CardMenuModalavatarCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#3CD6FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10
+  },
+  CardMenuModalavatarText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModalcommentInput: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 15,
+    marginRight: 8
+  },
+  recentCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    marginVertical: 8,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recentCardText: {
+    color: '#222',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  recentCardTimestamp: {
+    color: '#888',
+    fontSize: 12,
+    fontStyle: 'italic',
+    alignSelf: 'flex-end',
+  },
 });
 export const darkTheme = StyleSheet.create({
   //Homescreen dark theme settings
@@ -533,6 +1114,7 @@ quickActionsSubheading: {
   headerTextColor: "white",
   searchBackground:"#020110",
   searchBorderColor: '#0A072B',
+  searchTextColor:'white',
   
 },
 settingsModal: {
@@ -540,5 +1122,709 @@ settingsModal: {
   headerTextColor: "white",
   borderTopColor: "white",
 },
+favouritemodalView: {
+    flexGrow:1,
+    backgroundColor:"#020110",
+    padding: 0,
+    paddingTop: 0,
+    margin: 30,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    width: '100%',
+    alignItems: "center",
+    justifyContent:'flex-start',
+    height:'100%'
+  },
+    favouritemodalTitle: {
+    fontSize: 25,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color:'white',
+    paddingLeft:20,
+  
+  },
+    favouriteemptyText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color:"#6C92C4",
+    alignSelf: "center",
+    justifyContent:'center',
+  },
+   favouriteheader: {
+    height: 90,
+    width:'100%',
+    backgroundColor: "#0B1F3A",
+    paddingTop: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 10,
+    bottom: 20,
+    alignItems: "center",
+    
+  },
+  favouriteicon: {
+    position: "absolute",
+    right:0,
+  },
+  favouriteboardcard: {
+  backgroundColor: "white", // Deep blue-gray
+  width:"100%",
+  borderRadius: 10,
+  paddingVertical: 15,
+  paddingHorizontal: 15,
+  flexDirection: "row",
+  alignItems: "center",
+  elevation: 4,
+  shadowColor: "#000",
+  shadowOpacity: 0.3,
+  shadowRadius: 6,
+  marginVertical: 5,
+  margin: 10,
+ 
+},
+//Offline boards styles
+ OfflineBoardscontainer: { flex: 1, backgroundColor: "#020110" },
+  OfflineBoardsmainpage: {
+    backgroundColor: "#0A072B",
+    paddingTop: Platform.OS === "ios" ? 40 : 20,
+    paddingHorizontal: 10,
+    paddingBottom: 5
+  },
+  OfflineBoardsheader: {
+    height: 75,
+    width:"100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#0A072B"
+  },
+  OfflineBoardsheaderText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center"
+  },
+  OfflineBoardsiconButton: {
+    width: 40,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  OfflineBoardsworkspaceLabel: {
+    fontWeight: "bold",
+    marginTop: 12,
+    marginLeft: 18,
+    fontSize: 15,
+    color: "white"
+  },
+  OfflineBoardsboardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 24,
+    marginLeft: 18
+  },
+  OfflineBoardsboardVisual: {
+    width: 48,
+    height: 32,
+    backgroundColor: "#09034E",
+    borderRadius: 4,
+    marginRight: 16
+  },
+  OfflineBoardsboardTitle: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "500"
+  },
+  OfflineBoardsfab: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#09034E",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5
+  },
+  // Modal styles
+  OfflineBoardsmodalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    justifyContent: "center",
+    padding: 20
+  },
+  OfflineBoardsmodalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20
+  },
+  OfflineBoardsmodalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#0B1F3A",
+    marginBottom: 12
+  },
+  OfflineBoardsinput: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#222",
+    marginBottom: 20,
+    fontSize: 16
+  },
+  OfflineBoardsmodalButtons: { flexDirection: "row", justifyContent: "flex-end" },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 10
+  },
+  OfflineBoardscancelButton: { backgroundColor: "#555" },
+  OfflineBoardssaveButton: { backgroundColor: "#007CF0" },
+  OfflineBoardsmodalButtonText: { color: "white", fontWeight: "bold" },
 
+// =====================
+// templates styles
+// =====================
+  templatesContainer: {
+    flex: 1,
+    backgroundColor: "#020110" // dark background
+  },
+  templatesHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0A072B",
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 16
+  },
+  templatesHeaderTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 12
+  },
+  templatesFilterBar: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    paddingBottom: 50
+  },
+  templatesFilterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "gray",
+    marginRight: 10,
+    height: 35
+  },
+  templatesFilterButtonActive: {
+    backgroundColor: "#23272F",
+    borderColor: "#fff"
+  },
+  templatesFilterText: {
+    color: "#fff",
+    fontWeight: "600"
+  },
+  templatesFilterTextActive: {
+    color: "#fff"
+  },
+  templatesList: {
+    padding: 16
+  },
+  templatesCardWrapper: {
+    marginBottom: 24
+  },
+  templatesCard: {
+    width: "100%",
+    height: 220,
+    borderRadius: 16,
+    marginBottom: 12,
+    position: "relative",
+    overflow: "hidden",
+    justifyContent: "flex-start"
+  },
+  templatesRect: {
+    position: "absolute",
+    borderRadius: 8
+  },
+  templatesCardTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 8
+  },
+  templatesCardDescRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8
+  },
+  templatesCardDesc: {
+    color: "#b0b0b0",
+    fontSize: 14
+  },
+
+// =====================
+// help styles
+// =====================
+  helpContainer: {
+    flex: 1,
+    backgroundColor: "#020110",
+    paddingTop: 0,
+    paddingHorizontal: 0
+  },
+  helpSearchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#dedede",
+    borderRadius: 16,
+    marginBottom: 24,
+    paddingHorizontal: 12,
+    height: 44,
+    alignSelf: "center",
+    width: "90%",
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  helpSearchInput: {
+    flex: 1,
+    fontSize: 18,
+    color: "#888",
+    fontWeight: "bold",
+    letterSpacing: 1
+  },
+  helpSearchIcon: {
+    marginLeft: 8
+  },
+  helpCardContainer: {
+    marginBottom: 18
+  },
+  helpCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  helpCardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#222",
+    letterSpacing: 1
+  },
+  helpCardContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginTop: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1
+  },
+  helpCardContentText: {
+    fontSize: 15,
+    color: "#222",
+    lineHeight: 20
+  },
+  helpHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0B1F3A", // same as templates header
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    marginBottom:50,
+  },
+  helpHeaderBackButton: {
+    marginRight: 8
+  },
+  helpHeaderTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 12,
+    flex: 1
+  },
+  helpHeaderSearchBar: {
+    flex: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#dedede",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    height: 44,
+    marginLeft: 8
+  },
+
+  //Board details styles
+  BoardDetailscontainer: {
+    flex: 1,
+    color: "black",
+    backgroundColor:"#020110"
+  },
+  BoardDetailstopBar: {
+    height: 110,
+    backgroundColor:"#0A072B",
+    paddingTop: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 10,
+    bottom: 20
+  },
+  BoardDetailsbackButton: {
+    padding: 10
+  },
+  BoardDetailstitleContainer: {
+    flex: 1,
+    maxWidth: SCREEN_WIDTH * 0.4,
+    marginHorizontal: 10,
+    justifyContent: "center"
+  },
+  BoardDetailstitle: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "left"
+  },
+  BoardDetailsiconContainer: {
+    flexDirection: "row",
+    position: "absolute",
+    right: -5,
+    top: 50,
+    alignItems: "center"
+  },
+  BoardDetailsiconButton: {
+    padding: 10
+  },
+  BoardDetailscontent: {
+    flex: 1,
+    alignItems: "center"
+  },
+  BoardDetailscreatelist: {
+    backgroundColor: "#021734",
+    width: 160,
+    height: 45,
+    flexDirection: "row",
+    borderRadius: 25,
+    borderColor: "#722f37",
+    borderWidth: 1.5,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    elevation: 8,
+    marginVertical: 10
+  },
+  BoardDetailslistCard: {
+    backgroundColor: "#021734",
+    alignItems: "center",
+    marginLeft: 15,
+    width: 270,
+    borderRadius: 30,
+    height: 400,
+    paddingTop: 10,
+    marginTop: 20,
+    borderColor: "white",
+    borderWidth: 2
+  },
+  BoardDetailslistTitleInput: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20
+  },
+  BoardDetailslistTitle: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 15
+  },
+  BoardDetailscard: {
+    backgroundColor: "#0e1d3e",
+    marginHorizontal: 10,
+    textAlign: "left",
+    width: 250,
+    height: 50,
+    marginVertical: 5,
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    color: "white",
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  BoardDetailscardInput: {
+    borderColor: "white",
+    borderWidth: 1,
+    width: 270,
+    alignItems: "center",
+    textAlign: "center",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    color: "white",
+    paddingVertical: 6
+  },
+  BoardDetailscardText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "500",
+    paddingLeft: 10
+  },
+  BoardDetailscompletedText: {
+    textDecorationLine: "line-through",
+    color: "#888"
+  },
+  BoardDetailsmodalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  BoardDetailsmodalView: {
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    padding: 20,
+    margin: 30,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    minWidth: 300,
+    alignItems: "center"
+  },
+  BoardDetailsmodalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10
+  },
+  BoardDetailsmodalText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center"
+  },
+  BoardDetailsmodalButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6
+  },
+  BoardDetailsmodalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16
+  },
+
+  // CardMenuModal styles
+  CardMenuModalmenuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end"
+  },
+  CardMenuModalmenuContainer: {
+    backgroundColor: "#181A20",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 10,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+    minHeight: "85%",
+    maxHeight: "95%",
+    elevation: 12
+  },
+  CardMenuModalmenuTopBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12
+  },
+  CardMenuModalcoverButton: {
+    backgroundColor: "#23263A",
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginBottom: 14
+  },
+  CardMenuModalcoverButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModalsection: {
+    backgroundColor: "#22242d",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 18
+  },
+  CardMenuModalactivitiesRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10
+  },
+  CardMenuModalactivitiesTitle: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 20
+  },
+  CardMenuModaltodoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    marginBottom: 4
+  },
+  CardMenuModaltodoBadge: {
+    width: 32,
+    height: 24,
+    backgroundColor: "#3CD6FF",
+    borderRadius: 6,
+    marginRight: 10
+  },
+  CardMenuModaltodoTitle: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16
+  },
+  CardMenuModaltodoSubtitle: {
+    color: "#aaa",
+    fontSize: 13
+  },
+  CardMenuModalmoveText: {
+    color: "#3CD6FF",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModalquickActionsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8
+  },
+  CardMenuModalquickActionsTitle: {
+    color: "#aaa",
+    fontWeight: "bold",
+    fontSize: 14,
+    flex: 1
+  },
+  CardMenuModalquickActionsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    marginBottom: 8
+  },
+  CardMenuModalquickActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 10
+  },
+  CardMenuModalquickActionText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 8,
+    fontSize: 15
+  },
+  CardMenuModaldescriptionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6
+  },
+  CardMenuModaldescriptionTitle: {
+    color: "#aaa",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModaldescriptionInput: {
+    color: "#fff",
+    backgroundColor: "#23263A",
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 6,
+    fontSize: 15,
+    minHeight: 48
+  },
+  CardMenuModalmenuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#23263A"
+  },
+  CardMenuModalmenuRowText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500"
+  },
+  CardMenuModalcommentSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+    backgroundColor: "#23263A",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8
+  },
+  CardMenuModalavatarCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#3CD6FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10
+  },
+  CardMenuModalavatarText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15
+  },
+  CardMenuModalcommentInput: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 15,
+    marginRight: 8
+  },
+  recentCard: {
+    backgroundColor: '#181A2A',
+    borderRadius: 10,
+    padding: 16,
+    marginVertical: 8,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#23244A',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recentCardText: {
+    color: '#EAEFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  recentCardTimestamp: {
+    color: '#A0A4C0',
+    fontSize: 12,
+    fontStyle: 'italic',
+    alignSelf: 'flex-end',
+  },
 });

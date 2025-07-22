@@ -1,14 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from "react-native";
+import { useTheme } from "../../ThemeContext";
+import { lightTheme, darkTheme } from "../../styles/themes";
+import { useRouter } from "expo-router";
+
+export const options = {
+  headerShown: false,
+};
 
 const HELP_TOPICS = [
   {
@@ -38,26 +43,36 @@ const HELP_TOPICS = [
 
 export default function HelpScreen() {
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const { theme } = useTheme();
+  const styles = theme === "dark" ? darkTheme : lightTheme;
+  const router = useRouter();
 
   // Filter topics by search
   const filteredTopics = HELP_TOPICS.filter((topic) =>
     topic.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  const toggleExpand = (key) => {
+  const toggleExpand = (key: string) => {
     setExpanded((prev) => ({
       ...prev,
       [key]: !prev[key]
     }));
   };
 
-  return (
-    <View style={styles.container}>
-      {/* Search Bar */}
-      <View style={styles.searchBar}>
+  // Custom header with back and search
+  const renderHeader = () => (
+    <View style={styles.helpHeader as any}>
+      <TouchableOpacity onPress={() => router.replace("/screens/HomeScreen")}
+        style={styles.helpHeaderBackButton as any}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="arrow-back" size={28} color="#fff" />
+      </TouchableOpacity>
+      <Text style={styles.helpHeaderTitle as any}>Help</Text>
+      <View style={styles.helpHeaderSearchBar as any}>
         <TextInput
-          style={styles.searchInput}
+          style={styles.helpSearchInput as any}
           placeholder="Search..."
           placeholderTextColor="#bbb"
           value={search}
@@ -67,19 +82,24 @@ export default function HelpScreen() {
           name="search"
           size={20}
           color="#bbb"
-          style={styles.searchIcon}
+          style={styles.helpSearchIcon as any}
         />
       </View>
+    </View>
+  );
 
+  return (
+    <View style={styles.helpContainer as any}>
+      {renderHeader()}
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
         {filteredTopics.map((topic) => (
-          <View key={topic.key} style={styles.cardContainer}>
+          <View key={topic.key} style={styles.helpCardContainer as any}>
             <TouchableOpacity
-              style={styles.card}
+              style={styles.helpCard as any}
               onPress={() => toggleExpand(topic.key)}
               activeOpacity={0.8}
             >
-              <Text style={styles.cardTitle}>{topic.title}</Text>
+              <Text style={styles.helpCardTitle as any}>{topic.title}</Text>
               <Ionicons
                 name={expanded[topic.key] ? "chevron-up" : "chevron-down"}
                 size={24}
@@ -87,8 +107,8 @@ export default function HelpScreen() {
               />
             </TouchableOpacity>
             {expanded[topic.key] && (
-              <View style={styles.cardContent}>
-                <Text style={styles.cardContentText}>{topic.content}</Text>
+              <View style={styles.helpCardContent as any}>
+                <Text style={styles.helpCardContentText as any}>{topic.content}</Text>
               </View>
             )}
           </View>
@@ -97,75 +117,3 @@ export default function HelpScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#edeceb",
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
-    paddingHorizontal: 16
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#dedede",
-    borderRadius: 16,
-    marginBottom: 24,
-    paddingHorizontal: 12,
-    height: 44,
-    alignSelf: "center",
-    width: "90%",
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    elevation: 2
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 18,
-    color: "#888",
-    fontWeight: "bold",
-    letterSpacing: 1
-  },
-  searchIcon: {
-    marginLeft: 8
-  },
-  cardContainer: {
-    marginBottom: 18
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#222",
-    letterSpacing: 1
-  },
-  cardContent: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginTop: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1
-  },
-  cardContentText: {
-    fontSize: 15,
-    color: "#222",
-    lineHeight: 20
-  }
-});

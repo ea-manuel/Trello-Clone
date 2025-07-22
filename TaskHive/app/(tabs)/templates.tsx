@@ -4,11 +4,12 @@ import React, { useState } from "react";
 import {
   FlatList,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from "react-native";
+import { useTheme } from "../../ThemeContext";
+import { lightTheme, darkTheme } from "../../styles/themes";
 
 const FILTERS = ["All", "Business", "Design", "Education"];
 
@@ -52,6 +53,8 @@ const TEMPLATES = [
 
 export default function Templates() {
   const [selectedFilter, setSelectedFilter] = useState("All");
+  const { theme } = useTheme();
+  const styles = theme === "dark" ? darkTheme : lightTheme;
 
   // Filter templates based on selectedFilter
   const filteredTemplates =
@@ -60,34 +63,34 @@ export default function Templates() {
       : TEMPLATES.filter((tpl) => tpl.category === selectedFilter);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.templatesContainer as any}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles.templatesHeader as any}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Start with a template</Text>
+        <Text style={styles.templatesHeaderTitle as any}>Start with a template</Text>
       </View>
 
       {/* Filter Bar */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterBar}
+        contentContainerStyle={styles.templatesFilterBar as any}
       >
         {FILTERS.map((filter) => (
           <TouchableOpacity
             key={filter}
             style={[
-              styles.filterButton,
-              selectedFilter === filter && styles.filterButtonActive
+              styles.templatesFilterButton as any,
+              selectedFilter === filter && styles.templatesFilterButtonActive as any
             ]}
             onPress={() => setSelectedFilter(filter)}
           >
             <Text
               style={[
-                styles.filterText,
-                selectedFilter === filter && styles.filterTextActive
+                styles.templatesFilterText as any,
+                selectedFilter === filter && styles.templatesFilterTextActive as any
               ]}
             >
               {filter}
@@ -108,21 +111,21 @@ export default function Templates() {
       <FlatList
         data={filteredTemplates}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.templatesList}
+        contentContainerStyle={styles.templatesList as any}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.cardWrapper}
+            style={styles.templatesCardWrapper as any}
             activeOpacity={0.85}
             onPress={() => {
               /* Add navigation or action here */
             }}
           >
-            <View style={[styles.card, { backgroundColor: item.cardColor }]}>
+            <View style={[styles.templatesCard as any, { backgroundColor: item.cardColor }] }>
               {item.rectangles.map((rect, idx) => (
                 <View
                   key={idx}
                   style={[
-                    styles.rect,
+                    styles.templatesRect as any,
                     {
                       width: rect.width,
                       height: rect.height,
@@ -134,15 +137,15 @@ export default function Templates() {
                 />
               ))}
             </View>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <View style={styles.cardDescRow}>
+            <Text style={styles.templatesCardTitle as any}>{item.title}</Text>
+            <View style={styles.templatesCardDescRow as any}>
               <Ionicons
                 name="person"
                 size={14}
                 color="#b0b0b0"
                 style={{ marginRight: 4 }}
               />
-              <Text style={styles.cardDesc}>{item.description}</Text>
+              <Text style={styles.templatesCardDesc as any}>{item.description}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -150,86 +153,3 @@ export default function Templates() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B1F3A"
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#0B1F3A",
-    paddingTop: 48,
-    paddingBottom: 16,
-    paddingHorizontal: 16
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 12
-  },
-  filterBar: {
-    flexDirection: "row",
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    paddingBottom: 50
-  },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "gray",
-    marginRight: 10,
-    height: 35
-  },
-  filterButtonActive: {
-    backgroundColor: "#23272F",
-    borderColor: "#fff"
-  },
-  filterText: {
-    color: "#fff",
-    fontWeight: "600"
-  },
-  filterTextActive: {
-    color: "#fff"
-  },
-  templatesList: {
-    padding: 16
-  },
-  cardWrapper: {
-    marginBottom: 24
-  },
-  card: {
-    width: "100%",
-    height: 220,
-    borderRadius: 16,
-    marginBottom: 12,
-    position: "relative",
-    overflow: "hidden",
-    justifyContent: "flex-start"
-  },
-  rect: {
-    position: "absolute",
-    borderRadius: 8
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 8
-  },
-  cardDescRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8
-  },
-  cardDesc: {
-    color: "#b0b0b0",
-    fontSize: 14
-  }
-});

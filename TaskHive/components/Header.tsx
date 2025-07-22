@@ -10,6 +10,7 @@ import SearchModal from "./SearchModal";
 import SettingsModal from "./SettingsModal";
 import { useTheme } from "../ThemeContext";
 import { lightTheme, darkTheme } from "../styles/themes";
+import { useNotificationStore } from "../app/stores/notificationsStore";
 
 export default function Header() {
   const navigation = useNavigation();
@@ -29,6 +30,8 @@ export default function Header() {
     (ws) => ws.id === currentWorkspaceId
   );
   const workspaceName = currentWorkspace ? currentWorkspace.name : "Workspace";
+
+  const unreadCount = useNotificationStore((state) => state.notifications.filter(n => !n.read).length);
 
   const HeaderContent = () => (
     <View style={styles.header}>
@@ -55,6 +58,19 @@ export default function Header() {
           onPress={() => setNotificationsVisible(true)}
         >
           <Ionicons name="notifications-outline" size={24} color="white" />
+          {unreadCount > 0 && (
+            <View style={{
+              position: 'absolute',
+              top: -2,
+              right: -2,
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: '#2ecc40',
+              borderWidth: 2,
+              borderColor: 'white',
+            }} />
+          )}
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.7}

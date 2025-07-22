@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import bee from '../../assets/images/bee.png';
 import {
   Button,
@@ -17,6 +17,11 @@ import {
 import { useWorkspaceStore } from '../stores/workspaceStore'; // Import the hook
 import { useTheme } from "../../ThemeContext";
 import {lightTheme,darkTheme} from "../../styles/themes";
+import { useNotificationStore } from '../stores/notificationsStore';
+import {Heart,HeartOff} from "lucide-react-native";
+import BoardCard from "../../components/BoardCard";
+import NotificationToast from "../../components/NotificationToast";
+
 export default function HomeScreen() {
   const {theme,toggleTheme}=useTheme();
   const styles = theme === "dark" ? darkTheme : lightTheme;
@@ -26,6 +31,7 @@ export default function HomeScreen() {
   type Board = {
     id: string;
     title: string;
+    isFavorite: boolean;
     workspaceId: string;
     backgroundColor: string;
     lists: any[]; // Replace 'any' with your actual list type if available
@@ -36,9 +42,27 @@ export default function HomeScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
   const [longPressedBoardId, setLongPressedBoardId] = useState<string | null>(null);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [showRecentsModal, setShowRecentsModal] = useState(false);
+  const [recents, setRecents] = useState<{ id: string, message: string, timestamp: number }[]>([]);
+  const { notifications } = useNotificationStore();
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("info");
+  const prevNotificationId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (notifications.length > 0 && notifications[0].id !== prevNotificationId.current) {
+      setToastMessage(notifications[0].text);
+      setToastType(notifications[0].type);
+      setToastVisible(true);
+      prevNotificationId.current = notifications[0].id;
+    }
+  }, [notifications]);
 
   // Access store methods and state via the hook
   const { workspaces, getBoards, createBoard } = useWorkspaceStore();
+  const { addNotification } = useNotificationStore();
 
   // Get selected workspace based on params or default to first workspace
   const workspaceId = params.workspaceId as string;
@@ -74,15 +98,28 @@ export default function HomeScreen() {
     }
   }, [params.board]);
 
-  const handleCreateBoard = () => {
+  const handleCreateBoard = async () => {
     if (!boardTitle.trim()) return;
     const newBoard = createBoard({
       title: boardTitle,
       workspaceId: selectedWorkspace.id,
       backgroundColor: "#ADD8E6",
-      lists: []
+      lists: [],
+      isFavorite: false
     });
     setBoards(prev => [...prev, newBoard]);
+
+    setRecents(prev => [
+      { id: `recent-${Date.now()}`, message: `"${newBoard.title}" board created.`, timestamp: Date.now() },
+      ...prev
+    ]);
+
+    await addNotification({
+      type: "success", // Changed from "Board Created"
+      text: `Board "${newBoard.title}" was created.`,
+    });
+    console.log("Notification added");
+    
     setShowModal(false);
     setBoardTitle("");
     console.log('HomeScreen: Created new board:', JSON.stringify(newBoard, null, 2));
@@ -91,7 +128,6 @@ export default function HomeScreen() {
       params: { id: newBoard.id, board: JSON.stringify(newBoard) }
     });
   };
-
 
   const handleLongPress = (boardId: string) => {
     setLongPressedBoardId(boardId);
@@ -103,18 +139,49 @@ export default function HomeScreen() {
     setShowDeleteModal(true);
   };
 
-  const confirmDeleteBoard = () => {
+  const confirmDeleteBoard = async () => {
     if (boardToDelete !== null) {
       setBoards(prev => {
         const newBoards = prev.filter(board => board.id !== boardToDelete);
         console.log('HomeScreen: Deleted board', boardToDelete, 'New boards:', JSON.stringify(newBoards, null, 2));
         return newBoards;
       });
-      setShowDeleteModal(false);
+      const deletedBoard = boards.find(b => b.id === boardToDelete);
+      if (deletedBoard) {
+        setRecents(prev => [
+          { id: `recent-${Date.now()}`, message: `"${deletedBoard.title}" board deleted.`, timestamp: Date.now() },
+          ...prev
+        ]);
+        await addNotification({
+          type: "success", // Changed from "Board Deleted"
+          text: `Board "${deletedBoard.title}" was deleted.`,
+        });
+      }
       setBoardToDelete(null);
       setLongPressedBoardId(null);
+      setShowDeleteModal(false); // <-- Ensure modal closes
     }
   };
+
+  async function handleToggleFavorite(id: string): Promise<void> {
+    setBoards(prev =>
+      prev.map(board =>
+        board.id === id
+          ? { ...board, isFavorite: !board.isFavorite }
+          : board
+      )
+    );
+    const toggledBoard = boards.find(board => board.id === id);
+    if (toggledBoard) {
+      await addNotification({
+        type: toggledBoard.isFavorite ? "info" : "success",
+        text: toggledBoard.isFavorite
+          ? `Board "${toggledBoard.title}" removed from favorites.`
+          : `Board "${toggledBoard.title}" added to favorites.`,
+      });
+    }
+  }
+
   const quickActions = [
   {
     id: "createBoard",
@@ -126,13 +193,13 @@ export default function HomeScreen() {
     id: "favorites",
     title: "Favorites",
     icon: "heart-outline",
-    onPress: () => console.log("Favorites pressed"),
+    onPress: () => setShowFavoritesModal(true),
   },
   {
     id: "recent",
-    title: "Recent",
+    title: "Recents",
     icon: "time-outline",
-    onPress: () => console.log("Recent pressed"),
+    onPress: () => setShowRecentsModal(true),
   },
   {
     id: "settings",
@@ -216,31 +283,22 @@ export default function HomeScreen() {
       data={boards}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
-        <View style={styles.boardcard}>
-          <TouchableOpacity
-            onPress={() => {
-              console.log('HomeScreen: Navigating to board:', item.id);
-              setLongPressedBoardId(null); // Reset long press state on tap
-              router.push({
-                pathname: `/boards/${item.id}`,
-                params: { board: JSON.stringify(item) }
-              });
-            }}
-            onLongPress={() => handleLongPress(item.id)}
-            style={styles.boardcardTouchable}
-          >
-            <Ionicons name="grid" size={30} color="#34495e" />
-            <Text style={styles.boardcardText}>{item.title}</Text>
-          </TouchableOpacity>
-          {longPressedBoardId === item.id && (
-            <TouchableOpacity
-              onPress={() => handleDeleteBoard(item.id)}
-              style={styles.deleteButton}
-            >
-              <Ionicons name="trash-outline" size={24} color="#e74c3c" />
-            </TouchableOpacity>
-          )}
-        </View>
+        <BoardCard
+          id={item.id}
+          title={item.title}
+          isFavorite={item.isFavorite}
+          onPress={() => {
+            setLongPressedBoardId(null);
+            router.push({
+              pathname: `/boards/${item.id}`,
+              params: { board: JSON.stringify(item) }
+            });
+          }}
+          onToggleFavorite={() => handleToggleFavorite(item.id)}
+          onLongPress={() => handleLongPress(item.id)}
+          showDelete={longPressedBoardId === item.id}
+          onDelete={() => handleDeleteBoard(item.id)}
+        />
       )}
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
@@ -316,6 +374,79 @@ export default function HomeScreen() {
           </View>
         </Modal>
       )}
+      {showFavoritesModal && (
+  <Modal visible={showFavoritesModal} transparent animationType="slide">
+    <View style={styles.modalBackground}>
+      <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+      <View style={styles.favouritemodalView}>
+         <View style={styles.favouriteheader}>
+          <TouchableOpacity onPress={() => setShowFavoritesModal(false)}> 
+            <Ionicons name="arrow-back"color="white" size={28} />
+          </TouchableOpacity>
+                 <Text style={styles.favouritemodalTitle}>Favorite Boards</Text>
+          </View>
+       
+
+        {boards.filter(board => board.isFavorite).length === 0 ? (
+          <Text style={styles.favouriteemptyText}>No Favorite Boards</Text>
+        ) : (
+          boards
+            .filter(board => board.isFavorite)
+            .map(board => (
+              <BoardCard
+                key={board.id}
+                id={board.id}
+                title={board.title}
+                isFavorite={board.isFavorite}
+                onPress={() => {
+                  setShowFavoritesModal(false);
+                  router.push({
+                    pathname: `/boards/${board.id}`,
+                    params: { board: JSON.stringify(board) },
+                  });
+                }}
+                onToggleFavorite={() => handleToggleFavorite(board.id)}
+              />
+            ))
+        )}
+
+        
+      </View>
+    </View>
+  </Modal>
+)}
+
+{/* Recents Modal */}
+<Modal visible={showRecentsModal} transparent animationType="slide">
+  <View style={styles.modalBackground}>
+    <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+    <View style={styles.favouritemodalView}>
+      <View style={styles.favouriteheader}>
+        <TouchableOpacity onPress={() => setShowRecentsModal(false)}>
+          <Ionicons name="arrow-back" color="white" size={28} />
+        </TouchableOpacity>
+        <Text style={styles.favouritemodalTitle}>Recents</Text>
+      </View>
+      {recents.length === 0 ? (
+        <Text style={styles.favouriteemptyText}>No recent activities</Text>
+      ) : (
+        recents.map((item) => (
+          <View key={item.id} style={styles.recentCard}>
+            <Text style={styles.recentCardText}>{item.message}</Text>
+            <Text style={styles.recentCardTimestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
+          </View>
+        ))
+      )}
+    </View>
+  </View>
+</Modal>
+
+<NotificationToast
+  visible={toastVisible}
+  message={toastMessage}
+  type={toastType}
+  onHide={() => setToastVisible(false)}
+/>
 
       {/* <View style={styles.createBoardButton}>
         <TouchableOpacity

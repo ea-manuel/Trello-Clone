@@ -65,7 +65,7 @@ console.log("Redirect URI:", redirectUri);
     try {
       setLoading(true);
 
-      const res = await axios.post("http://192.168.32.193:8080/api/auth/google", {
+      const res = await axios.post("http://192.168.32.79:8080/api/auth/google", {
         token: accessToken,
       });
 
@@ -92,7 +92,7 @@ console.log("Redirect URI:", redirectUri);
     try {
       setLoading(true);
 
-      const response = await axios.post("http://192.168.32.193:8080/api/auth/login", {
+      const response = await axios.post("http://192.168.32.79:8080/api/auth/login", {
         email,
         password
       });

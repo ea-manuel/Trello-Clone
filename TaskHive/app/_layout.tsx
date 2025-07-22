@@ -240,6 +240,8 @@ export default function RootLayout() {
             pathname.includes("OfflineBoards") ||
             pathname === "/screens/SearchScreen" ||
             pathname === "/screens/NotificationScreen" ||
+            pathname === "/components/SplashScreen" ||
+            pathname === "/help" ||
             pathname.startsWith("/boards") ? null : (
               <Header />
             ),

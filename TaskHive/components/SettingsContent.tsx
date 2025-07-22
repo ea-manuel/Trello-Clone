@@ -10,22 +10,46 @@ import {
   Modal,
   Button,
   TextInput,
+  Image,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
-import { useTheme } from "../ThemeContext"; // your custom theme hook
-import { lightTheme, darkTheme } from "../styles/themes"; // import your themes
+import * as ImagePicker from "expo-image-picker";
+import { useTheme } from "../ThemeContext";
+import { lightTheme, darkTheme } from "../styles/themes";
 
 interface SettingsModalProps {
   visible: boolean;
   onClose: () => void;
 }
+
 export default function SettingsContent({ visible, onClose }: SettingsModalProps) {
   const router = useRouter();
-
   const { theme, toggleTheme } = useTheme();
   const themeColors = theme === "dark" ? darkTheme : lightTheme;
   const styles = getSettingsStyles(themeColors);
+
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Please allow access to your media library.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
 
   const [switchStates, setSwitchStates] = useState({
     colorBlindMode: false,
@@ -35,6 +59,7 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
   });
 
   const [searchText, setSearchText] = useState("");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const toggleSwitch = (key: keyof typeof switchStates) => {
     setSwitchStates((prev) => ({
@@ -47,9 +72,6 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
     router.push({ pathname: "/auth/login" });
   };
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  // Settings data structure for filtering and rendering
   const settingsData = [
     {
       section: "Notifications",
@@ -118,26 +140,21 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
     },
   ];
 
-  // Filter sections and items by search text
   const filteredSettings = useMemo(() => {
     if (!searchText.trim()) return settingsData;
 
     const lowerSearch = searchText.toLowerCase();
-
     return settingsData
       .map((section) => {
         const matchedItems = section.items.filter((item) =>
           item.label.toLowerCase().includes(lowerSearch)
         );
-
-        // Include section if its title matches or any of its items match
         if (matchedItems.length > 0 || section.section.toLowerCase().includes(lowerSearch)) {
           return {
             ...section,
             items: matchedItems.length > 0 ? matchedItems : section.items,
           };
         }
-
         return null;
       })
       .filter(Boolean) as typeof settingsData;
@@ -152,13 +169,34 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
             <Ionicons name="arrow-back" size={30} color={styles.headerText.color} />
           </TouchableOpacity>
           <Text style={styles.sheetTitle}>Settings</Text>
-          <View style={{ width: 30 }} /> {/* Spacer */}
+          <View style={{ width: 30 }} />
         </View>
-        <Ionicons
-          name="person-circle"
-          size={90}
-          color={theme === "dark" ? "#ffffff" : "white"}
-        />
+
+        <TouchableOpacity onPress={pickImage} style={{ alignItems: "center" }}>
+          {profileImage ? (
+            <Image
+              source={{ uri: profileImage }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                marginBottom: 10,
+                borderWidth: 2,
+                borderColor: "#ccc",
+              }}
+            />
+          ) : (
+            <Ionicons
+              name="person-circle"
+              size={90}
+              color={theme === "dark" ? "#ffffff" : "white"}
+            />
+          )}
+          <Text style={{ color: "#339dff", marginTop: 6 }}>
+            {profileImage ? "Change Photo" : "Add Photo"}
+          </Text>
+        </TouchableOpacity>
+
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
@@ -213,7 +251,7 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
         </Modal>
       )}
 
-      {/* Render filtered settings sections */}
+      {/* Render filtered settings */}
       {filteredSettings.map((section, i) => (
         <View key={i} style={styles.section}>
           <Text style={styles.sectionHeader}>{section.section}</Text>
@@ -245,7 +283,6 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
   );
 }
 
-// 🔁 Theme-aware styles
 const getSettingsStyles = (theme: any) =>
   StyleSheet.create({
     container: {
@@ -347,8 +384,6 @@ const getSettingsStyles = (theme: any) =>
       fontWeight: "bold",
       color: theme.settingsModal.headerTextColor,
     },
-
-    // New styles for search input container & box
     searchContainer: {
       paddingHorizontal: 10,
       paddingVertical: 8,
@@ -361,8 +396,8 @@ const getSettingsStyles = (theme: any) =>
       borderRadius: 10,
       paddingHorizontal: 10,
       height: 50,
-      borderColor:theme.settings.searchBorderColor,
-      borderWidth:2,
+      borderColor: theme.settings.searchBorderColor,
+      borderWidth: 2,
     },
     searchInput: {
       flex: 1,
