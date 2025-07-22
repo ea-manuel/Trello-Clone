@@ -21,6 +21,8 @@ import { useNotificationStore } from '../stores/notificationsStore';
 import {Heart,HeartOff} from "lucide-react-native";
 import BoardCard from "../../components/BoardCard";
 import NotificationToast from "../../components/NotificationToast";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
   const {theme,toggleTheme}=useTheme();
@@ -50,6 +52,11 @@ export default function HomeScreen() {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("info");
   const prevNotificationId = useRef<string | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteError, setInviteError] = useState("");
+  const [inviteSent, setInviteSent] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
 
   useEffect(() => {
     if (notifications.length > 0 && notifications[0].id !== prevNotificationId.current) {
@@ -202,10 +209,11 @@ export default function HomeScreen() {
     onPress: () => setShowRecentsModal(true),
   },
   {
-    id: "settings",
-    title: "Settings",
-    icon: "settings-outline",
-    onPress: () => router.push("/settings"),
+    id: "invite",
+    title: "Invite",
+    icon: "person-add-outline",
+    onPress: () => setShowInviteModal(true),
+    borderStyle: styles.borderSettings, // Use the same border as Settings
   },
 ];
 
@@ -225,8 +233,7 @@ export default function HomeScreen() {
   <View style={styles.quickActionsGrid}>
 
         {quickActions.map((action) => {
-          // Optional: Add border styles by action.id if you want different border colors
-          let borderStyle = {};
+          let borderStyle = action.borderStyle || {};
           switch (action.id) {
             case "createBoard":
               borderStyle = styles.borderCreateBoard;
@@ -237,7 +244,7 @@ export default function HomeScreen() {
             case "recent":
               borderStyle = styles.borderRecent;
               break;
-            case "settings":
+            case "invite":
               borderStyle = styles.borderSettings;
               break;
           }
@@ -447,6 +454,150 @@ export default function HomeScreen() {
   type={toastType}
   onHide={() => setToastVisible(false)}
 />
+
+{/* Invite Collaborators Modal */}
+<Modal
+  visible={showInviteModal}
+  transparent
+  animationType="slide"
+  onRequestClose={() => setShowInviteModal(false)}
+>
+  <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+    <View style={{
+      backgroundColor: theme === 'dark' ? '#181A2A' : '#fff',
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      padding: 24,
+      minHeight: 320,
+      maxHeight: 400,
+      shadowColor: '#000',
+      shadowOpacity: 0.12,
+      shadowRadius: 8,
+      elevation: 8,
+    }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#22345A', marginBottom: 18 }}>Invite Collaborators</Text>
+      {inviteSent ? (
+        <View style={{ alignItems: 'center', marginTop: 24 }}>
+          <Text style={{ fontSize: 16, color: theme === 'dark' ? '#BFC9D6' : '#333', marginBottom: 16, textAlign: 'center' }}>
+            Invitation sent to {inviteEmail}!
+          </Text>
+          <View style={{ backgroundColor: theme === 'dark' ? '#23253A' : '#f4f6fa', borderRadius: 12, padding: 18, marginBottom: 16, width: '100%' }}>
+            <Text style={{ color: theme === 'dark' ? '#fff' : '#22345A', fontSize: 15, marginBottom: 8 }}>
+              <Text style={{ fontWeight: 'bold' }}>You</Text> have invited <Text style={{ fontWeight: 'bold' }}>{inviteEmail}</Text> to work on the <Text style={{ fontWeight: 'bold' }}>{selectedWorkspace?.name || 'Workspace'}</Text> workspace.
+            </Text>
+            <TouchableOpacity style={{ backgroundColor: theme === 'dark' ? '#2C8CFF' : '#0B1F3A', borderRadius: 8, paddingVertical: 10, alignItems: 'center', marginTop: 8 }}>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Click here to accept</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity onPress={() => { setShowInviteModal(false); setInviteSent(false); setInviteEmail(""); }} style={{ marginTop: 10 }}>
+            <Text style={{ color: theme === 'dark' ? '#2C8CFF' : '#0B1F3A', fontWeight: 'bold', fontSize: 16 }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
+          <Text style={{ fontSize: 16, color: theme === 'dark' ? '#BFC9D6' : '#333', marginBottom: 8 }}>Enter email address:</Text>
+          <TextInput
+            style={{
+              backgroundColor: theme === 'dark' ? '#23253A' : '#f4f6fa',
+              borderRadius: 8,
+              padding: 12,
+              fontSize: 16,
+              color: theme === 'dark' ? '#fff' : '#22345A',
+              borderWidth: 1,
+              borderColor: inviteError ? '#E74C3C' : (theme === 'dark' ? '#2C8CFF' : '#B3B3B3'),
+              marginBottom: 8,
+            }}
+            placeholder="user@email.com"
+            placeholderTextColor={theme === 'dark' ? '#BFC9D6' : '#888'}
+            value={inviteEmail}
+            onChangeText={text => { setInviteEmail(text); setInviteError(""); }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          {inviteError ? <Text style={{ color: '#E74C3C', marginBottom: 8 }}>{inviteError}</Text> : null}
+          <TouchableOpacity
+            style={{
+              backgroundColor: theme === 'dark' ? '#2C8CFF' : '#0B1F3A',
+              borderRadius: 8,
+              paddingVertical: 12,
+              alignItems: 'center',
+              marginTop: 8,
+              opacity: inviteLoading ? 0.7 : 1,
+            }}
+            disabled={inviteLoading}
+            onPress={async () => {
+              // Simple email validation
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!inviteEmail.trim()) {
+                setInviteError('Please enter an email address.');
+                return;
+              }
+              if (!emailRegex.test(inviteEmail.trim())) {
+                setInviteError('Please enter a valid email address.');
+                return;
+              }
+              setInviteLoading(true);
+              setInviteError("");
+              try {
+                const token = await AsyncStorage.getItem('authToken');
+                const inviter = 'You'; // TODO: Replace with actual user email if available
+                const url = 'http://192.168.0.100:8080/api/invite';
+                const headers = {
+                  Authorization: `Bearer ${token}`,
+                };
+                const body = {
+                  email: inviteEmail.trim(),
+                  inviter,
+                  workspaceName: selectedWorkspace?.name || 'Workspace',
+                };
+                console.log('Invite token:', token);
+                console.log('Invite URL:', url);
+                console.log('Invite headers:', headers);
+                console.log('Invite body:', body);
+                const response = await axios.post(url, body, { headers });
+                console.log('Invite response:', response);
+                if (response.status === 200) {
+                  setInviteSent(true);
+                } else {
+                  setInviteError('Failed to send invite. Please try again.');
+                }
+              } catch (err) {
+                if (err.response) {
+                  // Server responded with a status code out of 2xx
+                  console.log('Invite error response:', err.response.data);
+                  console.log('Invite error status:', err.response.status);
+                  setInviteError(
+                    err.response.data?.message ||
+                    'Failed to send invite. Please try again.'
+                  );
+                } else if (err.request) {
+                  // Request was made but no response received
+                  console.log('Invite error request:', err.request);
+                  setInviteError('No response from server.');
+                } else {
+                  // Something else happened
+                  console.log('Invite error:', err.message);
+                  setInviteError('Failed to send invite. Please try again.');
+                }
+              } finally {
+                setInviteLoading(false);
+              }
+            }}
+          >
+            {inviteLoading ? (
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Sending...</Text>
+            ) : (
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Invite</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowInviteModal(false)} style={{ marginTop: 10 }}>
+            <Text style={{ color: theme === 'dark' ? '#2C8CFF' : '#0B1F3A', fontWeight: 'bold', fontSize: 16 }}>Cancel</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
+  </View>
+</Modal>
 
       {/* <View style={styles.createBoardButton}>
         <TouchableOpacity
