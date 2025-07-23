@@ -61,6 +61,8 @@ export default function HomeScreen() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const { addBoard: addOfflineBoard, removeBoard: removeOfflineBoard, boards: offlineBoards } = useOfflineBoardsStore();
   const [downloadingBoardId, setDownloadingBoardId] = useState<string | null>(null);
+  const flatListRef = useRef<FlatList>(null);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   useEffect(() => {
     if (notifications.length > 0 && notifications[0].id !== prevNotificationId.current) {
@@ -135,7 +137,7 @@ export default function HomeScreen() {
     setBoardTitle("");
     console.log('HomeScreen: Created new board:', JSON.stringify(newBoard, null, 2));
     router.push({
-      pathname: "/boards/[id]",
+       k: "/boards/[id]",
       params: { id: newBoard.id, board: JSON.stringify(newBoard) }
     });
   };
@@ -242,6 +244,15 @@ export default function HomeScreen() {
   },
 ];
 
+  // Helper to determine if FlatList is at bottom
+  const handleListScroll = (event: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const paddingToBottom = 20;
+    const isAtBottom =
+      layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
+    setShowScrollToBottom(!isAtBottom && contentSize.height > layoutMeasurement.height + 10);
+  };
+
 
   return (
   <View style={styles.mainpage}>
@@ -311,6 +322,7 @@ export default function HomeScreen() {
 
     {/* Boards List */}
     <FlatList
+      ref={flatListRef}
       contentContainerStyle={styles.scrollContent}
       data={boards}
       keyExtractor={(item) => item.id.toString()}
@@ -352,7 +364,33 @@ export default function HomeScreen() {
           <Text style={styles.emptySubText}>Create Your First Task Board</Text>
         </View>
       }
+      onScroll={handleListScroll}
+      scrollEventThrottle={16}
     />
+
+    {/* Floating Scroll to Bottom Button */}
+    {showScrollToBottom && (
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          right: 24,
+          bottom: 32,
+          backgroundColor: '#0B1F3A',
+          borderRadius: 24,
+          padding: 12,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOpacity: 0.2,
+          shadowRadius: 6,
+          shadowOffset: { width: 0, height: 2 },
+          zIndex: 100,
+        }}
+        onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="arrow-down" size={28} color="#fff" />
+      </TouchableOpacity>
+    )}
 
       {showModal && (
         <Modal visible={showModal} transparent animationType="slide">
