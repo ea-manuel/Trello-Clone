@@ -10,7 +10,7 @@ export default function Index() {
     const timer = setTimeout(() => {
       setShowSplash(false);
       router.replace("/auth/welcome");
-    }, 3000); // 2-second splash
+    }, 3000); // 3-second splash
 
     return () => clearTimeout(timer);
   }, []);

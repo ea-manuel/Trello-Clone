@@ -233,6 +233,7 @@ export default function RootLayout() {
           header: () =>
             createModalVisible ||
             editModalVisible ||
+            pathname === "/index" ||
             pathname === "/auth/login" ||
             pathname === "/auth/welcome" ||
             pathname === "/templates" ||

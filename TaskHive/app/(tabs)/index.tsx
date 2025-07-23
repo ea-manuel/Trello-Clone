@@ -63,6 +63,16 @@ export default function HomeScreen() {
   const [downloadingBoardId, setDownloadingBoardId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [showFullImage, setShowFullImage] = useState(false);
+
+  // Load profile image from AsyncStorage on mount
+  useEffect(() => {
+    (async () => {
+      const uri = await AsyncStorage.getItem("profileImageUri");
+      if (uri) setProfileImage(uri);
+    })();
+  }, []);
 
   useEffect(() => {
     if (notifications.length > 0 && notifications[0].id !== prevNotificationId.current) {
@@ -259,50 +269,86 @@ export default function HomeScreen() {
 
     {/* Quick Actions Container */}
     <View style={styles.quickActionsWrapper}>
-  <Text style={styles.quickActionsHeading}>
-    Welcome back 👋
-  </Text>
-  <Text style={styles.quickActionsSubheading}>
-    What do you want to do today?
-  </Text>
-
-  <View style={styles.quickActionsGrid}>
-
-        {quickActions.map((action) => {
-          let borderStyle = action.borderStyle || {};
-          switch (action.id) {
-            case "createBoard":
-              borderStyle = styles.borderCreateBoard;
-              break;
-            case "favorites":
-              borderStyle = styles.borderFavorites;
-              break;
-            case "recent":
-              borderStyle = styles.borderRecent;
-              break;
-            case "invite":
-              borderStyle = styles.borderSettings;
-              break;
-          }
-          return (
-            <TouchableOpacity
-              key={action.id}
-              onPress={action.onPress}
-              style={[styles.quickActionCard, borderStyle]}
-              activeOpacity={0.85}
-            >
-              <Ionicons
-                name={action.icon}
-                size={36}
-                color={theme === "dark" ? "white" : "#0B1F3A"} // or any color that contrasts well with light bg
+        {/* Profile + Welcome Block */}
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderRadius: 18,
+          paddingVertical: 18,
+          paddingHorizontal: 20,
+          marginBottom: 8, // reduced from 18
+          marginTop: 2,    // reduced from 8
+          shadowColor: '#000',
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+          elevation: 3,
+        }}>
+          <TouchableOpacity onPress={() => profileImage && setShowFullImage(true)}>
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                style={{ width: 64, height: 64, borderRadius: 32, marginRight: 18, borderWidth: 2, borderColor: '#339dff', backgroundColor: '#e6e6e6' }}
               />
-
-              <Text style={styles.quickActionText}>{action.title}</Text>
+            ) : (
+              <Ionicons name="person-circle" size={64} color={theme === "dark" ? "#ffffff" : "#0B1F3A"} style={{ marginRight: 18 }} />
+            )}
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 26, color: theme === 'dark' ? '#fff' : '#22345A', marginBottom: 2 }}>Welcome back 👋</Text>
+            <Text style={{ fontSize: 19, color: theme === 'dark' ? '#BFC9D6' : '#555' }}>What do you want to do today?</Text>
+          </View>
+        </View>
+        {/* Full Image Modal */}
+        <Modal visible={showFullImage} transparent animationType="fade">
+          <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", alignItems: "center" }}>
+            <TouchableOpacity style={{ position: "absolute", top: 40, right: 30, zIndex: 2 }} onPress={() => setShowFullImage(false)}>
+              <Ionicons name="close" size={36} color="#fff" />
             </TouchableOpacity>
-          );
-        })}
+            {profileImage && (
+              <Image
+                source={{ uri: profileImage }}
+                style={{ width: 320, height: 320, borderRadius: 16, borderWidth: 2, borderColor: "#fff" }}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        </Modal>
+        <View style={styles.quickActionsGrid}>
+          {quickActions.map((action) => {
+            let borderStyle = action.borderStyle || {};
+            switch (action.id) {
+              case "createBoard":
+                borderStyle = styles.borderCreateBoard;
+                break;
+              case "favorites":
+                borderStyle = styles.borderFavorites;
+                break;
+              case "recent":
+                borderStyle = styles.borderRecent;
+                break;
+              case "invite":
+                borderStyle = styles.borderSettings;
+                break;
+            }
+            return (
+              <TouchableOpacity
+                key={action.id}
+                onPress={action.onPress}
+                style={[styles.quickActionCard, borderStyle]}
+                activeOpacity={0.85}
+              >
+                <Ionicons
+                  name={action.icon}
+                  size={36}
+                  color={theme === "dark" ? "white" : "#0B1F3A"}
+                />
+                <Text style={styles.quickActionText}>{action.title}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
-    </View>
 
     {/* Boards Title */}
 {boards.length > 0 && (

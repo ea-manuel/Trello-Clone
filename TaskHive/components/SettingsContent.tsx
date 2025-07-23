@@ -18,6 +18,7 @@ import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "../ThemeContext";
 import { lightTheme, darkTheme } from "../styles/themes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface SettingsModalProps {
   visible: boolean;
@@ -34,6 +35,15 @@ export default function SettingsContent({
   const styles = getSettingsStyles(themeColors);
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [showFullImage, setShowFullImage] = useState(false);
+
+  // Load profile image from AsyncStorage on mount
+  React.useEffect(() => {
+    (async () => {
+      const uri = await AsyncStorage.getItem("profileImageUri");
+      if (uri) setProfileImage(uri);
+    })();
+  }, []);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,6 +64,7 @@ export default function SettingsContent({
 
     if (!result.canceled && result.assets.length > 0) {
       setProfileImage(result.assets[0].uri);
+      await AsyncStorage.setItem("profileImageUri", result.assets[0].uri);
     }
   };
 
@@ -178,7 +189,7 @@ export default function SettingsContent({
     >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <TouchableOpacity onPress={pickImage} style={{ alignItems: "center" }}>
+        <TouchableOpacity onPress={() => profileImage && setShowFullImage(true)} style={{ alignItems: "center" }}>
           {profileImage ? (
             <Image
               source={{ uri: profileImage }}
@@ -198,15 +209,31 @@ export default function SettingsContent({
               color={theme === "dark" ? "#ffffff" : "white"}
             />
           )}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={pickImage}>
           <Text style={{ color: "#339dff", marginTop: 6 }}>
             {profileImage ? "Change Photo" : "Add Photo"}
           </Text>
         </TouchableOpacity>
-
         <Text style={styles.profileText}>TaskHive User</Text>
         <Text style={styles.profileText}>@taskhiveuser1324</Text>
         <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
       </View>
+      {/* Full Image Modal */}
+      <Modal visible={showFullImage} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", alignItems: "center" }}>
+          <TouchableOpacity style={{ position: "absolute", top: 40, right: 30, zIndex: 2 }} onPress={() => setShowFullImage(false)}>
+            <Ionicons name="close" size={36} color="#fff" />
+          </TouchableOpacity>
+          {profileImage && (
+            <Image
+              source={{ uri: profileImage }}
+              style={{ width: 320, height: 320, borderRadius: 16, borderWidth: 2, borderColor: "#fff" }}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
 
       {/* Search Input */}
       <View style={styles.searchContainer}>

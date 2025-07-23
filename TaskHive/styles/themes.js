@@ -1231,12 +1231,13 @@ quickActionsWrapper: {
   marginHorizontal: 0,
   borderRadius: 16,
   backgroundColor: "transparent",  // same as main background
-  paddingVertical: 10,          // a tad longer container vertically
+  paddingBottom: 10,          // a tad longer container vertically
   paddingHorizontal: 0,
   borderColor:"#05081c",
   borderWidth:2,
   marginBottom:0,
   paddingBottom:0,
+  paddingTop:0
 },
 
 quickActionsGrid: {
