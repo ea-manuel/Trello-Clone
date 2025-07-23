@@ -24,7 +24,10 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-export default function SettingsContent({ visible, onClose }: SettingsModalProps) {
+export default function SettingsContent({
+  visible,
+  onClose,
+}: SettingsModalProps) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const themeColors = theme === "dark" ? darkTheme : lightTheme;
@@ -35,7 +38,10 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission needed", "Please allow access to your media library.");
+      Alert.alert(
+        "Permission needed",
+        "Please allow access to your media library."
+      );
       return;
     }
 
@@ -149,7 +155,10 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
         const matchedItems = section.items.filter((item) =>
           item.label.toLowerCase().includes(lowerSearch)
         );
-        if (matchedItems.length > 0 || section.section.toLowerCase().includes(lowerSearch)) {
+        if (
+          matchedItems.length > 0 ||
+          section.section.toLowerCase().includes(lowerSearch)
+        ) {
           return {
             ...section,
             items: matchedItems.length > 0 ? matchedItems : section.items,
@@ -161,17 +170,14 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
   }, [searchText]);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled" // <-- helps taps pass through when keyboard is open
+    >
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <View style={styles.sheetHeader}>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="arrow-back" size={30} color={styles.headerText.color} />
-          </TouchableOpacity>
-          <Text style={styles.sheetTitle}>Settings</Text>
-          <View style={{ width: 30 }} />
-        </View>
-
         <TouchableOpacity onPress={pickImage} style={{ alignItems: "center" }}>
           {profileImage ? (
             <Image
@@ -205,7 +211,11 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
       {/* Search Input */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBox}>
-          <Ionicons name="search" size={20} color={theme === "dark" ? "white" : "#555"} />
+          <Ionicons
+            name="search"
+            size={20}
+            color={theme === "dark" ? "white" : "#555"}
+          />
           <TextInput
             placeholder="Search settings..."
             placeholderTextColor={theme === "dark" ? "#aaa" : "#888"}
@@ -216,7 +226,11 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
           />
           {searchText.length > 0 && (
             <TouchableOpacity onPress={() => setSearchText("")}>
-              <Ionicons name="close-circle" size={20} color={theme === "dark" ? "white" : "#555"} />
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={theme === "dark" ? "white" : "#555"}
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -233,7 +247,9 @@ export default function SettingsContent({ visible, onClose }: SettingsModalProps
             />
             <View style={styles.modalView}>
               <Text style={styles.modalTitle}>Logout</Text>
-              <Text style={styles.modalText}>Are you sure you want to Logout?</Text>
+              <Text style={styles.modalText}>
+                Are you sure you want to Logout?
+              </Text>
               <View style={styles.modalButtons}>
                 <View style={styles.deleteConfirmButton}>
                   <Button title="Logout" onPress={logout} color="red" />
