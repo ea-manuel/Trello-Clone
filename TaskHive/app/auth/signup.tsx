@@ -1,7 +1,7 @@
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import axios from 'axios';
+import axios from "axios";
 import {
   Image,
   ScrollView,
@@ -10,7 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -19,42 +19,40 @@ const PRIMARY_COLOR = "#1F80E0";
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [password,setPassword]=useState("");
+  const [password, setPassword] = useState("");
   const [hidepassword, setHidepassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
+  const handleSignup = async () => {
+    if (!email || !username || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill all fields.");
+      return;
+    }
 
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
 
-const handleSignup = async () => {
-  if (!email || !username || !password || !confirmPassword) {
-    Alert.alert("Error", "Please fill all fields.");
-    return;
-  }
+    try {
+      const response = await axios.post(
+        "http://192.168.8.196:8080/api/auth/register",
+        {
+          email,
+          username,
+          password,
+        }
+      );
 
-  if (password !== confirmPassword) {
-    Alert.alert("Error", "Passwords do not match.");
-    return;
-  }
-
-  try {
-    const response = await axios.post("http://192.168.32.193:8080/api/auth/register", {
-      email,
-      username,
-      password,
-    });
-
-    Alert.alert("Success", response.data);
-    router.push("/auth/login");
-  } catch (error: any) {
-    const message =
-      error?.response?.data || "Something went wrong. Please try again.";
-    Alert.alert("Signup Failed", message);
-  }
-};
-
-
-
+      Alert.alert("Success", response.data);
+      router.push("/auth/login");
+    } catch (error: any) {
+      const message =
+        error?.response?.data || "Something went wrong. Please try again.";
+      Alert.alert("Signup Failed", message);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -84,63 +82,63 @@ const handleSignup = async () => {
         onChangeText={setUsername}
         autoCapitalize="none"
       />
-        <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
-             <TextInput
-               style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
-               placeholder="Enter your password"
-               placeholderTextColor="#888"
-               value={password}
-               onChangeText={setPassword}
-               keyboardType="default"
-               secureTextEntry={hidepassword}
-               autoCapitalize="none"
-             />
-             <TouchableOpacity
-               onPress={() => setHidepassword(!hidepassword)}
-               style={{
-                 position: "absolute",
-                 right: 12,
-                 top: 0,
-                 height: "100%",
-                 justifyContent: "center"
-               }}
-             >
-               {hidepassword ? (
-                 <Ionicons name="eye" size={22} color="#888" />
-               ) : (
-                 <Ionicons name="eye-off" size={22} color="#888" />
-               )}
-             </TouchableOpacity>
-           </View>
       <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
-             <TextInput
-                  style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
-                  placeholder="Confirm your password"
-                  placeholderTextColor="#888"
-                  value={confirmPassword}       
-                  onChangeText={setConfirmPassword}  
-                  keyboardType="default"
-                  secureTextEntry={hidepassword}
-                  autoCapitalize="none"
-             />
+        <TextInput
+          style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
+          placeholder="Enter your password"
+          placeholderTextColor="#888"
+          value={password}
+          onChangeText={setPassword}
+          keyboardType="default"
+          secureTextEntry={hidepassword}
+          autoCapitalize="none"
+        />
+        <TouchableOpacity
+          onPress={() => setHidepassword(!hidepassword)}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: 0,
+            height: "100%",
+            justifyContent: "center",
+          }}
+        >
+          {hidepassword ? (
+            <Ionicons name="eye" size={22} color="#888" />
+          ) : (
+            <Ionicons name="eye-off" size={22} color="#888" />
+          )}
+        </TouchableOpacity>
+      </View>
+      <View style={{ width: "100%", position: "relative", marginBottom: 25 }}>
+        <TextInput
+          style={[styles.input, { paddingRight: 40, marginBottom: 0 }]}
+          placeholder="Confirm your password"
+          placeholderTextColor="#888"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          keyboardType="default"
+          secureTextEntry={hidepassword}
+          autoCapitalize="none"
+        />
 
-             <TouchableOpacity
-               onPress={() => setHidepassword(!hidepassword)}
-               style={{
-                 position: "absolute",
-                 right: 12,
-                 top: 0,
-                 height: "100%",
-                 justifyContent: "center"
-               }}
-             >
-               {hidepassword ? (
-                 <Ionicons name="eye" size={22} color="#888" />
-               ) : (
-                 <Ionicons name="eye-off" size={22} color="#888" />
-               )}
-             </TouchableOpacity>
-           </View>
+        <TouchableOpacity
+          onPress={() => setHidepassword(!hidepassword)}
+          style={{
+            position: "absolute",
+            right: 12,
+            top: 0,
+            height: "100%",
+            justifyContent: "center",
+          }}
+        >
+          {hidepassword ? (
+            <Ionicons name="eye" size={22} color="#888" />
+          ) : (
+            <Ionicons name="eye-off" size={22} color="#888" />
+          )}
+        </TouchableOpacity>
+      </View>
 
       {/* Terms text */}
       <Text style={styles.terms}>
@@ -151,9 +149,8 @@ const handleSignup = async () => {
 
       {/* Sign up button */}
       <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-          <Text style={styles.signupButtonText}>Sign up</Text>
+        <Text style={styles.signupButtonText}>Sign up</Text>
       </TouchableOpacity>
-
 
       {/* Or continue with */}
       <Text style={styles.orText}>Or continue with:</Text>
@@ -215,14 +212,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: "#fff",
     flexGrow: 1,
-    alignItems: "center"
+    alignItems: "center",
   },
   logo: {
     width: 200,
     height: 100,
     resizeMode: "cover",
     marginBottom: 10,
-    marginTop: 0
+    marginTop: 0,
   },
   title: {
     fontWeight: "bold",
@@ -230,7 +227,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 20,
     marginTop: 10,
-    textTransform: "capitalize"
+    textTransform: "capitalize",
   },
   input: {
     width: "100%",
@@ -245,17 +242,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 2,
-    elevation: 2
+    elevation: 2,
   },
   terms: {
     fontSize: 13,
     color: "#222",
     marginBottom: 18,
     marginTop: 2,
-    textAlign: "center"
+    textAlign: "center",
   },
   link: {
-    textDecorationLine: "underline"
+    textDecorationLine: "underline",
   },
   signupButton: {
     width: "100%",
@@ -268,22 +265,22 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
-    elevation: 3
+    elevation: 3,
   },
   signupButtonText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 18
+    fontSize: 18,
   },
   orText: {
     fontSize: 16,
     color: "#444",
     alignSelf: "center",
-    marginVertical: 12
+    marginVertical: 12,
   },
   socialButtonsContainer: {
     width: "100%",
-    marginBottom: 24
+    marginBottom: 24,
   },
   socialButton: {
     flexDirection: "row",
@@ -295,21 +292,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     backgroundColor: "#fff",
-    marginBottom: 10
+    marginBottom: 10,
   },
   socialButtonText: {
     fontSize: 16,
     color: "#222",
-    fontWeight: "500"
+    fontWeight: "500",
   },
   loginText: {
     fontSize: 15,
     color: "#1F80E0",
     alignSelf: "center",
-    marginTop: 10
+    marginTop: 10,
   },
   loginLink: {
     color: "#1F80E0",
-    textDecorationLine: "underline"
-  }
+    textDecorationLine: "underline",
+  },
 });
