@@ -3,12 +3,13 @@ import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Tabs } from "expo-router";
 import { Platform, View } from "react-native";
 import { useTheme } from "../../ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context"; // Import
 
 export default function TabsLayout() {
-const { theme } = useTheme();
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets(); // Get safe area insets
 
-const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
-
+  const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
 
   return (
     <Tabs
@@ -16,7 +17,7 @@ const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
         headerShown: false,
         tabBarBackground() {
           return (
-            <View style={{ backgroundColor}}>
+            <View style={{ backgroundColor }}>
               <TabBarBackground />
             </View>
           );
@@ -27,12 +28,16 @@ const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
           ios: {
             position: "absolute",
             backgroundColor: "transparent",
-            height: 60,
-            paddingTop: 5
+            height: 60 + insets.bottom, // Add bottom inset
+            paddingTop: 5,
+            paddingBottom: insets.bottom, // Add safe area padding
           },
-         default: { backgroundColor, height: 60, paddingTop: 5 }
-
-        })
+          default: {
+            backgroundColor,
+            height: 60 + insets.bottom, // Add bottom inset for android
+            paddingBottom: insets.bottom,
+          },
+        }),
       }}
     >
       <Tabs.Screen
@@ -41,7 +46,7 @@ const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
           title: "Workspace",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.3.fill" color={color} />
-          )
+          ),
         }}
       />
       <Tabs.Screen
@@ -50,7 +55,7 @@ const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
           title: "Offline Boards",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="rectangle.stack.fill" color={color} />
-          )
+          ),
         }}
       />
       <Tabs.Screen
@@ -59,7 +64,7 @@ const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
           title: "Templates",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="folder.fill" color={color} />
-          )
+          ),
         }}
       />
       <Tabs.Screen
@@ -68,7 +73,7 @@ const backgroundColor = theme === "dark" ? "#00102C" : "#0B1F3A";
           title: "Help",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="questionmark.circle" color={color} />
-          )
+          ),
         }}
       />
     </Tabs>
