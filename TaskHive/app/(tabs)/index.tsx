@@ -481,14 +481,7 @@ export default function HomeScreen() {
           <Text style={{ fontSize: 16, color: theme === 'dark' ? '#BFC9D6' : '#333', marginBottom: 16, textAlign: 'center' }}>
             Invitation sent to {inviteEmail}!
           </Text>
-          <View style={{ backgroundColor: theme === 'dark' ? '#23253A' : '#f4f6fa', borderRadius: 12, padding: 18, marginBottom: 16, width: '100%' }}>
-            <Text style={{ color: theme === 'dark' ? '#fff' : '#22345A', fontSize: 15, marginBottom: 8 }}>
-              <Text style={{ fontWeight: 'bold' }}>You</Text> have invited <Text style={{ fontWeight: 'bold' }}>{inviteEmail}</Text> to work on the <Text style={{ fontWeight: 'bold' }}>{selectedWorkspace?.name || 'Workspace'}</Text> workspace.
-            </Text>
-            <TouchableOpacity style={{ backgroundColor: theme === 'dark' ? '#2C8CFF' : '#0B1F3A', borderRadius: 8, paddingVertical: 10, alignItems: 'center', marginTop: 8 }}>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Click here to accept</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Removed the 'Click here to accept' button from the modal */}
           <TouchableOpacity onPress={() => { setShowInviteModal(false); setInviteSent(false); setInviteEmail(""); }} style={{ marginTop: 10 }}>
             <Text style={{ color: theme === 'dark' ? '#2C8CFF' : '#0B1F3A', fontWeight: 'bold', fontSize: 16 }}>Close</Text>
           </TouchableOpacity>
@@ -540,8 +533,8 @@ export default function HomeScreen() {
               setInviteError("");
               try {
                 const token = await AsyncStorage.getItem('authToken');
-                const inviter = 'You'; // TODO: Replace with actual user email if available
-                const url = 'http://192.168.0.100:8080/api/invite';
+                const inviter = 'immajacobs2003@gmail.com'; // TODO: Replace with actual user email if available
+                const url = 'http://10.80.33.203:8080/api/invite';
                 const headers = {
                   Authorization: `Bearer ${token}`,
                 };
