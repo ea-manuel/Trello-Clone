@@ -14,6 +14,7 @@ import {
   View
 } from "react-native";
 import SearchModal from "@/components/SearchModal"; // Import your SearchModal
+import { useOfflineBoardsStore } from "../stores/offlineBoardsStore";
 import { useTheme } from "../../ThemeContext";
 import {lightTheme,darkTheme} from "../../styles/themes";
 
@@ -28,55 +29,12 @@ const EXAMPLE_BOARDS = [
 
 export default function OfflineBoards() {
   const router = useRouter();
-  const [boards, setBoards] = useState(EXAMPLE_BOARDS);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const { boards, clearBoards } = useOfflineBoardsStore();
   const [isSearchVisible, setSearchVisible] = useState(false);
   const {theme,toggleTheme}=useTheme();
   const styles = theme === "dark" ? darkTheme : lightTheme;
 
-  // Load boards from AsyncStorage on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const stored = await AsyncStorage.getItem("offlineBoards");
-        if (stored) setBoards(JSON.parse(stored));
-      } catch {}
-    })();
-  }, []);
-
-  // Save boards to AsyncStorage
-  const saveBoards = async (newBoards) => {
-    setBoards(newBoards);
-    await AsyncStorage.setItem("offlineBoards", JSON.stringify(newBoards));
-  };
-
-  const addBoard = () => {
-    if (!newBoardTitle.trim()) {
-      Alert.alert("Please enter a board title");
-      return;
-    }
-    const newBoard = {
-      id: Date.now().toString(),
-      title: newBoardTitle.trim()
-    };
-    const updatedBoards = [...boards, newBoard];
-    saveBoards(updatedBoards);
-    setNewBoardTitle("");
-    setModalVisible(false);
-  };
-
-  // Touchable board card
-  const renderBoard = ({ item }) => (
-    <TouchableOpacity
-      style={styles.OfflineBoardsboardRow as any}
-      activeOpacity={0.7}
-      onPress={() => Alert.alert("Board pressed", item.title)}
-    >
-      <View style={styles.OfflineBoardsboardVisual as any} />
-      <Text style={styles.OfflineBoardsboardTitle as any}>{item.title}</Text>
-    </TouchableOpacity>
-  );
+  // Remove EXAMPLE_BOARDS and modal state
 
   // Header matching your main header style
   const renderHeader = () => (
@@ -105,57 +63,30 @@ export default function OfflineBoards() {
     </View>
   );
 
+  // Touchable board card
+  const renderBoard = ({ item }) => (
+    <TouchableOpacity
+      style={styles.OfflineBoardsboardRow as any}
+      activeOpacity={0.7}
+      onPress={() => {}}
+    >
+      <View style={styles.OfflineBoardsboardVisual as any} />
+      <Text style={styles.OfflineBoardsboardTitle as any}>{item.title}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.OfflineBoardscontainer as any}>
       {renderHeader()}
-      <Text style={styles.OfflineBoardsworkspaceLabel as any}>User {USER_ID}'s Workspace</Text>
+      <Text style={styles.OfflineBoardsworkspaceLabel as any}>Offline Boards</Text>
       <FlatList
         data={boards}
         keyExtractor={(item) => item.id}
         renderItem={renderBoard}
         contentContainerStyle={{ paddingTop: 10 }}
       />
-      <TouchableOpacity
-        style={styles.OfflineBoardsfab as any}
-        onPress={() => setModalVisible(true)}
-        activeOpacity={0.85}
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
-      {/* Add Board Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.OfflineBoardsmodalOverlay as any}>
-          <View style={styles.OfflineBoardsmodalContent as any}>
-            <Text style={styles.OfflineBoardsmodalTitle as any}>New Board</Text>
-            <TextInput
-              placeholder="Board title"
-              value={newBoardTitle}
-              onChangeText={setNewBoardTitle}
-              style={styles.OfflineBoardsinput as any}
-              placeholderTextColor="#aaa"
-            />
-            <View style={styles.OfflineBoardsmodalButtons as any}>
-              <TouchableOpacity
-                style={[styles.OfflineBoardsmodalButton, styles.OfflineBoardscancelButton] as any}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.OfflineBoardsmodalButtonText as any}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.OfflineBoardsmodalButton, styles.OfflineBoardssaveButton] as any}
-                onPress={addBoard}
-              >
-                <Text style={styles.OfflineBoardsmodalButtonText as any}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Optionally, add a button to clear all offline boards for testing */}
+      {/* <TouchableOpacity onPress={clearBoards}><Text>Clear Offline Boards</Text></TouchableOpacity> */}
     </View>
   );
 }

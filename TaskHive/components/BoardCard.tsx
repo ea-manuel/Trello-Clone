@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, View, Text } from "react-native";
+import { TouchableOpacity, View, Text, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Heart } from "lucide-react-native";
 import { useTheme } from "../ThemeContext";
@@ -14,6 +14,9 @@ interface BoardCardProps {
   onLongPress?: () => void;
   showDelete?: boolean;
   onDelete?: () => void;
+  showToggle?: boolean;
+  toggleValue?: boolean;
+  onToggleSwitch?: (value: boolean) => void;
   style?: any;
 }
 
@@ -26,7 +29,10 @@ const BoardCard: React.FC<BoardCardProps> = ({
   onLongPress,
   showDelete = false,
   onDelete,
-  style
+  showToggle = false,
+  toggleValue = false,
+  onToggleSwitch,
+  style,
 }) => {
   const { theme } = useTheme();
   const styles = theme === "dark" ? darkTheme : lightTheme;
@@ -45,7 +51,12 @@ const BoardCard: React.FC<BoardCardProps> = ({
           {isFavorite ? <Heart color="red" /> : <Heart color="gray" />}
         </TouchableOpacity>
       </TouchableOpacity>
-      {showDelete && (
+      {showToggle ? (
+        <Switch
+          value={toggleValue}
+          onValueChange={onToggleSwitch}
+        />
+      ) : showDelete && (
         <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
           <Ionicons name="trash-outline" size={24} color="#e74c3c" />
         </TouchableOpacity>

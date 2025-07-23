@@ -95,7 +95,7 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await axios.post("http://10.80.33.203:8080/api/auth/login", {
+      const response = await axios.post("http://10.132.48.203:8080/api/auth/login", {
         email,
         password
       });

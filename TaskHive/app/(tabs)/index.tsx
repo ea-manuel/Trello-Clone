@@ -12,7 +12,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image
+  Image,
+  ActivityIndicator
 } from "react-native";
 import { useWorkspaceStore } from '../stores/workspaceStore'; // Import the hook
 import { useTheme } from "../../ThemeContext";
@@ -23,6 +24,7 @@ import BoardCard from "../../components/BoardCard";
 import NotificationToast from "../../components/NotificationToast";
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useOfflineBoardsStore } from "../stores/offlineBoardsStore";
 
 export default function HomeScreen() {
   const {theme,toggleTheme}=useTheme();
@@ -57,6 +59,8 @@ export default function HomeScreen() {
   const [inviteError, setInviteError] = useState("");
   const [inviteSent, setInviteSent] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
+  const { addBoard: addOfflineBoard, removeBoard: removeOfflineBoard, boards: offlineBoards } = useOfflineBoardsStore();
+  const [downloadingBoardId, setDownloadingBoardId] = useState<string | null>(null);
 
   useEffect(() => {
     if (notifications.length > 0 && notifications[0].id !== prevNotificationId.current) {
@@ -131,7 +135,7 @@ export default function HomeScreen() {
     setBoardTitle("");
     console.log('HomeScreen: Created new board:', JSON.stringify(newBoard, null, 2));
     router.push({
-      k: "/boards/[id]",
+      pathname: "/boards/[id]",
       params: { id: newBoard.id, board: JSON.stringify(newBoard) }
     });
   };
@@ -188,6 +192,27 @@ export default function HomeScreen() {
       });
     }
   }
+
+  // Helper to check if a board is offline
+  const isBoardOffline = (id: string) => offlineBoards.some(b => b.id === id);
+
+  // Handle toggle switch for offline
+  const handleToggleOffline = async (board: Board, value: boolean) => {
+    if (value) {
+      setDownloadingBoardId(board.id);
+      // Simulate download
+      setTimeout(async () => {
+        addOfflineBoard({ id: board.id, title: board.title });
+        setDownloadingBoardId(null);
+        await addNotification({
+          type: "success",
+          text: `Board "${board.title}" has been added to offline boards.`,
+        });
+      }, 1000);
+    } else {
+      removeOfflineBoard(board.id);
+    }
+  };
 
   const quickActions = [
   {
@@ -289,24 +314,37 @@ export default function HomeScreen() {
       contentContainerStyle={styles.scrollContent}
       data={boards}
       keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <BoardCard
-          id={item.id}
-          title={item.title}
-          isFavorite={item.isFavorite}
-          onPress={() => {
-            setLongPressedBoardId(null);
-            router.push({
-              pathname: `/boards/${item.id}`,
-              params: { board: JSON.stringify(item) }
-            });
-          }}
-          onToggleFavorite={() => handleToggleFavorite(item.id)}
-          onLongPress={() => handleLongPress(item.id)}
-          showDelete={longPressedBoardId === item.id}
-          onDelete={() => handleDeleteBoard(item.id)}
-        />
-      )}
+      renderItem={({ item }: { item: Board }) => {
+        const showToggle = longPressedBoardId === item.id;
+        const downloading = downloadingBoardId === item.id;
+        return (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <BoardCard
+              id={item.id}
+              title={item.title}
+              isFavorite={item.isFavorite}
+              onPress={() => {
+                setLongPressedBoardId(null);
+                router.push({
+                  pathname: `/boards/${item.id}`,
+                  params: { board: JSON.stringify(item) }
+                });
+              }}
+              onToggleFavorite={() => handleToggleFavorite(item.id)}
+              onLongPress={() => handleLongPress(item.id)}
+              showToggle={showToggle}
+              toggleValue={isBoardOffline(item.id)}
+              onToggleSwitch={(value) => handleToggleOffline(item, value)}
+              showDelete={showToggle}
+              onDelete={() => handleDeleteBoard(item.id)}
+              backgroundColor={item.backgroundColor}
+            />
+            {showToggle && downloading && (
+              <ActivityIndicator size="small" color="#007CF0" style={{ marginLeft: 8 }} />
+            )}
+          </View>
+        );
+      }}
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
           {/* <Image source={bee} style={{ width: 300, height: 300 }} /> */}
