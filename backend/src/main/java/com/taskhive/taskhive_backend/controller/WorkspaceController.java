@@ -47,4 +47,13 @@ public class WorkspaceController {
         List<Workspace> workspaces = workspaceService.getWorkspacesByUser(user);
         return ResponseEntity.ok(workspaces);
     }
+
+    // DELETE: Delete a workspace by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteWorkspace(@PathVariable Long id, Principal principal) {
+        String email = principal.getName();
+        User user = userService.getUserByEmail(email);
+        workspaceService.deleteWorkspace(id, user);
+        return ResponseEntity.noContent().build();
+    }
 }

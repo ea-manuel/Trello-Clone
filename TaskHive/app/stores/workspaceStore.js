@@ -106,17 +106,33 @@ export const useWorkspaceStore = create((set, get) => ({
     }));
   },
 
+  deleteWorkspace: async (id) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      await axiosClient.delete(`/workspaces/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      set((state) => ({
+        workspaces: state.workspaces.filter((ws) => ws.id !== id),
+      }));
+    } catch (error) {
+      console.error("Failed to delete workspace:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   setCurrentWorkspaceId: (id) => set({ currentWorkspaceId: id }),
 
-  // ✅ CREATE BOARD LOCALLY
+  // CREATE BOARD LOCALLY (no backend)
   createBoard: ({ title, workspaceId, backgroundColor }) => {
     const newBoard = {
       id: `board-${nextId++}`,
       title,
       workspaceId,
-      backgroundColor,
+      backgroundColor: backgroundColor || "#ADD8E6",
       createdAt: Date.now(),
       lists: [],
+      isFavorite: false,
     };
     set((state) => ({
       boards: [...state.boards, newBoard],
@@ -130,6 +146,7 @@ export const useWorkspaceStore = create((set, get) => ({
     }));
   },
 
+  // GET BOARDS LOCALLY (no backend)
   getBoards: (workspaceId) => {
     return get().boards.filter((b) => b.workspaceId === workspaceId);
   },

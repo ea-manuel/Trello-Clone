@@ -16,6 +16,8 @@ import com.taskhive.taskhive_backend.model.Board;
 import com.taskhive.taskhive_backend.model.Workspace;
 import com.taskhive.taskhive_backend.repository.WorkspaceRepository;
 import com.taskhive.taskhive_backend.service.BoardService;
+import com.taskhive.taskhive_backend.service.UserService;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/boards")
@@ -26,6 +28,9 @@ public class BoardController {
 
     @Autowired
     private WorkspaceRepository workspaceRepository;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping
     public ResponseEntity<Board> createBoard(@RequestBody Map<String, String> request) {
@@ -38,6 +43,7 @@ public class BoardController {
         Board board = new Board();
         board.setTitle(title);
         board.setWorkspace(workspace);
+        // (Reverted) Do not set user field
 
         return ResponseEntity.ok(boardService.createBoard(board));
     }

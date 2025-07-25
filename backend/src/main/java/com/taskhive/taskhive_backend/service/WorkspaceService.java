@@ -22,5 +22,14 @@ public class WorkspaceService {
     public List<Workspace> getWorkspacesByUser(User user) {
         return workspaceRepository.findByUser(user);
     }
+
+    public void deleteWorkspace(Long id, User user) {
+        Workspace workspace = workspaceRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Workspace not found"));
+        if (!workspace.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized to delete this workspace");
+        }
+        workspaceRepository.delete(workspace);
+    }
 }
 

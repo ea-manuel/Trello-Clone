@@ -7,7 +7,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  ActivityIndicator
 } from "react-native";
 import { useWorkspaceStore } from "../app/stores/workspaceStore"; // Import the hook
 
@@ -25,9 +26,14 @@ export default function CreateWorkspaceModal({
   const [name, setName] = useState("");
   const [visibility, setVisibility] = useState("Private");
   const { createWorkspace } = useWorkspaceStore(); // Access createWorkspace via hook
+  const [loading, setLoading] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
 
   const handleCreate = async () => {
   if (!name.trim()) return;
+  setLoading(true);
+  setShowLoader(true);
+  onClose(); // Close modal immediately
 
   try {
     const workspace = await createWorkspace({ name, visibility });
@@ -36,48 +42,63 @@ export default function CreateWorkspaceModal({
     onCreate(workspace);
     setName("");
     setVisibility("Private");
-    onClose();
   } catch (error) {
     console.error("Error creating workspace from modal:", error);
     alert("Failed to create workspace. Please try again.");
+  } finally {
+    setLoading(false);
+    setTimeout(() => setShowLoader(false), 800); // Hide loader after short delay
   }
 };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.modalBackground}>
-        <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Create Workspace</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Workspace Name"
-            value={name}
-            onChangeText={setName}
-          />
-          <TouchableOpacity
-            style={styles.visibilityButton}
-            onPress={() =>
-              setVisibility(visibility === "Private" ? "Public" : "Private")
-            }
-          >
-            <Text style={styles.visibilityText}>{visibility}</Text>
-            <Ionicons name="chevron-down" size={24} />
-          </TouchableOpacity>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
+    <>
+      <Modal visible={visible} transparent animationType="fade">
+        <View style={styles.modalBackground}>
+          <BlurView style={StyleSheet.absoluteFill} intensity={100} tint="dark" />
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Create Workspace</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Workspace Name"
+              value={name}
+              onChangeText={setName}
+            />
             <TouchableOpacity
-              style={styles.createButton}
-              onPress={handleCreate}
+              style={styles.visibilityButton}
+              onPress={() =>
+                setVisibility(visibility === "Private" ? "Public" : "Private")
+              }
             >
-              <Text style={styles.buttonText}>Create</Text>
+              <Text style={styles.visibilityText}>{visibility}</Text>
+              <Ionicons name="chevron-down" size={24} />
             </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.createButton}
+                onPress={handleCreate}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>{loading ? "Creating..." : "Create"}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+      {/* Custom Loader Overlay */}
+      {showLoader && (
+        <View style={styles.loaderOverlay}>
+          <BlurView style={StyleSheet.absoluteFill} intensity={40} tint="light" />
+          <View style={styles.loaderContent}>
+            <ActivityIndicator size="large" color="#0B1F3A" />
+            <Text style={{ marginTop: 16, fontWeight: 'bold', fontSize: 18, color: '#0B1F3A' }}>Creating workspace...</Text>
+          </View>
+        </View>
+      )}
+    </>
   );
 }
 
@@ -149,5 +170,19 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold"
-  }
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loaderContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

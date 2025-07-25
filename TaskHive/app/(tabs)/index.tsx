@@ -65,6 +65,7 @@ export default function HomeScreen() {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
+  const [creatingDefault, setCreatingDefault] = useState(false);
 
   // Load profile image from AsyncStorage on mount
   useEffect(() => {
@@ -84,8 +85,25 @@ export default function HomeScreen() {
   }, [notifications]);
 
   // Access store methods and state via the hook
-  const { workspaces, getBoards, createBoard } = useWorkspaceStore();
+  const { workspaces, getBoards, createBoard, createWorkspace } = useWorkspaceStore();
   const { addNotification } = useNotificationStore();
+  const getUserWorkspaces = useWorkspaceStore((s) => s.getUserWorkspaces);
+
+  useEffect(() => {
+    (async () => {
+      await getUserWorkspaces();
+    })();
+  }, []);
+
+  // Automatically create a default workspace if none exist
+  useEffect(() => {
+    if (workspaces && workspaces.length === 0) {
+      setCreatingDefault(true);
+      createWorkspace({ name: "Default Workspace" })
+        .catch(() => {})
+        .finally(() => setCreatingDefault(false));
+    }
+  }, [workspaces]);
 
   // Get selected workspace based on params or default to first workspace
   const workspaceId = params.workspaceId as string;
@@ -121,35 +139,23 @@ export default function HomeScreen() {
     }
   }, [params.board]);
 
-  const handleCreateBoard = async () => {
+  const handleCreateBoard = () => {
     if (!boardTitle.trim()) return;
     const newBoard = createBoard({
       title: boardTitle,
-      workspaceId: selectedWorkspace.id,
-      backgroundColor: "#ADD8E6",
-      lists: [],
-      isFavorite: false
+      workspaceId: selectedWorkspace.id
     });
-    setBoards(prev => [...prev, newBoard]);
-
+    setBoards(getBoards(selectedWorkspace.id));
     setRecents(prev => [
       { id: `recent-${Date.now()}`, message: `"${newBoard.title}" board created.`, timestamp: Date.now() },
       ...prev
     ]);
-
-    await addNotification({
-      type: "success", // Changed from "Board Created"
+    addNotification({
+      type: "success",
       text: `Board "${newBoard.title}" was created.`,
     });
-    console.log("Notification added");
-    
     setShowModal(false);
     setBoardTitle("");
-    console.log('HomeScreen: Created new board:', JSON.stringify(newBoard, null, 2));
-    router.push({
-       k: "/boards/[id]",
-      params: { id: newBoard.id, board: JSON.stringify(newBoard) }
-    });
   };
 
   const handleLongPress = (boardId: string) => {
@@ -351,7 +357,7 @@ export default function HomeScreen() {
       </View>
 
     {/* Boards Title */}
-{boards.length > 0 && (
+{Array.isArray(boards) && boards.length > 0 && (
   <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
     <Text
       style={{
@@ -370,7 +376,7 @@ export default function HomeScreen() {
     <FlatList
       ref={flatListRef}
       contentContainerStyle={styles.scrollContent}
-      data={boards}
+      data={Array.isArray(boards) ? boards : []}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }: { item: Board }) => {
         const showToggle = longPressedBoardId === item.id;
@@ -516,11 +522,10 @@ export default function HomeScreen() {
           </View>
        
 
-        {boards.filter(board => board.isFavorite).length === 0 ? (
+        {Array.isArray(boards) && boards.filter(board => board.isFavorite).length === 0 ? (
           <Text style={styles.favouriteemptyText}>No Favorite Boards</Text>
         ) : (
-          boards
-            .filter(board => board.isFavorite)
+          (Array.isArray(boards) ? boards : []).filter(board => board.isFavorite)
             .map(board => (
               <BoardCard
                 key={board.id}

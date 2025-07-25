@@ -15,7 +15,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Alert
+  Alert,
+  BlurView
 } from "react-native";
 import {ThemeProvider} from "../ThemeContext";
 import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
@@ -24,6 +25,7 @@ import Header from "@/components/Header";
 import WorkspaceMenuModal from "@/components/WorkspaceMenuModal"; // Import the new modal
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
 
 const BADGE_COLORS = [
   "#2980B9",
@@ -50,7 +52,7 @@ const InitialCircle = ({ text, backgroundColor }) => {
 };
 
 export default function RootLayout() {
-  const { workspaces, setCurrentWorkspaceId } = useWorkspaceStore();
+  const { workspaces, setCurrentWorkspaceId, deleteWorkspace } = useWorkspaceStore();
   const colorScheme = useColorScheme();
   const pathname = usePathname();
   const [loaded] = useFonts({
@@ -70,6 +72,10 @@ export default function RootLayout() {
   const [selectedWorkspace, setSelectedWorkspace] = useState(null);
   const [menuModalVisible, setMenuModalVisible] = useState(false);
   const [menuWorkspace, setMenuWorkspace] = useState(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedWorkspaceIds, setSelectedWorkspaceIds] = useState([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
 
   // Assume you have a user object or username from your auth system
   // For demo, hardcoding username:
@@ -115,8 +121,20 @@ export default function RootLayout() {
               {...props}
               style={{ backgroundColor: "#0B1F3A", flex: 1 }}
             >
-              <Text style={styles.workspacesHeader}>Workspaces</Text>
-              <TouchableOpacity onPress={() => setCreateModalVisible(true)}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Text style={styles.workspacesHeader}>Workspaces</Text>
+                {!selectionMode && (
+                  <TouchableOpacity onPress={() => setSelectionMode(true)}>
+                    <Ionicons name="checkmark-circle-outline" size={24} color="#fff" />
+                  </TouchableOpacity>
+                )}
+                {selectionMode && (
+                  <TouchableOpacity onPress={() => { setSelectionMode(false); setSelectedWorkspaceIds([]); }}>
+                    <Ionicons name="close" size={24} color="#fff" />
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TouchableOpacity onPress={() => setCreateModalVisible(true)} disabled={selectionMode}>
                 <LinearGradient
                   colors={["#00C6AE", "#007CF0"]}
                   style={styles.createWorkspaceButton}
@@ -129,8 +147,45 @@ export default function RootLayout() {
                 </LinearGradient>
               </TouchableOpacity>
               <Text style={styles.yourWorkspacesLabel}>Your Workspaces</Text>
+              {selectionMode && workspaces.length > 0 && (
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, marginLeft: 8 }}
+                  onPress={() => {
+                    if (selectedWorkspaceIds.length === workspaces.length) {
+                      setSelectedWorkspaceIds([]);
+                    } else {
+                      setSelectedWorkspaceIds(workspaces.map(ws => ws.id));
+                    }
+                  }}
+                >
+                  <Ionicons
+                    name={selectedWorkspaceIds.length === workspaces.length ? "checkbox" : "square-outline"}
+                    size={22}
+                    color="#00C6AE"
+                  />
+                  <Text style={{ color: '#fff', marginLeft: 8, fontWeight: '500' }}>Select All</Text>
+                </TouchableOpacity>
+              )}
               {modifiedWorkspaces.map((workspace) => (
                 <View key={workspace.id} style={styles.workspaceRow}>
+                  {selectionMode && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (selectedWorkspaceIds.includes(workspace.id)) {
+                          setSelectedWorkspaceIds(selectedWorkspaceIds.filter(id => id !== workspace.id));
+                        } else {
+                          setSelectedWorkspaceIds([...selectedWorkspaceIds, workspace.id]);
+                        }
+                      }}
+                      style={{ marginRight: 8 }}
+                    >
+                      <Ionicons
+                        name={selectedWorkspaceIds.includes(workspace.id) ? "checkbox" : "square-outline"}
+                        size={22}
+                        color={selectedWorkspaceIds.includes(workspace.id) ? "#00C6AE" : "#fff"}
+                      />
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity
                     style={[
                       styles.workspaceItem,
@@ -138,6 +193,14 @@ export default function RootLayout() {
                         styles.activeWorkspaceItem
                     ]}
                     onPress={() => {
+                      if (selectionMode) {
+                        if (selectedWorkspaceIds.includes(workspace.id)) {
+                          setSelectedWorkspaceIds(selectedWorkspaceIds.filter(id => id !== workspace.id));
+                        } else {
+                          setSelectedWorkspaceIds([...selectedWorkspaceIds, workspace.id]);
+                        }
+                        return;
+                      }
                       setCurrentWorkspaceIdLocal(workspace.id);
                       setCurrentWorkspaceId(workspace.id);
                       router.push({
@@ -146,8 +209,10 @@ export default function RootLayout() {
                       });
                     }}
                     onLongPress={() => {
-                      setSelectedWorkspace(workspace);
-                      setEditModalVisible(true);
+                      if (!selectionMode) {
+                        setSelectedWorkspace(workspace);
+                        setEditModalVisible(true);
+                      }
                     }}
                   >
                     <View
@@ -164,16 +229,75 @@ export default function RootLayout() {
                     />
                     <Text style={styles.workspaceText}>{workspace.name}</Text>
                   </TouchableOpacity>
-                  {/* 3 dots button */}
-                  <TouchableOpacity
-                    onPress={() => openMenuForWorkspace(workspace)}
-                    style={styles.menuButton}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Text style={styles.menuButtonText}>⋯</Text>
-                  </TouchableOpacity>
+                  {!selectionMode && (
+                    <TouchableOpacity
+                      onPress={() => openMenuForWorkspace(workspace)}
+                      style={styles.menuButton}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text style={styles.menuButtonText}>⋯</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
+              {/* Floating Bulk Delete FAB */}
+              {selectionMode && selectedWorkspaceIds.length > 0 && (
+                <View style={{ position: 'absolute', right: 24, bottom: 32, zIndex: 2000, flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 16, paddingVertical: 6, paddingHorizontal: 14, marginRight: 10, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 }}>
+                    <Text style={{ color: '#e74c3c', fontWeight: 'bold', fontSize: 16 }}>{selectedWorkspaceIds.length} selected</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#e74c3c', width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 8, elevation: 6 }}
+                    onPress={async () => {
+                      Alert.alert(
+                        "Delete Workspaces",
+                        `Are you sure you want to delete ${selectedWorkspaceIds.length} workspaces? This action cannot be undone.`,
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          {
+                            text: "Delete",
+                            style: "destructive",
+                            onPress: async () => {
+                              setBulkLoading(true);
+                              setBulkProgress({ current: 0, total: selectedWorkspaceIds.length });
+                              try {
+                                for (let i = 0; i < selectedWorkspaceIds.length; i++) {
+                                  await deleteWorkspace(selectedWorkspaceIds[i]);
+                                  setBulkProgress({ current: i + 1, total: selectedWorkspaceIds.length });
+                                }
+                                setSelectedWorkspaceIds([]);
+                                setSelectionMode(false);
+                              } catch (e) {
+                                Alert.alert("Delete Failed", "Could not delete all workspaces. Please try again.");
+                              } finally {
+                                setTimeout(() => setBulkLoading(false), 800);
+                              }
+                            },
+                          },
+                        ]
+                      );
+                    }}
+                  >
+                    <Ionicons name="trash" size={28} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              {/* Loader for bulk delete */}
+              {bulkLoading && (
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.15)', zIndex: 1000 }}>
+                  <BlurView style={StyleSheet.absoluteFill} intensity={40} tint="light" />
+                  <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                    <StatusBar style="light" />
+                    <Ionicons name="trash" size={48} color="#e74c3c" />
+                    <Text style={{ marginTop: 16, fontWeight: 'bold', fontSize: 18, color: '#e74c3c' }}>
+                      Deleting {bulkProgress.current} of {bulkProgress.total} workspaces...
+                    </Text>
+                    <View style={{ width: 180, height: 8, backgroundColor: '#eee', borderRadius: 4, marginTop: 16, overflow: 'hidden' }}>
+                      <View style={{ width: `${bulkProgress.total ? (bulkProgress.current / bulkProgress.total) * 100 : 0}%`, height: 8, backgroundColor: '#e74c3c', borderRadius: 4 }} />
+                    </View>
+                  </View>
+                </View>
+              )}
              <CreateWorkspaceModal
   visible={createModalVisible}
   onClose={() => setCreateModalVisible(false)}
