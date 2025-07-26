@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { usePathname, useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
+import { BlurView } from "expo-blur";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -16,7 +17,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
-  BlurView
+  Image
 } from "react-native";
 import {ThemeProvider} from "../ThemeContext";
 import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
@@ -42,7 +43,7 @@ const getRandomColor = () => {
   return BADGE_COLORS[randomIndex];
 };
 
-const InitialCircle = ({ text, backgroundColor }) => {
+const InitialCircle = ({ text, backgroundColor }: { text: string; backgroundColor: string }) => {
   const initial = text ? text.charAt(0).toUpperCase() : "?";
   return (
     <View style={[styles.initialCircle, { backgroundColor }]}>
@@ -100,7 +101,7 @@ export default function RootLayout() {
           );
 
           // Override default workspace name with username + " workspace"
-          const modifiedWorkspaces = workspaces.map((ws, idx) => {
+          const modifiedWorkspaces = workspaces.map((ws: any, idx: number) => {
             if (idx === 0) {
               return {
                 ...ws,
@@ -354,22 +355,30 @@ export default function RootLayout() {
           );
         }}
         screenOptions={{
-          header: () =>
-            createModalVisible ||
-            editModalVisible ||
-            pathname === "/index" ||
-            pathname === "/auth/login" ||
-            pathname === "/auth/welcome" ||
-            pathname === "/templates" ||
-            pathname === "/auth/signup" ||
-            pathname.includes("OfflineBoards") ||
-            pathname === "/screens/SearchScreen" ||
-            pathname === "/screens/NotificationScreen" ||
-            pathname === "/components/SplashScreen" ||
-            pathname === "/help" ||
-            pathname.startsWith("/boards") ? null : (
-              <Header />
-            ),
+          header: () => {
+            // Hide header on splash screen and auth screens
+            const hideHeaderPaths = [
+              "/splash",
+              "/index",
+              "/auth/login",
+              "/auth/welcome", 
+              "/auth/signup",
+              "/templates",
+              "/help"
+            ];
+            
+            const shouldHideHeader = 
+              createModalVisible ||
+              editModalVisible ||
+              hideHeaderPaths.includes(pathname) ||
+              pathname.includes("OfflineBoards") ||
+              pathname.includes("SearchScreen") ||
+              pathname.includes("NotificationScreen") ||
+              pathname.includes("SplashScreen") ||
+              pathname.startsWith("/boards");
+            
+            return shouldHideHeader ? null : <Header />;
+          },
           drawerStyle: {
             backgroundColor: colorScheme === "dark" ? "#0B1F3A" : "#34495e"
           },
