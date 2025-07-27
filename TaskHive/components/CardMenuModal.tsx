@@ -42,7 +42,6 @@ interface CardMenuModalProps {
   onClose: () => void;
   card: any;
   styles: any;
-  // Optionally, you might want an onDeleteCard callback to handle UI changes after delete
   onDeleteCard?: () => void;
 }
 
@@ -55,7 +54,7 @@ export default function CardMenuModal({
 }: CardMenuModalProps) {
   const storageKey = `cardData-${card?.id ?? "default"}`;
 
-  // States
+  // Card-level states
   const [description, setDescription] = useState("");
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -70,6 +69,9 @@ export default function CardMenuModal({
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [showCoverPickerModal, setShowCoverPickerModal] = useState(false);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+
+  // State for activities circle toggle (true means all todos complete)
+  const [allTodosCompleted, setAllTodosCompleted] = useState(false);
 
   // Load saved card data on mount or card change
   useEffect(() => {
@@ -87,13 +89,7 @@ export default function CardMenuModal({
                 id: Date.now().toString(),
                 title: "Default Checklist",
                 editing: false,
-                todos: [
-                  {
-                    id: Date.now().toString() + "-todo-1",
-                    text: "",
-                    completed: false,
-                  },
-                ],
+                todos: [],
               },
             ]
           );
@@ -104,22 +100,16 @@ export default function CardMenuModal({
           setCoverColor(savedData.coverColor || null);
           setCoverImage(savedData.coverImage || null);
         } else {
-          // Initialize if no saved data
+          // Initialize fresh card data
           setDescription(card?.description || "");
           setIsEditingDescription(!card?.description);
-          setComments(card?.comments || []);
+          setComments([]);
           setChecklists([
             {
               id: Date.now().toString(),
               title: "Default Checklist",
               editing: false,
-              todos: [
-                {
-                  id: Date.now().toString() + "-todo-1",
-                  text: "",
-                  completed: false,
-                },
-              ],
+              todos: [],
             },
           ]);
           setStartDate(null);
@@ -141,7 +131,7 @@ export default function CardMenuModal({
     }
   }, [card, visible]);
 
-  // Save all editable card data whenever any part changes
+  // Save all card data when changed
   useEffect(() => {
     const saveData = async () => {
       try {
@@ -155,6 +145,8 @@ export default function CardMenuModal({
           coverImage,
         };
         await AsyncStorage.setItem(storageKey, JSON.stringify(cardDataToSave));
+        // Update allTodosCompleted state after save
+        updateAllTodosCompletedState();
       } catch (e) {
         console.error("Failed to save card data to storage:", e);
       }
@@ -175,6 +167,32 @@ export default function CardMenuModal({
     visible,
   ]);
 
+  // Update the allTodosCompleted state based on current todos completion
+  const updateAllTodosCompletedState = () => {
+    let allDone = true;
+    for (const checklist of checklists) {
+      if (checklist.todos.some((todo) => !todo.completed)) {
+        allDone = false;
+        break;
+      }
+    }
+    setAllTodosCompleted(allDone && checklists.length > 0);
+  };
+
+  // Toggle all todos completion on Activities circle press
+  const toggleAllTodos = () => {
+    const shouldCompleteAll = !allTodosCompleted; // Toggle state
+    const updatedChecklists = checklists.map((cl) => ({
+      ...cl,
+      todos: cl.todos.map((todo) => ({
+        ...todo,
+        completed: shouldCompleteAll,
+      })),
+    }));
+    setChecklists(updatedChecklists);
+    setAllTodosCompleted(shouldCompleteAll);
+  };
+
   // Description handlers
   const finishEditingDescription = () => {
     if (description.trim().length > 0) setIsEditingDescription(false);
@@ -193,14 +211,13 @@ export default function CardMenuModal({
     );
   };
 
+  // Add empty checklist with no todos (all new data reset as requested)
   const handleAddChecklist = () => {
     const newChecklist: Checklist = {
       id: Date.now().toString(),
       title: "New Checklist",
       editing: false,
-      todos: [
-        { id: Date.now().toString() + "-todo-1", text: "", completed: false },
-      ],
+      todos: [], // No todos by default
     };
     setChecklists((prev) => [...prev, newChecklist]);
   };
@@ -243,31 +260,25 @@ export default function CardMenuModal({
     );
   };
 
-  const addTodoOnSubmitEditing = (checklistId: string, todoId: string) => {
+  // Add todo only when user presses plus button (no auto add on submit)
+  const addTodo = (checklistId: string) => {
+    const newTodo: Todo = {
+      id:
+        Date.now().toString() + "-todo-" + Math.random().toString(16).slice(2),
+      text: "",
+      completed: false,
+    };
     setChecklists((prev) =>
-      prev.map((cl) => {
-        if (cl.id === checklistId) {
-          const todoIndex = cl.todos.findIndex((todo) => todo.id === todoId);
-          if (todoIndex === -1) return cl;
-          const currentTodo = cl.todos[todoIndex];
-          if (!currentTodo.text.trim()) {
-            return cl;
-          }
-          const newTodo: Todo = {
-            id: Date.now().toString() + "-todo-" + (cl.todos.length + 1),
-            text: "",
-            completed: false,
-          };
-          const newTodos = [...cl.todos];
-          newTodos.splice(todoIndex + 1, 0, newTodo);
-          return { ...cl, todos: newTodos };
-        }
-        return cl;
-      })
+      prev.map((cl) =>
+        cl.id === checklistId ? { ...cl, todos: [...cl.todos, newTodo] } : cl
+      )
     );
   };
 
-  // Enhanced deleteChecklist handler
+  const addTodoOnSubmitEditing = (checklistId: string, todoId: string) => {
+    // Intentionally empty to disable auto add on submit editing
+  };
+
   const deleteChecklist = (id: string) => {
     Alert.alert(
       "Delete Checklist",
@@ -279,13 +290,13 @@ export default function CardMenuModal({
           style: "destructive",
           onPress: () => {
             setChecklists((prev) => prev.filter((cl) => cl.id !== id));
+            updateAllTodosCompletedState();
           },
         },
       ]
     );
   };
 
-  // Enhance deleteTodo handler remains unchanged except no deleting checklist here
   const deleteTodo = (checklistId: string, todoId: string) => {
     Alert.alert(
       "Delete Todo",
@@ -300,23 +311,12 @@ export default function CardMenuModal({
               prev.map((cl) => {
                 if (cl.id === checklistId) {
                   const filteredTodos = cl.todos.filter((t) => t.id !== todoId);
-                  return {
-                    ...cl,
-                    todos:
-                      filteredTodos.length > 0
-                        ? filteredTodos
-                        : [
-                            {
-                              id: Date.now().toString() + "-todo-1",
-                              text: "",
-                              completed: false,
-                            },
-                          ],
-                  };
+                  return { ...cl, todos: filteredTodos };
                 }
                 return cl;
               })
             );
+            updateAllTodosCompletedState();
           },
         },
       ]
@@ -374,7 +374,7 @@ export default function CardMenuModal({
           onPress: async () => {
             try {
               await AsyncStorage.removeItem(storageKey);
-              // Optionally, if you want to clear state after deletion:
+              // Clear state
               setDescription("");
               setComments([]);
               setChecklists([]);
@@ -418,7 +418,7 @@ export default function CardMenuModal({
           />
 
           <View style={styles.CardMenuModalmenuContainer}>
-            {/* Top Bar */}
+            {/* Top Bar (Close and Ellipsis outside cover) */}
             <View style={[styles.CardMenuModalmenuTopBar]}>
               <TouchableOpacity onPress={onClose}>
                 <Ionicons name="close" size={28} color="white" />
@@ -454,7 +454,6 @@ export default function CardMenuModal({
                 <TouchableOpacity
                   onPress={() => {
                     setDropdownVisible(false);
-                    // Add your archive action here
                     Alert.alert("Archive", "Archive action not implemented.");
                   }}
                   style={{ paddingVertical: 8 }}
@@ -476,87 +475,60 @@ export default function CardMenuModal({
               </TouchableOpacity>
             )}
 
-            {/* Scrollable content */}
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
+            {/* Cover Header */}
+            <TouchableOpacity
+              style={{
+                height: 110,
+                width: "100%",
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                overflow: "hidden",
+                marginBottom: 12,
+                backgroundColor: coverColor || "#222",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => setShowCoverPickerModal(true)}
+              activeOpacity={0.9}
             >
-              {/* Cover Header */}
-              <View
-                style={{
-                  height: 110,
-                  width: "100%",
-                  borderTopLeftRadius: 16,
-                  borderTopRightRadius: 16,
-                  overflow: "hidden",
-                  marginBottom: 12,
-                  backgroundColor: coverColor || "#222",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {coverImage ? (
-                  <ImageBackground
-                    source={{ uri: coverImage }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    imageStyle={{
-                      borderTopLeftRadius: 16,
-                      borderTopRightRadius: 16,
-                    }}
-                    resizeMode="cover"
-                  >
-                    {/** Overlay for semi-transparent background */}
-                    {coverColor && (
-                      <View
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: coverColor + "80",
-                          borderTopLeftRadius: 16,
-                          borderTopRightRadius: 16,
-                        }}
-                      />
-                    )}
-
-                    {/* The button */}
-                    <TouchableOpacity
-                      onPress={() => setShowCoverPickerModal(true)}
+              {coverImage ? (
+                <ImageBackground
+                  source={{ uri: coverImage }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  imageStyle={{
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                  }}
+                  resizeMode="cover"
+                >
+                  {coverColor && (
+                    <View
                       style={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 20,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        borderRadius: 25,
-                        zIndex: 10,
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: coverColor + "80",
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
                       }}
-                    >
-                      <Text
-                        style={[
-                          styles.CardMenuModalcoverButtonText,
-                          { fontSize: 16 },
-                        ]}
-                      >
-                        Cover
-                      </Text>
-                    </TouchableOpacity>
-                  </ImageBackground>
-                ) : (
+                    />
+                  )}
                   <TouchableOpacity
                     onPress={() => setShowCoverPickerModal(true)}
                     style={{
                       paddingVertical: 10,
                       paddingHorizontal: 20,
-                      backgroundColor: "rgba(255,255,255,0.2)",
+                      backgroundColor: "rgba(0,0,0,0.5)",
                       borderRadius: 25,
+                      zIndex: 10,
                     }}
-                    activeOpacity={0.8}
                   >
                     <Text
                       style={[
@@ -564,25 +536,60 @@ export default function CardMenuModal({
                         { fontSize: 16 },
                       ]}
                     >
-                      Cover
+                      Set Cover
                     </Text>
                   </TouchableOpacity>
-                )}
-              </View>
+                </ImageBackground>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setShowCoverPickerModal(true)}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    borderRadius: 25,
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.CardMenuModalcoverButtonText,
+                      { fontSize: 16 },
+                    ]}
+                  >
+                    Set Cover
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
 
+            {/* Scrollable content */}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
               {/* Activities Section */}
               <View style={styles.CardMenuModalsection}>
-                <View style={styles.CardMenuModalactivitiesRow}>
+                <TouchableOpacity
+                  style={styles.CardMenuModalactivitiesRow}
+                  onPress={toggleAllTodos}
+                  activeOpacity={0.7}
+                  accessibilityLabel={
+                    allTodosCompleted
+                      ? "Mark all todos incomplete"
+                      : "Mark all todos complete"
+                  }
+                >
                   <Ionicons
-                    name="ellipse-outline"
+                    name={allTodosCompleted ? "checkbox" : "square-outline"}
                     size={24}
-                    color="#ccc"
+                    color={allTodosCompleted ? "#3CD6FF" : "#ccc"}
                     style={{ marginRight: 8 }}
                   />
                   <Text style={styles.CardMenuModalactivitiesTitle}>
                     Activities
                   </Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.CardMenuModaltodoRow}>
                   <View style={styles.CardMenuModaltodoBadge} />
                   <View>
@@ -603,7 +610,7 @@ export default function CardMenuModal({
                   <Text style={styles.CardMenuModalquickActionsTitle}>
                     Quick Actions
                   </Text>
-                  <Ionicons name="chevron-up" size={22} color="#ccc" />
+                  {/* Removed chevron as requested */}
                 </View>
                 <View style={styles.CardMenuModalquickActionsRow}>
                   <TouchableOpacity
@@ -717,7 +724,7 @@ export default function CardMenuModal({
                       <TextInput
                         style={{
                           flex: 1,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: "600",
                           color: "white",
                           borderBottomWidth: 1,
@@ -739,7 +746,7 @@ export default function CardMenuModal({
                         >
                           <Text
                             style={{
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: "600",
                               color: "white",
                             }}
@@ -750,12 +757,12 @@ export default function CardMenuModal({
                             onPress={() =>
                               toggleEditChecklistTitle(checklist.id)
                             }
-                            style={{ marginLeft: 8 }}
+                            style={{ marginLeft: 6 }}
                             accessibilityLabel={`Edit checklist ${checklist.title}`}
                           >
                             <Ionicons
                               name="pencil-outline"
-                              size={22}
+                              size={16}
                               color="white"
                             />
                           </TouchableOpacity>
@@ -776,7 +783,101 @@ export default function CardMenuModal({
                     )}
                   </View>
 
-                  {/* ... render todos here ... */}
+                  {checklist.todos.map((todo) => (
+                    <View
+                      key={todo.id}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 8,
+                        backgroundColor: "rgba(255,255,255,0.1)",
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() =>
+                          toggleTodoCompleted(checklist.id, todo.id)
+                        }
+                        style={{ marginRight: 12 }}
+                        accessibilityLabel={`Mark todo ${
+                          todo.text || "empty"
+                        } as ${todo.completed ? "incomplete" : "complete"}`}
+                      >
+                        <Ionicons
+                          name={
+                            todo.completed
+                              ? "checkmark-circle"
+                              : "ellipse-outline"
+                          }
+                          size={20}
+                          color={todo.completed ? "#2ecc71" : "#ccc"}
+                        />
+                      </TouchableOpacity>
+                      <TextInput
+                        style={{
+                          flex: 1,
+                          fontSize: 14,
+                          color: todo.completed ? "gray" : "white",
+                          textDecorationLine: todo.completed
+                            ? "line-through"
+                            : "none",
+                          paddingVertical: 0,
+                          backgroundColor: "transparent",
+                        }}
+                        placeholder="Enter todo..."
+                        placeholderTextColor="rgba(255,255,255,0.6)"
+                        value={todo.text}
+                        onChangeText={(text) =>
+                          updateTodoText(checklist.id, todo.id, text)
+                        }
+                        onSubmitEditing={() =>
+                          addTodoOnSubmitEditing(checklist.id, todo.id)
+                        }
+                        returnKeyType="done"
+                        blurOnSubmit={false}
+                      />
+                      <TouchableOpacity
+                        onPress={() => deleteTodo(checklist.id, todo.id)}
+                        style={{ marginLeft: 8 }}
+                        accessibilityLabel={`Delete todo ${
+                          todo.text || "empty"
+                        }`}
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={20}
+                          color="#ff6b6b"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+
+                  {/* Plus Button to add new todo */}
+                  <TouchableOpacity
+                    onPress={() => addTodo(checklist.id)}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      backgroundColor: "rgba(255,255,255,0.15)",
+                      borderRadius: 8,
+                    }}
+                    accessibilityLabel="Add todo"
+                  >
+                    <Ionicons name="add" size={20} color="white" />
+                    <Text
+                      style={{
+                        color: "white",
+                        marginLeft: 8,
+                        fontWeight: "600",
+                      }}
+                    >
+                      Add Todo
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
 
@@ -823,7 +924,7 @@ export default function CardMenuModal({
                 <Text style={styles.CardMenuModalmenuRowText}>Members</Text>
               </TouchableOpacity>
 
-              {/* Comments list above input field */}
+              {/* Comments List */}
               {comments.length > 0 && (
                 <View style={{ marginTop: 12, paddingHorizontal: 16 }}>
                   {comments.map(({ id, author, text }) => (

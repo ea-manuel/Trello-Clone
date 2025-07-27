@@ -95,10 +95,13 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await axios.post("http://10.36.13.65:8080/api/auth/login", {
-        email,
-        password
-      });
+      const response = await axios.post(
+        "http://192.168.8.196:8080/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
       const token = response.data.token;
       if (!token) throw new Error("Token not found in response.");

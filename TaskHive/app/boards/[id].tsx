@@ -2,13 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import * as ImagePicker from "expo-image-picker";
 import {
   Animated,
-  Dimensions,
   FlatList,
   Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,16 +13,158 @@ import {
   View,
   ImageBackground,
   Alert,
-  TextStyle,
+  Dimensions,
 } from "react-native";
 import { useTheme } from "../../ThemeContext";
 import { lightTheme, darkTheme } from "../../styles/themes";
 import CardMenuModal from "@/components/CardMenuModal";
 
-const PRIMARY_COLOR = "#0B1F3A";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// --- Main BoardDetails component ---
+// Dropdown components (CardDropdownMenu and ListDropdownMenu) included here
+
+function CardDropdownMenu({
+  onArchive,
+  onDelete,
+  onRename,
+  onCopy,
+  onClose,
+  style,
+}: {
+  onArchive: () => void;
+  onDelete: () => void;
+  onRename: () => void;
+  onCopy: () => void;
+  onClose: () => void;
+  style?: any;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.dropdownOverlay, style]}
+      activeOpacity={1}
+      onPressOut={onClose}
+    >
+      <View style={styles.dropdownMenu}>
+        <TouchableOpacity
+          onPress={() => {
+            onArchive();
+            onClose();
+          }}
+          style={styles.dropdownItem}
+        >
+          <Text style={styles.dropdownText}>Archive Card</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            onDelete();
+            onClose();
+          }}
+          style={styles.dropdownItem}
+        >
+          <Text style={[styles.dropdownText, styles.destructiveText]}>
+            Delete Card
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            onRename();
+            onClose();
+          }}
+          style={styles.dropdownItem}
+        >
+          <Text style={styles.dropdownText}>Rename Card</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            onCopy();
+            onClose();
+          }}
+          style={styles.dropdownItem}
+        >
+          <Text style={styles.dropdownText}>Copy Card</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onClose} style={styles.dropdownItem}>
+          <Text style={[styles.dropdownText, styles.cancelText]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function ListDropdownMenu({
+  visible,
+  onDeleteList,
+  onClose,
+  eyeVisible,
+  onToggleEye,
+  style,
+}: {
+  visible: boolean;
+  onDeleteList: () => void;
+  onClose: () => void;
+  eyeVisible: boolean;
+  onToggleEye: (newValue: boolean) => void;
+  style?: any;
+}) {
+  if (!visible) return null;
+
+  const notify = (msg: string) => Alert.alert("Notification", msg);
+
+  const toggleEye = () => {
+    const newVal = !eyeVisible;
+    onToggleEye(newVal);
+    notify(newVal ? "List visibility turned ON" : "List visibility turned OFF");
+  };
+
+  return (
+    <TouchableOpacity
+      style={[styles.dropdownOverlay, style]}
+      activeOpacity={1}
+      onPressOut={onClose}
+    >
+      <View style={styles.dropdownMenu}>
+        <TouchableOpacity
+          onPress={() => {
+            onDeleteList();
+            onClose();
+          }}
+          style={styles.dropdownItem}
+        >
+          <Text style={[styles.dropdownText, styles.destructiveText]}>
+            Delete List
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleEye} style={styles.dropdownItem}>
+          <Text style={styles.dropdownText}>
+            {eyeVisible ? "Hide List" : "Show List"}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onClose} style={styles.dropdownItem}>
+          <Text style={[styles.dropdownText, styles.cancelText]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// Helper to create a new empty card with reset data
+function createEmptyCard() {
+  return {
+    id: Date.now().toString() + "-" + Math.random().toString(16).slice(2),
+    text: "",
+    completed: false,
+    isInput: true,
+    editing: true,
+    description: "",
+    checklists: [],
+    startDate: null,
+    labels: [],
+    comments: [],
+    coverColor: null,
+    coverImage: null,
+  };
+}
+
 export default function BoardDetails() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -38,46 +177,45 @@ export default function BoardDetails() {
     listId: string;
     cardIndex: number;
   } | null>(null);
-  const [listToDelete, setListToDelete] = useState<string | null>(null);
-  const [cardToDelete, setCardToDelete] = useState<{
-    listId: string;
-    cardIndex: number;
-  } | null>(null);
   const { theme } = useTheme();
-  const isDark = theme === "dark";
   const styles = theme === "dark" ? darkTheme : lightTheme;
 
-  // Modal state for card menu
   const [isCardMenuVisible, setCardMenuVisible] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [taskToDelete, settaskToDelete] = useState<string | null>(null);
-  const [longPressedCardIndex, setLongPressedCardIndex] = useState<
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [cardDropdownVisibleFor, setCardDropdownVisibleFor] = useState<{
+    listId: string;
+    cardId: string;
+  } | null>(null);
+  const [listDropdownVisibleFor, setListDropdownVisibleFor] = useState<
     string | null
   >(null);
-  // Parse the board param
+  const [listEyeVisibility, setListEyeVisibility] = useState<
+    Record<string, boolean>
+  >({});
+
   let board = null;
   try {
-    console.log("BoardDetails: Raw params.board:", params.board);
     if (typeof params.board === "string" && params.board) {
       board = JSON.parse(params.board);
       if (board && !board.backgroundColor && !board.backgroundImage) {
         board.backgroundColor = "#ADD8E6";
       }
-    } else {
-      console.warn("BoardDetails: params.board is invalid:", params.board);
     }
   } catch (e) {
     console.error("BoardDetails: Failed to parse board:", e);
   }
 
   const [lists, setLists] = useState(board?.lists || []);
+
   useEffect(() => {
-    console.log(
-      "BoardDetails: Received board:",
-      JSON.stringify(board, null, 2)
-    );
-  }, [board?.id, board?.backgroundImage]);
+    if (lists.length > 0 && Object.keys(listEyeVisibility).length === 0) {
+      const initialVis: Record<string, boolean> = {};
+      lists.forEach((l) => {
+        initialVis[l.id] = true;
+      });
+      setListEyeVisibility(initialVis);
+    }
+  }, [lists]);
 
   useEffect(() => {
     setLists(board?.lists || []);
@@ -107,10 +245,17 @@ export default function BoardDetails() {
       params: { board: JSON.stringify(updatedBoard) },
     });
   };
-  const handleDeleteList = (listId) => {
+
+  const handleDeleteList = (listId: string) => {
     const updated = lists.filter((list) => list.id !== listId);
     setLists(updated);
     setLongPressedListId(null);
+    setListDropdownVisibleFor(null);
+    setListEyeVisibility((prev) => {
+      const copy = { ...prev };
+      delete copy[listId];
+      return copy;
+    });
   };
 
   const handleDeleteCard = (listIndex: number, cardIndex: number) => {
@@ -118,11 +263,69 @@ export default function BoardDetails() {
     updated[listIndex].cards.splice(cardIndex, 1);
     setLists(updated);
     setLongPressedCardId(null);
+    setCardDropdownVisibleFor(null);
+  };
+
+  const toggleAllTodosForCard = (listIndex: number, cardIndex: number) => {
+    const updated = [...lists];
+    const card = updated[listIndex].cards[cardIndex];
+
+    if (!card.checklists || card.checklists.length === 0) return;
+
+    const allDone = card.checklists.every((cl) =>
+      cl.todos.every((todo) => todo.completed)
+    );
+    card.checklists.forEach((cl) => {
+      cl.todos.forEach((todo) => {
+        todo.completed = !allDone;
+      });
+    });
+
+    setLists(updated);
+  };
+
+  const addNewList = () => {
+    setLists((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        title: "",
+        editingTitle: true,
+        newCardText: "",
+        cards: [],
+      },
+    ]);
+  };
+
+  const addCardToList = (listIndex: number) => {
+    const updatedLists = [...lists];
+    const list = updatedLists[listIndex];
+    const newCardIndex = list.cards.length + 1;
+    const newCard = {
+      id: Date.now().toString() + "-" + Math.random().toString(16).slice(2),
+      text: `Card ${newCardIndex}`,
+      description: "",
+      checklists: [],
+      startDate: null,
+      labels: [],
+      comments: [],
+      coverColor: null,
+      coverImage: null,
+      completed: false,
+      isInput: false,
+      editing: false,
+    };
+
+    list.cards.push(newCard);
+    setLists(updatedLists);
+
+    setSelectedCard(newCard);
+    setCardMenuVisible(true);
   };
 
   return (
     <ImageBackground
-      key={`${board?.id}-${board?.backgroundImage}`} // Ensure re-render
+      key={`${board?.id}-${board?.backgroundImage}`}
       source={
         board?.backgroundImage ? { uri: board.backgroundImage } : undefined
       }
@@ -135,9 +338,6 @@ export default function BoardDetails() {
         },
       ]}
       resizeMode="cover"
-      onError={(e) =>
-        console.error("BoardDetails: ImageBackground error:", e.nativeEvent)
-      }
     >
       {/* Top Bar */}
       <View style={styles.BoardDetailstopBar}>
@@ -147,25 +347,48 @@ export default function BoardDetails() {
         >
           <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => setShowTitleModal(true)}
           style={styles.BoardDetailstitleContainer}
         >
           <Text
-            style={styles.BoardDetailstitle}
+            style={[
+              styles.BoardDetailstitle,
+              { paddingHorizontal: 8, fontSize: 21 },
+            ]} // normal size (30 * 0.7 = 21 removed)
             numberOfLines={1}
             ellipsizeMode="tail"
           >
             {board?.title ?? "Board"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.BoardDetailsiconButton,
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              right: 25,
+            },
+          ]}
+          onPress={addNewList}
+        >
+          <Ionicons name="add" size={30} color="white" />{" "}
+        </TouchableOpacity>
+
         <View style={styles.BoardDetailsiconContainer}>
           <TouchableOpacity style={styles.BoardDetailsiconButton}>
-            <Ionicons name="search-outline" size={28} color="white" />
+            <Ionicons name="search-outline" size={28} color="white" />{" "}
+            {/* restored size */}
           </TouchableOpacity>
           <TouchableOpacity style={styles.BoardDetailsiconButton}>
-            <Ionicons name="notifications-outline" size={28} color="white" />
+            <Ionicons name="notifications-outline" size={28} color="white" />{" "}
+            {/* restored size */}
           </TouchableOpacity>
+
+          {/* Create List button (plus icon + text) */}
+
           <TouchableOpacity
             style={styles.BoardDetailsiconButton}
             onPress={() => {
@@ -175,340 +398,335 @@ export default function BoardDetails() {
               });
             }}
           >
-            <Ionicons name="ellipsis-vertical" size={28} color="white" />
+            <Ionicons name="ellipsis-vertical" size={28} color="white" />{" "}
+            {/* restored size */}
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Content */}
-      <View style={styles.BoardDetailscontent}>
-        <Animated.View style={{ transform: [{ translateY: floatAnim }] }}>
-          <TouchableOpacity
-            style={styles.BoardDetailscreatelist}
-            onPress={() => {
-              setLists((prev) => [
-                ...prev,
-                {
-                  id: Date.now().toString(),
-                  title: "",
-                  cards: [
-                    {
-                      text: "Enter card name here...",
-                      completed: false,
-                      isInput: true,
-                    },
-                  ],
-                  editingTitle: true,
-                  newCardText: "",
-                },
-              ]);
-            }}
-          >
-            <Ionicons name="add" size={25} color="white" />
-            <Text style={{ color: "white" }}>Create List</Text>
-          </TouchableOpacity>
-        </Animated.View>
-        <FlatList
-          data={lists}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item: list, index: listIndex }) => (
-            <TouchableOpacity
-              style={styles.BoardDetailslistCard}
-              onLongPress={() => handleLongPressList(list.id)}
-              onPress={() => {
-                setLongPressedListId(null);
-                setLongPressedCardId(null);
-              }}
-              activeOpacity={1}
-            >
-              {list.editingTitle ? (
-                <TextInput
-                  value={list.title}
-                  placeholder="Enter list title"
-                  placeholderTextColor="gray"
-                  onChangeText={(text) => {
-                    const updated = [...lists];
-                    updated[listIndex].title = text;
-                    setLists(updated);
-                  }}
-                  onSubmitEditing={() => {
-                    const updated = [...lists];
-                    updated[listIndex].editingTitle = false;
-                    setLists(updated);
-                  }}
-                  style={styles.BoardDetailslistTitleInput}
-                />
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    const updated = [...lists];
-                    updated[listIndex].editingTitle = true;
-                    setLists(updated);
-                  }}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <Text style={styles.BoardDetailslistTitle}>
-                    {list.title || "Untitled List"}
-                  </Text>
-                  {longPressedListId === list.id && (
-                    <TouchableOpacity
-                      onPress={() => handleDeleteList(list.id)}
-                      style={styles.deleteButton}
-                    >
-                      <Ionicons name="trash-outline" size={20} color="red" />
-                    </TouchableOpacity>
-                  )}
-                </TouchableOpacity>
-              )}
+      <View style={[styles.BoardDetailscontent, { flex: 1 }]}>
+        <Animated.View style={{ flex: 1 }}>
+          <FlatList
+            data={lists}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ alignItems: "flex-start" }} // push lists to top
+            renderItem={({ item: list, index: listIndex }) => {
+              const eyeVisible = listEyeVisibility[list.id] ?? true;
+              const isListDropdownVisible = listDropdownVisibleFor === list.id;
+              const cardsToRender = eyeVisible ? list.cards : [];
 
-              <FlatList
-                data={list.cards}
-                keyExtractor={(card, i) => i.toString()}
-                renderItem={({
-                  item: card,
-                  index: cardIndex,
-                }: {
-                  item: any;
-                  index: number;
-                }) => {
-                  if (card.isInput) {
-                    // Show as a normal card with placeholder text, turn into input on tap
-                    if (!card.editing) {
+              return (
+                <View
+                  key={list.id}
+                  style={[
+                    styles.BoardDetailslistCard,
+                    {
+                      minWidth: 100,
+                      maxWidth: SCREEN_WIDTH * 0.4,
+                      flexShrink: 1,
+                      marginRight: 12,
+                      borderRadius: 8, // reduced from 12 to 8
+                      minHeight: 200,
+                      borderColor: "#444",
+                      maxHeight: SCREEN_WIDTH * 0.5,
+                    },
+                  ]}
+                >
+                  {list.editingTitle ? (
+                    <TextInput
+                      value={list.title}
+                      placeholder="Enter list title"
+                      placeholderTextColor="gray"
+                      onChangeText={(text) => {
+                        const updated = [...lists];
+                        updated[listIndex].title = text;
+                        setLists(updated);
+                      }}
+                      onSubmitEditing={() => {
+                        const updated = [...lists];
+                        updated[listIndex].editingTitle = false;
+                        setLists(updated);
+                      }}
+                      style={[
+                        styles.BoardDetailslistTitleInput,
+                        { paddingHorizontal: 8, fontSize: 14 * 0.7 },
+                      ]}
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 6,
+                        justifyContent: "space-between",
+                        paddingHorizontal: 8,
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.BoardDetailslistTitle,
+                          { fontSize: 14 * 0.7, flex: 1 },
+                        ]}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {list.title || "Untitled List"}
+                      </Text>
+
+                      {/* Eye toggle */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          const newVisibility = !eyeVisible;
+                          setListEyeVisibility({
+                            ...listEyeVisibility,
+                            [list.id]: newVisibility,
+                          });
+                          Alert.alert(
+                            "Visibility",
+                            newVisibility
+                              ? "List visibility turned ON"
+                              : "List visibility turned OFF"
+                          );
+                        }}
+                        style={{ marginRight: 12 }}
+                      >
+                        <Ionicons
+                          name={eyeVisible ? "eye" : "eye-off"}
+                          size={22 * 0.7}
+                          color="white"
+                        />
+                      </TouchableOpacity>
+
+                      {/* List ellipsis button */}
+                      <TouchableOpacity
+                        onPress={() =>
+                          setListDropdownVisibleFor(
+                            isListDropdownVisible ? null : list.id
+                          )
+                        }
+                      >
+                        <Ionicons
+                          name="ellipsis-vertical"
+                          size={22 * 0.7}
+                          color="white"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  <ListDropdownMenu
+                    visible={isListDropdownVisible}
+                    onDeleteList={() => {
+                      handleDeleteList(list.id);
+                      setListDropdownVisibleFor(null);
+                    }}
+                    onClose={() => setListDropdownVisibleFor(null)}
+                    eyeVisible={eyeVisible}
+                    onToggleEye={(val) =>
+                      setListEyeVisibility({
+                        ...listEyeVisibility,
+                        [list.id]: val,
+                      })
+                    }
+                    style={{ top: 36, right: 12 }}
+                  />
+
+                  <FlatList
+                    data={cardsToRender}
+                    keyExtractor={(card) => card.id}
+                    // No fixed height here; grows naturally with content (maxHeight set on list container)
+                    renderItem={({ item: card, index: cardIndex }) => {
+                      const allTodosCompleted =
+                        card.checklists &&
+                        card.checklists.length > 0 &&
+                        card.checklists.every(
+                          (cl) =>
+                            cl.todos.length > 0 &&
+                            cl.todos.every((todo) => todo.completed)
+                        );
+
+                      const cardDropdownVisible =
+                        cardDropdownVisibleFor?.listId === list.id &&
+                        cardDropdownVisibleFor?.cardId === card.id;
+
                       return (
                         <TouchableOpacity
+                          activeOpacity={0.96}
                           onPress={() => {
-                            const updated = [...lists];
-                            updated[listIndex].cards[cardIndex].editing = true;
-                            setLists(updated);
-                          }}
-                          style={styles.BoardDetailscard}
-                        >
-                          <Ionicons
-                            name="ellipse-outline"
-                            size={24}
-                            color="#555"
-                          />
-                          <View style={{ flex: 1 }}>
-                            <Text
-                              style={{
-                                color: "#888",
-                                fontSize: styles.BoardDetailscardText.fontSize,
-                                fontWeight:
-                                  styles.BoardDetailscardText.fontWeight,
-                              }}
-                            >
-                              {"Enter card name here..."}
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            onPress={() => {
+                            if (!card.isInput && card.text.trim().length > 0) {
                               setSelectedCard(card);
                               setCardMenuVisible(true);
-                            }}
-                            style={{ marginLeft: "auto" }}
-                          >
-                            <Ionicons
-                              name="ellipsis-vertical-sharp"
-                              size={30}
-                              color="white"
-                            />
-                          </TouchableOpacity>
-                        </TouchableOpacity>
-                      );
-                    } else {
-                      // Show styled input for editing
-                      return (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            backgroundColor: isDark ? "#23253A" : "#f4f6fa",
-                            borderRadius: 12,
-                            paddingVertical: 10,
-                            paddingHorizontal: 14,
-                            marginBottom: 10,
-                            borderWidth: 1,
-                            borderColor: isDark ? "#2C8CFF" : "#B3B3B3",
-                            shadowColor: isDark ? "#000" : "#ccc",
-                            shadowOpacity: 0.08,
-                            shadowRadius: 4,
-                            elevation: 2,
-                          }}
-                        >
-                          <Ionicons
-                            name="ellipse-outline"
-                            size={22}
-                            color={isDark ? "#BFC9D6" : "#888"}
-                            style={{ marginRight: 8 }}
-                          />
-                          <TextInput
-                            placeholder="Enter card name here..."
-                            placeholderTextColor={isDark ? "#BFC9D6" : "#888"}
-                            style={{
-                              flex: 1,
-                              fontSize: 16,
-                              color: isDark ? "#fff" : "#22345A",
-                              paddingVertical: 0,
-                              backgroundColor: "transparent",
-                            }}
-                            value={
-                              card.text === "Enter card name here..."
-                                ? ""
-                                : card.text
+                              setCardDropdownVisibleFor(null);
                             }
-                            autoFocus
-                            onChangeText={(text) => {
-                              const updated = [...lists];
-                              updated[listIndex].cards[cardIndex].text = text;
-                              setLists(updated);
-                            }}
-                            onSubmitEditing={() => {
-                              const updated = [...lists];
-                              const text =
-                                updated[listIndex].cards[cardIndex].text.trim();
-                              if (text) {
-                                updated[listIndex].cards[cardIndex].isInput =
-                                  false;
-                                updated[listIndex].cards[cardIndex].editing =
-                                  false;
-                                // Add a new input card at the end
-                                updated[listIndex].cards.push({
-                                  text: "Enter card name here...",
-                                  completed: false,
-                                  isInput: true,
-                                });
-                                setLists(updated);
-                              }
-                            }}
-                            onBlur={() => {
-                              const updated = [...lists];
-                              updated[listIndex].cards[cardIndex].editing =
-                                false;
-                              setLists(updated);
-                            }}
-                            returnKeyType="done"
-                          />
-                          <TouchableOpacity
-                            onPress={() => {
-                              const updated = [...lists];
-                              const text =
-                                updated[listIndex].cards[cardIndex].text.trim();
-                              if (text) {
-                                updated[listIndex].cards[cardIndex].isInput =
-                                  false;
-                                updated[listIndex].cards[cardIndex].editing =
-                                  false;
-                                updated[listIndex].cards.push({
-                                  text: "Enter card name here...",
-                                  completed: false,
-                                  isInput: true,
-                                });
-                                setLists(updated);
-                              }
-                            }}
-                            style={{
-                              marginLeft: 8,
-                              backgroundColor: isDark
-                                ? "#2C8CFF"
-                                : PRIMARY_COLOR,
-                              borderRadius: 6,
-                              padding: 6,
-                            }}
-                          >
-                            <Ionicons name="add" size={20} color="#fff" />
-                          </TouchableOpacity>
-                        </View>
-                      );
-                    }
-                  } else {
-                    // Normal card
-                    return (
-                      <TouchableOpacity
-                        onLongPress={() =>
-                          setLongPressedCardId({ listId: list.id, cardIndex })
-                        }
-                        onPress={() => {
-                          const updated = [...lists];
-                          updated[listIndex].cards[cardIndex].completed =
-                            !updated[listIndex].cards[cardIndex].completed;
-                          setLists(updated);
-                          setLongPressedCardId(null);
-                        }}
-                        style={styles.BoardDetailscard}
-                      >
-                        {card.completed ? (
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={24}
-                            color="#2ecc71"
-                          />
-                        ) : (
-                          <Ionicons
-                            name="ellipse-outline"
-                            size={24}
-                            color="#555"
-                          />
-                        )}
-                        <View style={{ flex: 1 }}>
-                          <Text
-                            style={{
-                              color: styles.BoardDetailscardText.color,
-                              fontSize: styles.BoardDetailscardText.fontSize,
-                              fontWeight:
-                                styles.BoardDetailscardText.fontWeight,
-                              ...(card.completed
-                                ? {
-                                    color:
-                                      styles.BoardDetailscompletedText.color,
-                                    textDecorationLine:
-                                      styles.BoardDetailscompletedText
-                                        .textDecorationLine,
-                                  }
-                                : {}),
-                            }}
-                          >
-                            {card.text}
-                          </Text>
-                        </View>
-                        {longPressedCardId?.listId === list.id &&
-                        longPressedCardId?.cardIndex === cardIndex ? (
+                          }}
+                          style={[
+                            styles.BoardDetailscard,
+                            card.coverColor
+                              ? { backgroundColor: card.coverColor }
+                              : {},
+                            card.coverImage && !card.coverColor
+                              ? { backgroundColor: "transparent" }
+                              : {},
+                            card.coverImage
+                              ? { borderRadius: 5, overflow: "hidden" }
+                              : {},
+                            { marginBottom: 6 },
+                            {
+                              width: SCREEN_WIDTH * 0.35,
+                            },
+                          ]}
+                          key={card.id}
+                          onLongPress={() =>
+                            handleLongPressCard(list.id, cardIndex)
+                          }
+                        >
+                          {/* Circle toggle */}
                           <TouchableOpacity
                             onPress={() =>
-                              handleDeleteCard(listIndex, cardIndex)
+                              toggleAllTodosForCard(listIndex, cardIndex)
                             }
-                            style={{ marginLeft: "auto" }}
+                            style={{ marginRight: 1 }}
                           >
                             <Ionicons
-                              name="trash-outline"
-                              size={24}
-                              color="red"
+                              name={
+                                allTodosCompleted
+                                  ? "checkmark-circle"
+                                  : "ellipse-outline"
+                              }
+                              size={12}
+                              color={allTodosCompleted ? "#2ecc71" : "#fff"}
                             />
                           </TouchableOpacity>
-                        ) : (
-                          <TouchableOpacity
-                            onPress={() => {
-                              setSelectedCard(card);
-                              setCardMenuVisible(true);
-                            }}
-                            style={{ marginLeft: "auto" }}
-                          >
-                            <Ionicons
-                              name="ellipsis-vertical-sharp"
-                              size={30}
-                              color="white"
+
+                          {card.coverImage && (
+                            <ImageBackground
+                              source={{ uri: card.coverImage }}
+                              style={[
+                                StyleSheet.absoluteFill,
+                                { borderRadius: 12 },
+                              ]}
+                              imageStyle={{ borderRadius: 12 }}
+                              resizeMode="cover"
                             />
-                          </TouchableOpacity>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  }
-                }}
-              />
-            </TouchableOpacity>
-          )}
-        />
+                          )}
+
+                          <View style={{ flex: 1 }}>
+                            <Text
+                              style={[
+                                styles.BoardDetailscardText,
+                                card.coverColor ? { color: "white" } : {},
+                                card.completed && {
+                                  color: styles.BoardDetailscompletedText.color,
+                                  textDecorationLine:
+                                    styles.BoardDetailscompletedText
+                                      .textDecorationLine,
+                                },
+                                { zIndex: 1, fontSize: 9 },
+                              ]}
+                              numberOfLines={2}
+                              ellipsizeMode="tail"
+                            >
+                              {card.text}
+                            </Text>
+
+                            {card.checklists && card.checklists.length > 0 && (
+                              <Text
+                                style={[
+                                  styles.todoProgressText,
+                                  { zIndex: 1, fontSize: 6 },
+                                ]}
+                              >
+                                {(() => {
+                                  let total = 0;
+                                  let done = 0;
+                                  card.checklists.forEach((cl) => {
+                                    total += cl.todos.length;
+                                    done += cl.todos.filter(
+                                      (t) => t.completed
+                                    ).length;
+                                  });
+                                  return total > 0
+                                    ? `${done}/${total} done`
+                                    : "";
+                                })()}
+                              </Text>
+                            )}
+                          </View>
+
+                          {/* Smaller card ellipsis dropdown trigger */}
+                          {!card.isInput && card.text.trim().length > 0 && (
+                            <TouchableOpacity
+                              onPress={() =>
+                                setCardDropdownVisibleFor(
+                                  cardDropdownVisible
+                                    ? null
+                                    : { listId: list.id, cardId: card.id }
+                                )
+                              }
+                              style={{ marginLeft: "auto" }}
+                            >
+                              <Ionicons
+                                name="ellipsis-vertical"
+                                size={14}
+                                color="white"
+                              />
+                            </TouchableOpacity>
+                          )}
+
+                          {cardDropdownVisible && (
+                            <CardDropdownMenu
+                              style={{ top: 30, right: 10 }}
+                              onArchive={() => Alert.alert("Archive card")}
+                              onDelete={() => {
+                                handleDeleteCard(listIndex, cardIndex);
+                                setCardDropdownVisibleFor(null);
+                              }}
+                              onRename={() => Alert.alert("Rename card")}
+                              onCopy={() => Alert.alert("Copy card")}
+                              onClose={() => setCardDropdownVisibleFor(null)}
+                            />
+                          )}
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
+
+                  {eyeVisible && (
+                    <TouchableOpacity
+                      style={{
+                        marginTop: 8,
+                        paddingVertical: 7,
+                        paddingHorizontal: 8,
+                        backgroundColor: "rgba(255,255,255,0.15)",
+                        borderRadius: 8,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      onPress={() => addCardToList(listIndex)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="add" size={14} color="white" />
+                      <Text
+                        style={{
+                          color: "white",
+                          marginLeft: 6,
+                          fontWeight: "600",
+                          fontSize: 14 * 0.7,
+                        }}
+                      >
+                        Add Card
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              );
+            }}
+          />
+        </Animated.View>
       </View>
 
       {/* Board Title Modal */}
@@ -547,4 +765,106 @@ export default function BoardDetails() {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  dropdownOverlay: {
+    position: "absolute",
+    zIndex: 1000,
+  },
+  dropdownMenu: {
+    backgroundColor: "#222",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    minWidth: 140,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 10,
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+  },
+  dropdownText: {
+    color: "white",
+    fontSize: 14 * 0.7,
+  },
+  destructiveText: {
+    color: "#ff6b6b",
+  },
+  cancelText: {
+    color: "#3b82f6",
+    fontWeight: "600",
+  },
+
+  todoProgressText: {
+    marginTop: 4,
+    fontSize: 11,
+    color: "#ddd",
+  },
+
+  BoardDetailslistCard: {
+    backgroundColor: "#222",
+    borderRadius: 1, // reduced from 12 to 8
+    padding: 8,
+    marginVertical: 6,
+    minWidth: 150,
+    maxWidth: SCREEN_WIDTH * 0.3,
+    flexShrink: 1,
+    minHeight: 200,
+    maxHeight: SCREEN_WIDTH * 0.4,
+  },
+
+  BoardDetailslistTitle: {
+    color: "white",
+    fontSize: 14 * 0.5,
+  },
+
+  BoardDetailslistTitleInput: {
+    color: "white",
+    fontSize: 14 * 0.7,
+    fontWeight: "600",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    backgroundColor: "#333",
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+
+  BoardDetailscard: {
+    marginBottom: 6,
+    borderRadius: 12,
+    backgroundColor: "#333",
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  BoardDetailscardText: {
+    color: "white",
+    fontSize: 14 * 0.7,
+  },
+
+  BoardDetailscompletedText: {
+    color: "#888",
+    textDecorationLine: "line-through",
+  },
+
+  BoardDetailscreatelist: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3b3b3b",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    position: "absolute",
+    bottom: 50,
+    alignSelf: "center",
+    width: SCREEN_WIDTH * 0.5,
+    zIndex: 1000,
+    elevation: 5,
+  },
+  fixedCreateListButton: {},
+});
