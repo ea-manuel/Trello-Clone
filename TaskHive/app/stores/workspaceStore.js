@@ -123,32 +123,76 @@ export const useWorkspaceStore = create((set, get) => ({
 
   setCurrentWorkspaceId: (id) => set({ currentWorkspaceId: id }),
 
-  // CREATE BOARD LOCALLY (no backend)
-  createBoard: ({ title, workspaceId, backgroundColor }) => {
-    const newBoard = {
-      id: `board-${nextId++}`,
-      title,
-      workspaceId,
-      backgroundColor: backgroundColor || "#ADD8E6",
-      createdAt: Date.now(),
-      lists: [],
-      isFavorite: false,
-    };
-    set((state) => ({
-      boards: [...state.boards, newBoard],
-    }));
-    return newBoard;
+
+  // CREATE BOARD (Backend)
+  createBoard: async ({ title, workspaceId, backgroundColor }) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axiosClient.post(
+        "/api/boards",
+        { title, workspaceId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const newBoard = {
+        ...response.data,
+        backgroundColor: backgroundColor || "#ADD8E6",
+        createdAt: Date.now(),
+        lists: [],
+        isFavorite: false,
+      };
+      set((state) => ({
+        boards: [...state.boards, newBoard],
+      }));
+      return newBoard;
+    } catch (error) {
+      console.error("Failed to create board:", error.response?.data || error.message);
+      throw error;
+    }
   },
 
-  deleteBoard: (boardId) => {
-    set((state) => ({
-      boards: state.boards.filter((b) => b.id !== boardId),
-    }));
+  // DELETE BOARD (Backend, if endpoint exists, else local only)
+  deleteBoard: async (boardId) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      // If you have a backend endpoint, uncomment the next line:
+      // await axiosClient.delete(`/api/boards/${boardId}`, { headers: { Authorization: `Bearer ${token}` } });
+      set((state) => ({
+        boards: state.boards.filter((b) => b.id !== boardId),
+      }));
+    } catch (error) {
+      console.error("Failed to delete board:", error.response?.data || error.message);
+      throw error;
+    }
   },
 
-  // GET BOARDS LOCALLY (no backend)
-  getBoards: (workspaceId) => {
-    return get().boards.filter((b) => b.workspaceId === workspaceId);
+  // GET BOARDS (Backend, robust to non-array response)
+  getBoards: async (workspaceId) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      const response = await axiosClient.get(`/api/boards/${workspaceId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const boardsArr = Array.isArray(response.data) ? response.data : [];
+      set((state) => ({
+        boards: boardsArr.map((b) => ({
+          ...b,
+          backgroundColor: b.backgroundColor || "#ADD8E6",
+          lists: b.lists || [],
+          isFavorite: b.isFavorite || false,
+        })),
+      }));
+      return boardsArr;
+    } catch (error) {
+      console.error("Failed to fetch boards:", error.response?.data || error.message);
+      throw error;
+    }
   },
 
   getWorkspaces: () => {

@@ -17,6 +17,8 @@ import com.taskhive.taskhive_backend.model.Workspace;
 import com.taskhive.taskhive_backend.repository.WorkspaceRepository;
 import com.taskhive.taskhive_backend.service.BoardService;
 import com.taskhive.taskhive_backend.service.UserService;
+import com.taskhive.taskhive_backend.dto.BoardDTO;
+import java.util.stream.Collectors;
 import java.security.Principal;
 
 @RestController
@@ -33,7 +35,7 @@ public class BoardController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<Board> createBoard(@RequestBody Map<String, String> request) {
+    public ResponseEntity<BoardDTO> createBoard(@RequestBody Map<String, String> request) {
         Long workspaceId = Long.parseLong(request.get("workspaceId"));
         String title = request.get("title");
 
@@ -45,14 +47,20 @@ public class BoardController {
         board.setWorkspace(workspace);
         // (Reverted) Do not set user field
 
-        return ResponseEntity.ok(boardService.createBoard(board));
+        Board saved = boardService.createBoard(board);
+        BoardDTO dto = new BoardDTO(saved.getId(), saved.getTitle(), saved.getWorkspace().getId());
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/{workspaceId}")
-    public ResponseEntity<List<Board>> getBoardsByWorkspace(@PathVariable Long workspaceId) {
+    public ResponseEntity<List<BoardDTO>> getBoardsByWorkspace(@PathVariable Long workspaceId) {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new RuntimeException("Workspace not found"));
 
-        return ResponseEntity.ok(boardService.getBoardsByWorkspace(workspace));
+        List<BoardDTO> dtos = boardService.getBoardsByWorkspace(workspace)
+            .stream()
+            .map(b -> new BoardDTO(b.getId(), b.getTitle(), b.getWorkspace().getId()))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }

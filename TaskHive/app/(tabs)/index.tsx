@@ -111,12 +111,14 @@ export default function HomeScreen() {
     ? workspaces.find(ws => ws.id === workspaceId) || workspaces[0]
     : workspaces[0];
 
-  // Load boards for selected workspace
+  // Load boards for selected workspace (async)
   useEffect(() => {
     if (selectedWorkspace) {
-      const fetchedBoards = getBoards(selectedWorkspace.id);
-      setBoards(fetchedBoards);
-      console.log('HomeScreen: Current boards state for workspace', selectedWorkspace.id, ':', JSON.stringify(fetchedBoards, null, 2));
+      (async () => {
+        const fetchedBoards = await getBoards(selectedWorkspace.id);
+        setBoards(fetchedBoards);
+        console.log('HomeScreen: Current boards state for workspace', selectedWorkspace.id, ':', JSON.stringify(fetchedBoards, null, 2));
+      })();
     }
   }, [selectedWorkspace]);
 
@@ -139,13 +141,14 @@ export default function HomeScreen() {
     }
   }, [params.board]);
 
-  const handleCreateBoard = () => {
+  const handleCreateBoard = async () => {
     if (!boardTitle.trim()) return;
-    const newBoard = createBoard({
+    const newBoard = await createBoard({
       title: boardTitle,
       workspaceId: selectedWorkspace.id
     });
-    setBoards(getBoards(selectedWorkspace.id));
+    const updatedBoards = await getBoards(selectedWorkspace.id);
+    setBoards(updatedBoards);
     setRecents(prev => [
       { id: `recent-${Date.now()}`, message: `"${newBoard.title}" board created.`, timestamp: Date.now() },
       ...prev
@@ -170,11 +173,9 @@ export default function HomeScreen() {
 
   const confirmDeleteBoard = async () => {
     if (boardToDelete !== null) {
-      setBoards(prev => {
-        const newBoards = prev.filter(board => board.id !== boardToDelete);
-        console.log('HomeScreen: Deleted board', boardToDelete, 'New boards:', JSON.stringify(newBoards, null, 2));
-        return newBoards;
-      });
+      await deleteBoard(boardToDelete);
+      const updatedBoards = await getBoards(selectedWorkspace.id);
+      setBoards(updatedBoards);
       const deletedBoard = boards.find(b => b.id === boardToDelete);
       if (deletedBoard) {
         setRecents(prev => [
@@ -182,13 +183,13 @@ export default function HomeScreen() {
           ...prev
         ]);
         await addNotification({
-          type: "success", // Changed from "Board Deleted"
+          type: "success",
           text: `Board "${deletedBoard.title}" was deleted.`,
         });
       }
       setBoardToDelete(null);
       setLongPressedBoardId(null);
-      setShowDeleteModal(false); // <-- Ensure modal closes
+      setShowDeleteModal(false);
     }
   };
 

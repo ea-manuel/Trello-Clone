@@ -302,13 +302,8 @@ export default function RootLayout() {
              <CreateWorkspaceModal
   visible={createModalVisible}
   onClose={() => setCreateModalVisible(false)}
-  onCreate={async (workspaceData) => {
-    try {
-      await useWorkspaceStore.getState().createWorkspace(workspaceData);
-      setCreateModalVisible(false);
-    } catch (error) {
-      Alert.alert("Error", "Failed to create workspace");
-    }
+  onCreate={() => {
+    setCreateModalVisible(false);
   }}
 />
 
