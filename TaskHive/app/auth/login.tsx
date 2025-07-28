@@ -1,18 +1,8 @@
 // app/auth/login.tsx
+import { Alert, ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, BackHandler } from "react-native";
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,6 +27,23 @@ export default function Login() {
 
   console.log("Redirect URI:", redirectUri);
   const router = useRouter();
+
+  // Prevent back button from leaving login screen if not authenticated
+  useEffect(() => {
+    const backAction = async () => {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        // Prevent back navigation
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    return () => backHandler.remove();
+  }, []);
 
   // 👇 Google OAuth setup
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -95,7 +102,7 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await axios.post("http://10.36.13.131:8080/api/auth/login", {
+      const response = await axios.post("http://192.168.137.73:8080/api/auth/login", {
         email,
         password
       });
@@ -271,21 +278,8 @@ const styles = StyleSheet.create({
     marginTop: -40,
     // textTransform: "lowercase"
   },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#B3B3B3",
-    borderRadius: 5,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 25,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-  },
+  // shadowRadius: 2,
+  // elevation: 2,
   terms: {
     fontSize: 13,
     color: "#222",
@@ -337,7 +331,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10,
   },
-
   socialButtonText: {
     fontSize: 16,
     color: "#222",

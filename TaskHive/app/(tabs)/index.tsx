@@ -24,6 +24,7 @@ import BoardCard from "../../components/BoardCard";
 import NotificationToast from "../../components/NotificationToast";
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BackHandler } from 'react-native';
 import { useOfflineBoardsStore } from "../stores/offlineBoardsStore";
 
 export default function HomeScreen() {
@@ -73,6 +74,20 @@ export default function HomeScreen() {
       const uri = await AsyncStorage.getItem("profileImageUri");
       if (uri) setProfileImage(uri);
     })();
+  }, []);
+
+  // Prevent back button from navigating to previous app states
+  useEffect(() => {
+    const backAction = () => {
+      // Optionally, show a confirmation or just prevent navigation
+      // Returning true disables default back behavior
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+    return () => backHandler.remove();
   }, []);
 
   useEffect(() => {

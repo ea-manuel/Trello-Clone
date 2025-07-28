@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -19,6 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "../ThemeContext";
 import { lightTheme, darkTheme } from "../styles/themes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getCurrentUser } from '../src/api/userApi';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -36,12 +37,16 @@ export default function SettingsContent({
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
+  const [user, setUser] = useState<{ name?: string; username?: string; email?: string } | null>(null);
 
   // Load profile image from AsyncStorage on mount
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const uri = await AsyncStorage.getItem("profileImageUri");
       if (uri) setProfileImage(uri);
+      // Fetch user info from backend
+      const userInfo = await getCurrentUser();
+      if (userInfo) setUser(userInfo);
     })();
   }, []);
 
@@ -215,9 +220,9 @@ export default function SettingsContent({
             {profileImage ? "Change Photo" : "Add Photo"}
           </Text>
         </TouchableOpacity>
-        <Text style={styles.profileText}>TaskHive User</Text>
-        <Text style={styles.profileText}>@taskhiveuser1324</Text>
-        <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
+        <Text style={styles.profileText}>{user?.name || "TaskHive User"}</Text>
+        <Text style={styles.profileText}>{user?.username ? `@${user.username}` : "@taskhiveuser1324"}</Text>
+        <Text style={styles.profileText}>{user?.email || "taskhiveuser@gmail.com"}</Text>
       </View>
       {/* Full Image Modal */}
       <Modal visible={showFullImage} transparent animationType="fade">
