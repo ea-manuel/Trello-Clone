@@ -41,7 +41,7 @@ export default function Header() {
         activeOpacity={0.7}
       >
         <Ionicons name="menu-sharp" size={35} color="white" />
-        <Text style={styles.headerText}>{workspaceName} Workspace</Text>
+        <Text style={styles.headerText}>{workspaceName} workspace</Text>
       </TouchableOpacity>
 
       <View style={styles.rightIcons}>

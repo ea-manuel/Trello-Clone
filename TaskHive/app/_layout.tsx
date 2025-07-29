@@ -24,6 +24,8 @@ import CreateWorkspaceModal from "@/components/CreateWorkspaceModal";
 import EditWorkspaceModal from "@/components/EditWorkspaceModal";
 import Header from "@/components/Header";
 import WorkspaceMenuModal from "@/components/WorkspaceMenuModal"; // Import the new modal
+import ChatSection from "@/components/ChatSection";
+import ChatModal from "@/components/ChatModal";
 import { useWorkspaceStore } from "../app/stores/workspaceStore";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
@@ -82,6 +84,7 @@ export default function RootLayout() {
   const [selectedWorkspaceIds, setSelectedWorkspaceIds] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const [chatModalVisible, setChatModalVisible] = useState(false);
 
   // Initialize store when app starts
   useEffect(() => {
@@ -251,6 +254,11 @@ export default function RootLayout() {
                   )}
                 </View>
               ))}
+              {/* Chat Section */}
+              <ChatSection
+                onOpenChat={() => setChatModalVisible(true)}
+                styles={styles}
+              />
               {/* Floating Bulk Delete FAB */}
               {selectionMode && selectedWorkspaceIds.length > 0 && (
                 <View style={{ position: 'absolute', right: 24, bottom: 32, zIndex: 2000, flexDirection: 'row', alignItems: 'center' }}>
@@ -394,6 +402,11 @@ export default function RootLayout() {
       <StatusBar
         style={colorScheme === "dark" ? "light" : "light"}
         backgroundColor={colorScheme === "dark" ? "#34495e" : "#34495e"}
+      />
+      <ChatModal
+        visible={chatModalVisible}
+        onClose={() => setChatModalVisible(false)}
+        styles={styles}
       />
     </ThemeProvider>
   );

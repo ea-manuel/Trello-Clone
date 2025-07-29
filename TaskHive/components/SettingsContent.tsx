@@ -49,6 +49,7 @@ export default function SettingsContent({
       const token = await AsyncStorage.getItem('authToken');
       if (token) {
         const userInfo = await getCurrentUser(token);
+        console.log('SettingsContent: Received user info:', userInfo);
         if (userInfo) setUser(userInfo);
       }
     })();
