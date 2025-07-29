@@ -1,54 +1,36 @@
 package com.taskhive.taskhive_backend.controller;
 
-import java.security.Principal;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import com.taskhive.taskhive_backend.dto.UserProfileResponse;
 import com.taskhive.taskhive_backend.model.User;
 import com.taskhive.taskhive_backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    // ✅ Get current user profile
-    @GetMapping("/profile")
-    public ResponseEntity<User> getCurrentUserProfile(Principal principal) {
-        String email = principal.getName();
-        User user = userService.getUserByEmail(email);
-        return ResponseEntity.ok(user);
-    }
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getCurrentUser(Authentication authentication) {
+        String email = authentication.getName(); // extracted from JWT
+        Optional<User> optionalUser = userService.findByEmail(email);
+if (optionalUser.isEmpty()) {
+    return ResponseEntity.notFound().build();
+}
+User user = optionalUser.get();
 
-    // ✅ Update profile picture
-    @PutMapping("/profile-picture")
-    public ResponseEntity<?> updateProfilePicture(
-            @RequestBody ProfilePictureRequest request,
-            Principal principal) {
 
-        String email = principal.getName();
-        User user = userService.getUserByEmail(email);
-        user.setProfilePictureUrl(request.getProfilePictureUrl());
-        userService.saveUser(user);
+        UserProfileResponse response = new UserProfileResponse(
+            user.getUsername(), // use the username field
+            user.getEmail()
+        );
 
-        return ResponseEntity.ok().body("Profile picture updated successfully");
-    }
-
-    // ✅ Inner class to map request JSON
-    public static class ProfilePictureRequest {
-        private String profilePictureUrl;
-
-        public String getProfilePictureUrl() {
-            return profilePictureUrl;
-        }
-
-        public void setProfilePictureUrl(String profilePictureUrl) {
-            this.profilePictureUrl = profilePictureUrl;
-        }
+        return ResponseEntity.ok(response);
     }
 }
-

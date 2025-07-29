@@ -14,17 +14,9 @@ const getRandomColor = () => {
 let nextId = 2;
 
 export const useWorkspaceStore = create((set, get) => ({
-  workspaces: [
-    {
-      id: "ws-1",
-      name: "Default",
-      visibility: "Private",
-      createdAt: Date.now(),
-      badgeColor: "#2980B9",
-    },
-  ],
+  workspaces: [],
   boards: [],
-  currentWorkspaceId: "ws-1",
+  currentWorkspaceId: null,
 
   // ✅ CREATE WORKSPACE (Updated)
   createWorkspace: async ({ name, visibility }) => {
@@ -37,7 +29,7 @@ export const useWorkspaceStore = create((set, get) => ({
 
       const response = await axiosClient.post(
         "/workspaces",
-        { name }, // visibility is not required by backend
+        { name },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -176,6 +168,7 @@ export const useWorkspaceStore = create((set, get) => ({
     try {
       const token = await AsyncStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
+      if (!workspaceId) throw new Error("No workspace selected");
       const response = await axiosClient.get(`/api/boards/${workspaceId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

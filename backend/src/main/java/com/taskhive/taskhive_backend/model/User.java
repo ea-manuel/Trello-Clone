@@ -1,23 +1,15 @@
 package com.taskhive.taskhive_backend.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -36,16 +28,31 @@ public class User implements UserDetails {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "profile_picture_url")
-    private String profilePictureUrl;
+    private String otp;
 
-    @JsonIgnore
+    private LocalDateTime otpExpiry;
+
+    private boolean isVerified = false;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Board> boards = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Workspace> workspaces = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "users")
+    @JsonIgnore
+    private Set<Workspace> sharedWorkspaces;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "user-comments")
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "assignedUser")
+    @JsonManagedReference(value = "user-assigned-cards")
+    private List<Card> assignedCards = new ArrayList<>();
 
     public User() {}
 
@@ -54,6 +61,8 @@ public class User implements UserDetails {
         this.email = email;
         this.passwordHash = passwordHash;
     }
+
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -83,6 +92,30 @@ public class User implements UserDetails {
         this.passwordHash = passwordHash;
     }
 
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public LocalDateTime getOtpExpiry() {
+        return otpExpiry;
+    }
+
+    public void setOtpExpiry(LocalDateTime otpExpiry) {
+        this.otpExpiry = otpExpiry;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        isVerified = verified;
+    }
+
     public List<Board> getBoards() {
         return boards;
     }
@@ -92,22 +125,38 @@ public class User implements UserDetails {
     }
 
     public List<Workspace> getWorkspaces() {
-        return this.workspaces;
+        return workspaces;
     }
 
     public void setWorkspaces(List<Workspace> workspaces) {
         this.workspaces = workspaces;
     }
 
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
+    public Set<Workspace> getSharedWorkspaces() {
+        return sharedWorkspaces;
     }
 
-    public void setProfilePictureUrl(String profilePictureUrl) {
-        this.profilePictureUrl = profilePictureUrl;
+    public void setSharedWorkspaces(Set<Workspace> sharedWorkspaces) {
+        this.sharedWorkspaces = sharedWorkspaces;
     }
 
-    // Spring Security methods
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public List<Card> getAssignedCards() {
+        return assignedCards;
+    }
+
+    public void setAssignedCards(List<Card> assignedCards) {
+        this.assignedCards = assignedCards;
+    }
+
+    // Spring Security
 
     @JsonIgnore
     @Override
@@ -142,7 +191,7 @@ public class User implements UserDetails {
     @JsonIgnore
     @Override
     public boolean isEnabled() {
-        return true;
+        return isVerified;
     }
 
     @Override

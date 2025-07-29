@@ -3,6 +3,8 @@ package com.taskhive.taskhive_backend.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,13 +30,43 @@ public class TaskList {
     // Many lists belong to one board
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)
-    public Board board;
+    @JsonBackReference
+    private Board board;
 
     // One list can have many cards
     @OneToMany(mappedBy = "list", cascade = CascadeType.ALL)
     private List<Card> cards = new ArrayList<>();
 
-    // Getters and setters can be added/generated
+    // ✅ Required for Jackson (JSON to Object)
+    public TaskList() {
+    }
+
+    // Getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
+    }
 }
-
-

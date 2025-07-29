@@ -10,23 +10,28 @@ import org.springframework.stereotype.Service;
 
 import com.taskhive.taskhive_backend.model.User;
 import com.taskhive.taskhive_backend.repository.UserRepository;
+import com.taskhive.taskhive_backend.security.CustomUserDetails;
 
 @Service
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.taskhive.taskhive_backend.repository.WorkspaceRepository workspaceRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, com.taskhive.taskhive_backend.repository.WorkspaceRepository workspaceRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.workspaceRepository = workspaceRepository;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-    }
+   @Override
+public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    return new CustomUserDetails(user); // ✅ Wrap user in CustomUserDetails
+}
+
 
     public User registerUser(String username, String email, String password) {
         if (userRepository.existsByEmail(email)) {
@@ -38,7 +43,16 @@ public class UserService implements UserDetailsService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Create default workspace for new user
+        com.taskhive.taskhive_backend.model.Workspace defaultWorkspace = new com.taskhive.taskhive_backend.model.Workspace();
+        defaultWorkspace.setName("My Workspace");
+        defaultWorkspace.setOwner(savedUser);
+        defaultWorkspace.addUser(savedUser);
+        workspaceRepository.save(defaultWorkspace);
+
+        return savedUser;
     }
 
     public Optional<User> findByEmail(String email) {
@@ -49,27 +63,8 @@ public class UserService implements UserDetailsService {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-    }
-
-    // ✅ Needed to update user fields (like profile picture)
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-    public void processOAuthPostLogin(String email, String name) {
-    Optional<User> existUser = userRepository.findByEmail(email);
-
-    if (existUser.isEmpty()) {
-        User newUser = new User();
-        newUser.setEmail(email);
-        newUser.setUsername(name != null ? name : email); // fallback to email if name is null
-        // You can set a default password or leave it null if you don't allow password login for OAuth users
-        newUser.setPassword(""); // or null if your model allows
-        // Set any default roles if you have a roles system
-        userRepository.save(newUser);
-    }
+    public boolean userExistsInDatabase(Long id) {
+    return userRepository.findById(id).isPresent();
 }
 
 }

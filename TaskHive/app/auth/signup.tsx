@@ -22,43 +22,79 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [hidepassword, setHidepassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const router = useRouter();
 
-  const handleSignup = async () => {
+  // Step 1: Send OTP to email
+  const handleVerifyEmail = async () => {
     if (!email || !username || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill all fields.");
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match.");
       return;
     }
-
     try {
-      const response = await axios.post(
-        "http://192.168.8.196:8080/api/auth/register",
-        {
-          email,
-          username,
-          password,
-        }
-      );
-
-      Alert.alert("Success", response.data);
-      router.push("/auth/login");
+      // Register user first (unverified)
+      await axios.post("http://192.168.137.166:8080/api/auth/register", {
+        email,
+        username,
+        password,
+      });
+      // Then send OTP
+      await axios.post(`http://192.168.137.166:8080/api/auth/send-otp?email=${encodeURIComponent(email)}`);
+      setShowOtpModal(true);
+      Alert.alert("OTP Sent", "Check your email for the OTP.");
     } catch (error: any) {
-      const message =
-        error?.response?.data || "Something went wrong. Please try again.";
-      Alert.alert("Signup Failed", message);
+      const message = error?.response?.data || "Failed to send OTP or register user.";
+      Alert.alert("Error", message);
     }
+  };
+
+  // Step 2: Verify OTP
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      Alert.alert("Error", "Please enter the OTP.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    try {
+      // Call backend to verify OTP (as request param)
+      const response = await axios.post(`http://192.168.137.166:8080/api/auth/verify-otp?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`);
+      if (response.data === "Account verified successfully.") {
+        setIsOtpVerified(true);
+        setShowOtpModal(false);
+        Alert.alert("Success", "Email verified. You can now sign up.");
+      } else {
+        Alert.alert("Error", "Invalid OTP. Try again.");
+      }
+    } catch (error: any) {
+      const message = error?.response?.data || "Failed to verify OTP.";
+      Alert.alert("Error", message);
+    }
+    setIsVerifyingOtp(false);
+  };
+
+  // Step 3: Signup after OTP verification
+  const handleSignup = async () => {
+    if (!isOtpVerified) {
+      Alert.alert("Error", "Please verify your email first.");
+      return;
+    }
+    // User is already registered, just show success and redirect
+    Alert.alert("Success", "Signup complete. You can now log in.");
+    router.push("/auth/login");
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Logo */}
       <Image
-        source={require("../../assets/images/splash.png")} // Use your logo image path
+        source={require("../../assets/images/splash.png")}
         style={styles.logo}
       />
 
@@ -121,7 +157,6 @@ export default function Signup() {
           secureTextEntry={hidepassword}
           autoCapitalize="none"
         />
-
         <TouchableOpacity
           onPress={() => setHidepassword(!hidepassword)}
           style={{
@@ -147,10 +182,48 @@ export default function Signup() {
         <Text style={styles.link}>Privacy Policy</Text>
       </Text>
 
-      {/* Sign up button */}
-      <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-        <Text style={styles.signupButtonText}>Sign up</Text>
-      </TouchableOpacity>
+      {/* Verify Email button (step 1) */}
+      {!isOtpVerified && (
+        <TouchableOpacity style={styles.signupButton} onPress={handleVerifyEmail}>
+          <Text style={styles.signupButtonText}>Verify Email</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Sign up button (step 3) */}
+      {isOtpVerified && (
+        <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+          <Text style={styles.signupButtonText}>Sign up</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* OTP Modal */}
+      {showOtpModal && (
+        <View style={styles.otpModalOverlay}>
+          <View style={styles.otpModalContainer}>
+            <Text style={styles.otpModalTitle}>Enter OTP</Text>
+            <TextInput
+              style={styles.otpInput}
+              placeholder="Enter OTP"
+              placeholderTextColor="#888"
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+              maxLength={6}
+              autoFocus
+            />
+            <TouchableOpacity
+              style={styles.otpVerifyButton}
+              onPress={handleVerifyOtp}
+              disabled={isVerifyingOtp}
+            >
+              <Text style={styles.otpVerifyButtonText}>{isVerifyingOtp ? "Verifying..." : "Verify"}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowOtpModal(false)}>
+              <Text style={{ color: "#1F80E0", marginTop: 10 }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Or continue with */}
       <Text style={styles.orText}>Or continue with:</Text>
@@ -308,5 +381,53 @@ const styles = StyleSheet.create({
   loginLink: {
     color: "#1F80E0",
     textDecorationLine: "underline",
+  },
+  otpModalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  otpModalContainer: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 10,
+    alignItems: "center",
+    width: "80%",
+    elevation: 5,
+  },
+  otpModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  otpInput: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#B3B3B3",
+    borderRadius: 5,
+    padding: 12,
+    fontSize: 18,
+    marginBottom: 18,
+    textAlign: "center",
+    backgroundColor: "#fff",
+  },
+  otpVerifyButton: {
+    width: "100%",
+    backgroundColor: PRIMARY_COLOR,
+    paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  otpVerifyButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

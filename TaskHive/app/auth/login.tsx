@@ -1,3 +1,4 @@
+
 // app/auth/login.tsx
 import { Alert, ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, BackHandler } from "react-native";
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
@@ -73,7 +74,7 @@ export default function Login() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://192.168.8.196:8080/api/auth/google",
+        "http://192.168.137.166:8080/api/auth/google",
         {
           token: accessToken,
         }
@@ -102,7 +103,7 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await axios.post("http://192.168.137.73:8080/api/auth/login", {
+      const response = await axios.post("http://100.112.20.102:8080/api/auth/login", {
         email,
         password
       });
@@ -276,19 +277,37 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 40,
     marginTop: -40,
-    // textTransform: "lowercase"
-  },
-  // shadowRadius: 2,
-  // elevation: 2,
+    textTransform: "lowercase",
+ 
+  shadowRadius: 2,
+  elevation: 2,
+   },
   terms: {
     fontSize: 13,
     color: "#222",
+    shadowColor: "#1F80E0",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
     marginBottom: 18,
     marginTop: 2,
     textAlign: "center",
   },
   link: {
     textDecorationLine: "underline",
+  },
+    input: {
+    width: "100%",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "#D3D3D3",
+    borderRadius: 6,
+    fontSize: 16,
+    marginBottom: 25,
+    backgroundColor: "#F9F9F9",
+    color: "#222",
   },
   signupButton: {
     width: "100%",
@@ -298,7 +317,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
     shadowColor: "#1F80E0",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 4},
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,

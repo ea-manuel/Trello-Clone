@@ -1,5 +1,6 @@
 package com.taskhive.taskhive_backend.service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
@@ -20,9 +20,9 @@ public class JwtService {
     private static final long EXPIRATION_TIME = 86400000; // 1 day
 
     public JwtService(@Value("${jwt.secret}") String secret) {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+}
+
 
     public String generateToken(String username) {
         return Jwts.builder()

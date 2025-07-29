@@ -162,7 +162,9 @@ export default function HomeScreen() {
       title: boardTitle,
       workspaceId: selectedWorkspace.id
     });
+    console.log('DEBUG: createBoard response:', JSON.stringify(newBoard, null, 2));
     const updatedBoards = await getBoards(selectedWorkspace.id);
+    console.log('DEBUG: getBoards after createBoard:', JSON.stringify(updatedBoards, null, 2));
     setBoards(updatedBoards);
     setRecents(prev => [
       { id: `recent-${Date.now()}`, message: `"${newBoard.title}" board created.`, timestamp: Date.now() },

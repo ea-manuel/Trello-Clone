@@ -1,16 +1,11 @@
 package com.taskhive.taskhive_backend.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import java.util.*;
 
 @Entity
 public class Workspace {
@@ -22,21 +17,31 @@ public class Workspace {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "owner_id")
+    @JsonBackReference
+    private User owner;
+
+    @ManyToMany
+    @JoinTable(
+        name = "workspace_users",
+        joinColumns = @JoinColumn(name = "workspace_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @JsonIgnore  // prevent infinite recursion
+    private Set<User> users = new HashSet<>();
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Board> boards = new ArrayList<>();
 
-    // Constructors
     public Workspace() {}
 
-    public Workspace(String name, User user) {
+    public Workspace(String name, User owner) {
         this.name = name;
-        this.user = user;
+        this.owner = owner;
+        this.users.add(owner);
     }
 
-    // Getters & Setters
     public Long getId() {
         return id;
     }
@@ -49,12 +54,24 @@ public class Workspace {
         this.name = name;
     }
 
-    public User getUser() {
-        return user;
+    public User getOwner() {
+        return owner;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
+
+    public void addUser(User user) {
+        this.users.add(user);
     }
 
     public List<Board> getBoards() {
@@ -64,14 +81,4 @@ public class Workspace {
     public void setBoards(List<Board> boards) {
         this.boards = boards;
     }
-//     private String visibility;
-
-// public String getVisibility() {
-//     return visibility;
-// }
-
-// public void setVisibility(String visibility) {
-//     this.visibility = visibility;
-// }
-
 }
