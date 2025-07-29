@@ -31,7 +31,7 @@ public class ReminderService {
             if (card.getAssignedUser() != null && card.getAssignedUser().getEmail() != null) {
                 String email = card.getAssignedUser().getEmail();
                 String subject = "Reminder: Card '" + card.getTitle() + "' is due soon!";
-                String body = "Hi " + card.getAssignedUser().getUsername() + ",\n\n"
+                String body = "Hi " + card.getAssignedUser().getUsernameRaw() + ",\n\n"
 
                         + "This is a reminder that the card **" + card.getTitle() + "** is due at "
                         + card.getDueDate() + ".\n\n"

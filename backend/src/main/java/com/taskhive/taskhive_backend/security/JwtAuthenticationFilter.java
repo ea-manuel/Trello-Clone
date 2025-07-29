@@ -43,9 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
+        System.out.println("=== JWT Filter Debug ===");
+        System.out.println("Request path: " + request.getServletPath());
+        System.out.println("Auth header: " + (authHeader != null ? "present" : "null"));
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response); // Optional: return 401 here if desired
+            System.out.println("No valid auth header, continuing without authentication");
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -54,27 +58,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             email = jwtService.extractUsername(token);
+            System.out.println("Extracted email from token: " + email);
         } catch (Exception e) {
+            System.err.println("Failed to extract username from token: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
             return;
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.loadUserByUsername(email);
+            try {
+                UserDetails userDetails = userService.loadUserByUsername(email);
+                System.out.println("Loaded user details for: " + email);
 
-            if (jwtService.isTokenValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token signature");
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("Authentication set successfully for user: " + email);
+                } else {
+                    System.err.println("Token validation failed for user: " + email);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token signature");
+                    return;
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to load user details for: " + email + ", Error: " + e.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
                 return;
             }
+        } else if (email == null) {
+            System.out.println("No email extracted from token");
+        } else {
+            System.out.println("Authentication already exists for user: " + email);
         }
 
         filterChain.doFilter(request, response);

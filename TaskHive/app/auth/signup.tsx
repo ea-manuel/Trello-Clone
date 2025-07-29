@@ -13,6 +13,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { API_BASE_URL, AUTH_ENDPOINTS } from "../../appconstants/api.js";
 
 const PRIMARY_COLOR = "#1F80E0";
 
@@ -40,13 +41,13 @@ export default function Signup() {
     }
     try {
       // Register user first (unverified)
-      await axios.post("http://192.168.137.166:8080/api/auth/register", {
+      await axios.post(`${API_BASE_URL}${AUTH_ENDPOINTS.REGISTER}`, {
         email,
         username,
         password,
       });
       // Then send OTP
-      await axios.post(`http://192.168.137.166:8080/api/auth/send-otp?email=${encodeURIComponent(email)}`);
+      await axios.post(`${API_BASE_URL}${AUTH_ENDPOINTS.SEND_OTP}?email=${encodeURIComponent(email)}`);
       setShowOtpModal(true);
       Alert.alert("OTP Sent", "Check your email for the OTP.");
     } catch (error: any) {
@@ -64,7 +65,7 @@ export default function Signup() {
     setIsVerifyingOtp(true);
     try {
       // Call backend to verify OTP (as request param)
-      const response = await axios.post(`http://192.168.137.166:8080/api/auth/verify-otp?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`);
+      const response = await axios.post(`${API_BASE_URL}${AUTH_ENDPOINTS.VERIFY_OTP}?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`);
       if (response.data === "Account verified successfully.") {
         setIsOtpVerified(true);
         setShowOtpModal(false);

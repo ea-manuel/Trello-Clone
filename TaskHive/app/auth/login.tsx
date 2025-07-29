@@ -1,17 +1,29 @@
 
 // app/auth/login.tsx
-import { Alert, ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, BackHandler } from "react-native";
 import { AntDesign, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+  BackHandler,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import * as Google from "expo-auth-session/providers/google";
+import { API_BASE_URL, AUTH_ENDPOINTS } from "../../appconstants/api.js";
 import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import { makeRedirectUri } from "expo-auth-session";
+import { useWorkspaceStore } from "../stores/workspaceStore";
 WebBrowser.maybeCompleteAuthSession(); // Required for auth to work right on mobile
 
 const PRIMARY_COLOR = "#1F80E0";
@@ -28,6 +40,7 @@ export default function Login() {
 
   console.log("Redirect URI:", redirectUri);
   const router = useRouter();
+  const { initializeStore } = useWorkspaceStore();
 
   // Prevent back button from leaving login screen if not authenticated
   useEffect(() => {
@@ -74,7 +87,7 @@ export default function Login() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://192.168.137.166:8080/api/auth/google",
+        `${API_BASE_URL}${AUTH_ENDPOINTS.GOOGLE_LOGIN}`,
         {
           token: accessToken,
         }
@@ -85,6 +98,10 @@ export default function Login() {
 
       await AsyncStorage.setItem("authToken", token);
       Alert.alert("Login Successful", "Welcome via Google!");
+      
+      // Initialize workspace store after successful login
+      await initializeStore();
+      
       router.replace("/(tabs)");
     } catch (err: any) {
       console.error("Google login failed", err.response?.data || err.message);
@@ -103,7 +120,7 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await axios.post("http://100.112.20.102:8080/api/auth/login", {
+      const response = await axios.post(`${API_BASE_URL}${AUTH_ENDPOINTS.LOGIN}`, {
         email,
         password
       });
@@ -113,6 +130,10 @@ export default function Login() {
 
       await AsyncStorage.setItem("authToken", token);
       Alert.alert("Login Success", "You're now logged in.");
+      
+      // Initialize workspace store after successful login
+      await initializeStore();
+      
       router.replace("/(tabs)");
     } catch (error: any) {
       console.error("Login Error:", error.response?.data || error.message);

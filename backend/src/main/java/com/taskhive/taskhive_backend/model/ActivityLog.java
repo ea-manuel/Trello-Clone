@@ -42,7 +42,7 @@ public void setLocation(String location) {
                 ", targetType='" + targetType + '\'' +
                 ", targetId=" + targetId +
                 ", timestamp=" + timestamp +
-                ", user=" + user.getUsername() +
+                ", user=" + user.getUsernameRaw() +
                 ", location='" + location + '\'' +
                 '}';
     }   

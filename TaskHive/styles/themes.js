@@ -968,6 +968,19 @@ favouritemodalView: {
     color: '#333',
     marginBottom: 10,
   },
+  boardScreenMenuInviteButton: {
+    backgroundColor: '#0B1F3A',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  boardScreenMenuInviteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   boardScreenMenuCollaboratorRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -2179,6 +2192,19 @@ favouritemodalView: {
     fontSize: 16,
     color: '#fff',
     marginBottom: 10,
+  },
+  boardScreenMenuInviteButton: {
+    backgroundColor: '#0B1F3A',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  boardScreenMenuInviteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   boardScreenMenuCollaboratorRow: {
     flexDirection: 'row',

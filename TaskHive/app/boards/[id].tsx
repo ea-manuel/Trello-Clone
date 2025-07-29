@@ -18,6 +18,9 @@ import {
 import { useTheme } from "../../ThemeContext";
 import { lightTheme, darkTheme } from "../../styles/themes";
 import CardMenuModal from "@/components/CardMenuModal";
+import SearchModal from "@/components/SearchModal";
+import NotificationsModal from "@/components/NotificationModal";
+import { useNotificationStore } from "../stores/notificationsStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -192,6 +195,11 @@ export default function BoardDetails() {
   const [listEyeVisibility, setListEyeVisibility] = useState<
     Record<string, boolean>
   >({});
+
+  // Add state for search and notifications modals
+  const [isSearchVisible, setSearchVisible] = useState(false);
+  const [isNotificationsVisible, setNotificationsVisible] = useState(false);
+  const { notifications } = useNotificationStore();
 
   let board = null;
   try {
@@ -378,13 +386,31 @@ export default function BoardDetails() {
         </TouchableOpacity>
 
         <View style={styles.BoardDetailsiconContainer}>
-          <TouchableOpacity style={styles.BoardDetailsiconButton}>
+          <TouchableOpacity 
+            style={styles.BoardDetailsiconButton}
+            onPress={() => setSearchVisible(true)}
+          >
             <Ionicons name="search-outline" size={28} color="white" />{" "}
             {/* restored size */}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.BoardDetailsiconButton}>
-            <Ionicons name="notifications-outline" size={28} color="white" />{" "}
-            {/* restored size */}
+          <TouchableOpacity 
+            style={styles.BoardDetailsiconButton}
+            onPress={() => setNotificationsVisible(true)}
+          >
+            <Ionicons name="notifications-outline" size={28} color="white" />
+            {notifications.filter(n => !n.read).length > 0 && (
+              <View style={{
+                position: 'absolute',
+                top: -2,
+                right: -2,
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: '#2ecc40',
+                borderWidth: 2,
+                borderColor: 'white',
+              }} />
+            )}
           </TouchableOpacity>
 
           {/* Create List button (plus icon + text) */}
@@ -760,6 +786,18 @@ export default function BoardDetails() {
         onClose={() => setCardMenuVisible(false)}
         card={selectedCard}
         styles={styles}
+      />
+
+      {/* Search Modal */}
+      <SearchModal
+        visible={isSearchVisible}
+        onClose={() => setSearchVisible(false)}
+      />
+
+      {/* Notifications Modal */}
+      <NotificationsModal
+        visible={isNotificationsVisible}
+        onClose={() => setNotificationsVisible(false)}
       />
     </ImageBackground>
   );

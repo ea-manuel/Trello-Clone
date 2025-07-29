@@ -110,16 +110,6 @@ export default function HomeScreen() {
     })();
   }, []);
 
-  // Automatically create a default workspace if none exist
-  useEffect(() => {
-    if (workspaces && workspaces.length === 0) {
-      setCreatingDefault(true);
-      createWorkspace({ name: "Default Workspace" })
-        .catch(() => {})
-        .finally(() => setCreatingDefault(false));
-    }
-  }, [workspaces]);
-
   // Get selected workspace based on params or default to first workspace
   const workspaceId = params.workspaceId as string;
   const selectedWorkspace = workspaceId

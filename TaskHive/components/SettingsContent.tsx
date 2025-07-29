@@ -12,6 +12,7 @@ import {
   TextInput,
   Image,
   Alert,
+  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
@@ -45,8 +46,11 @@ export default function SettingsContent({
       const uri = await AsyncStorage.getItem("profileImageUri");
       if (uri) setProfileImage(uri);
       // Fetch user info from backend
-      const userInfo = await getCurrentUser();
-      if (userInfo) setUser(userInfo);
+      const token = await AsyncStorage.getItem('authToken');
+      if (token) {
+        const userInfo = await getCurrentUser(token);
+        if (userInfo) setUser(userInfo);
+      }
     })();
   }, []);
 
@@ -83,15 +87,83 @@ export default function SettingsContent({
   const [searchText, setSearchText] = useState("");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const toggleSwitch = (key: keyof typeof switchStates) => {
-    setSwitchStates((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  // Load settings from AsyncStorage on mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const savedSettings = await AsyncStorage.getItem('userSettings');
+      if (savedSettings) {
+        setSwitchStates(JSON.parse(savedSettings));
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
   };
 
-  const logout = () => {
-    router.push({ pathname: "/auth/login" });
+  const saveSettings = async (newSettings: typeof switchStates) => {
+    try {
+      await AsyncStorage.setItem('userSettings', JSON.stringify(newSettings));
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
+  };
+
+  const toggleSwitch = (key: keyof typeof switchStates) => {
+    const newSettings = {
+      ...switchStates,
+      [key]: !switchStates[key],
+    };
+    setSwitchStates(newSettings);
+    saveSettings(newSettings);
+  };
+
+  const logout = async () => {
+    try {
+      // Clear all stored data
+      await AsyncStorage.multiRemove([
+        'authToken',
+        'userSettings',
+        'profileImageUri',
+        'taskhive_workspaces',
+        'taskhive_boards',
+        'taskhive_current_workspace'
+      ]);
+      
+      // Close modal and redirect
+      setShowLogoutModal(false);
+      router.replace("/auth/login");
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect even if clearing fails
+      router.replace("/auth/login");
+    }
+  };
+
+  const contactSupport = () => {
+    const email = 'support@taskhive.app';
+    const subject = 'TaskHive Support Request';
+    const body = 'Hello TaskHive Support Team,\n\nI need help with the following issue:\n\n[Please describe your issue here]\n\nThank you!';
+    
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    Linking.canOpenURL(mailtoUrl).then(supported => {
+      if (supported) {
+        Linking.openURL(mailtoUrl);
+      } else {
+        Alert.alert('Error', 'No email app found. Please email us at support@taskhive.app');
+      }
+    });
+  };
+
+  const showAboutApp = () => {
+    Alert.alert(
+      'About TaskHive',
+      'TaskHive v1.0.0\n\nA modern task management app for teams and individuals.\n\nMade with ❤️ by the TaskHive Team',
+      [{ text: 'OK' }]
+    );
   };
 
   const settingsData = [
@@ -149,9 +221,17 @@ export default function SettingsContent({
           onToggle: () => toggleSwitch("showQuickAdd"),
         },
         { label: "Delete account", type: "text" },
-        { label: "About Trello", type: "text" },
+        { 
+          label: "About TaskHive", 
+          type: "action",
+          onPress: showAboutApp,
+        },
         { label: "More Atlassian apps", type: "text" },
-        { label: "Contact support", type: "text" },
+        { 
+          label: "Contact support", 
+          type: "action",
+          onPress: contactSupport,
+        },
         { label: "Manage accounts on browser", type: "text" },
         {
           label: "Log out",
@@ -220,8 +300,8 @@ export default function SettingsContent({
             {profileImage ? "Change Photo" : "Add Photo"}
           </Text>
         </TouchableOpacity>
-        <Text style={styles.profileText}>{user?.name || "TaskHive User"}</Text>
-        <Text style={styles.profileText}>{user?.username ? `@${user.username}` : "@taskhiveuser1324"}</Text>
+        <Text style={styles.profileText}>{user?.username || "TaskHive User"}</Text>
+        <Text style={styles.profileText}>{user?.username ? `@${user.username.toLowerCase().replace(/\s+/g, '')}` : "@taskhiveuser1324"}</Text>
         <Text style={styles.profileText}>{user?.email || "taskhiveuser@gmail.com"}</Text>
       </View>
       {/* Full Image Modal */}

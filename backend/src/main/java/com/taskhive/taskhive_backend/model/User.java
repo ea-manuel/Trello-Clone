@@ -92,6 +92,10 @@ public class User implements UserDetails {
         this.passwordHash = passwordHash;
     }
 
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
     public String getOtp() {
         return otp;
     }

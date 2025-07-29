@@ -27,7 +27,7 @@ User user = optionalUser.get();
 
 
         UserProfileResponse response = new UserProfileResponse(
-            user.getUsername(), // use the username field
+            user.getUsernameRaw(), // use the actual username field, not the email
             user.getEmail()
         );
 

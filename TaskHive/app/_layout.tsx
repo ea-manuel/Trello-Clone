@@ -10,7 +10,7 @@ import { usePathname, useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import { BlurView } from "expo-blur";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -43,17 +43,22 @@ const getRandomColor = () => {
   return BADGE_COLORS[randomIndex];
 };
 
-const InitialCircle = ({ text, backgroundColor }: { text: string; backgroundColor: string }) => {
-  const initial = text ? text.charAt(0).toUpperCase() : "?";
-  return (
-    <View style={[styles.initialCircle, { backgroundColor }]}>
-      <Text style={styles.initialText}>{initial}</Text>
-    </View>
-  );
-};
+// InitialCircle component
+const InitialCircle = ({ text, backgroundColor }) => (
+  <View
+    style={[
+      styles.initialCircle,
+      { backgroundColor: backgroundColor || getRandomColor() },
+    ]}
+  >
+    <Text style={styles.initialText}>
+      {text ? text.charAt(0).toUpperCase() : "W"}
+    </Text>
+  </View>
+);
 
 export default function RootLayout() {
-  const { workspaces, setCurrentWorkspaceId, deleteWorkspace } = useWorkspaceStore();
+  const { workspaces, setCurrentWorkspaceId, deleteWorkspace, initializeStore } = useWorkspaceStore();
   const colorScheme = useColorScheme();
   const pathname = usePathname();
   const [loaded] = useFonts({
@@ -77,6 +82,11 @@ export default function RootLayout() {
   const [selectedWorkspaceIds, setSelectedWorkspaceIds] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+
+  // Initialize store when app starts
+  useEffect(() => {
+    initializeStore();
+  }, []);
 
   // Assume you have a user object or username from your auth system
   // For demo, hardcoding username:

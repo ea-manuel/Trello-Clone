@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, TextInput,
-  ImageBackground, Alert, Share
+  ImageBackground, Alert, Share, ScrollView
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker"; // Import expo-image-picker
@@ -11,6 +11,9 @@ import * as FileSystem from 'expo-file-system';
 import { useWorkspaceStore } from "../stores/workspaceStore";
 import { useTheme } from "../../ThemeContext";
 import { lightTheme, darkTheme } from "../../styles/themes";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_BASE_URL, WORKSPACE_ENDPOINTS } from '../../appconstants/api.js';
 
 const PRIMARY_COLOR = "#0B1F3A";
 
@@ -32,6 +35,12 @@ export default function BoardScreenMenu() {
   const [inviteInput, setInviteInput] = useState("");
   const [backgroundImage, setBackgroundImage] = useState(null); // State for selected image URI
   const {updateBoard}=useWorkspaceStore();
+  
+  // Add invite functionality state
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState("");
+  const [inviteSuccess, setInviteSuccess] = useState(false);
+  
   // Parse the board
   let board: Board | null = null;
   try {
@@ -126,6 +135,64 @@ export default function BoardScreenMenu() {
     }
   };
 
+  // Add invite collaborator function
+  const handleInviteCollaborator = async () => {
+    if (!inviteInput.trim()) {
+      setInviteError('Please enter an email address.');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteInput.trim())) {
+      setInviteError('Please enter a valid email address.');
+      return;
+    }
+
+    setInviteLoading(true);
+    setInviteError("");
+    setInviteSuccess(false);
+
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        setInviteError('Authentication required. Please login again.');
+        return;
+      }
+
+      // Get current workspace ID (you might need to adjust this based on your data structure)
+      const workspaceId = board?.workspaceId || "default-workspace";
+      
+      const response = await axios.post(
+        `${API_BASE_URL}${WORKSPACE_ENDPOINTS.INVITE}`,
+        {
+          workspaceId: workspaceId,
+          email: inviteInput.trim()
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        setInviteSuccess(true);
+        setInviteInput("");
+        Alert.alert("Success", `Invitation sent to ${inviteInput.trim()}!`);
+      } else {
+        setInviteError('Failed to send invitation. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Invite error:', error);
+      const errorMessage = error.response?.data || 'Failed to send invitation. Please try again.';
+      setInviteError(errorMessage);
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   // Color options
   const colors = [
     { id: "1", value: "#0B1F3A" },
@@ -178,7 +245,11 @@ export default function BoardScreenMenu() {
         </TouchableOpacity>
         <Text style={styles.boardScreenMenuTitle}>Board Screen Menu</Text>
       </View>
-      <View style={styles.boardScreenMenuContent}>
+      <ScrollView 
+        style={styles.boardScreenMenuContent}
+        contentContainerStyle={{ paddingBottom: 50 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.boardScreenMenuColorSection}>
           <Text style={styles.boardScreenMenuColorSectionTitle}>Change Board Background</Text>
           
@@ -254,11 +325,42 @@ export default function BoardScreenMenu() {
           <Text style={styles.boardScreenMenuSectionTitle}>Invite Collaborators</Text>
           <TextInput
             style={styles.boardScreenMenuInviteInput}
-            placeholder="Enter username or email"
+            placeholder="Enter email address"
             placeholderTextColor="#aaa"
             value={inviteInput}
             onChangeText={setInviteInput}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
+          
+          {/* Error message */}
+          {inviteError ? (
+            <Text style={{ color: '#ff6b6b', fontSize: 12, marginTop: 4, marginBottom: 8 }}>
+              {inviteError}
+            </Text>
+          ) : null}
+          
+          {/* Success message */}
+          {inviteSuccess ? (
+            <Text style={{ color: '#2ecc71', fontSize: 12, marginTop: 4, marginBottom: 8 }}>
+              Invitation sent successfully!
+            </Text>
+          ) : null}
+          
+          {/* Invite button */}
+          <TouchableOpacity
+            style={[
+              styles.boardScreenMenuInviteButton,
+              inviteLoading && { opacity: 0.7 }
+            ]}
+            onPress={handleInviteCollaborator}
+            disabled={inviteLoading}
+          >
+            <Text style={styles.boardScreenMenuInviteButtonText}>
+              {inviteLoading ? "Sending..." : "Send Invitation"}
+            </Text>
+          </TouchableOpacity>
+          
           <Text style={styles.boardScreenMenuSubSectionTitle}>Current Collaborators</Text>
           <FlatList
             data={collaborators}
@@ -298,7 +400,7 @@ export default function BoardScreenMenu() {
             </TouchableOpacity>
           )}
         />
-      </View>
+      </ScrollView>
 
       {showVisibilityModal && (
         <Modal visible={showVisibilityModal} transparent animationType="fade">

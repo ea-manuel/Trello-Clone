@@ -1,22 +1,92 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
 import {
+  Alert,
   Dimensions,
-  Modal,
+  Image,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
+  Switch,
+  Modal,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
+import { useWorkspaceStore } from "./stores/workspaceStore";
+import { getCurrentUser } from "../src/api/userApi.js";
 
 const PRIMARY_COLOR = "#0B1F3A";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
+interface UserProfile {
+  username: string;
+  email: string;
+}
+
 export default function Settings() {
-  const navigation = useNavigation();
+  const router = useRouter();
+  const { clearAllData } = useWorkspaceStore();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.log('No auth token found');
+        setLoading(false);
+        return;
+      }
+
+      const userData = await getCurrentUser(token);
+      if (userData) {
+        setUserProfile(userData);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Clear workspace data
+              await clearAllData();
+              
+              // Clear auth token
+              await AsyncStorage.removeItem("authToken");
+              
+              // Navigate to login
+              router.replace("/auth/login");
+            } catch (error) {
+              console.error("Logout error:", error);
+              Alert.alert("Error", "Failed to logout. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [switchStates, setSwitchStates] = useState({
@@ -34,32 +104,10 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => setSheetVisible(true)}
-          style={{ marginRight: 15 }}
-          accessibilityLabel="Open settings"
-        >
-          <Ionicons name="settings-sharp" size={24} color="white" />
-        </TouchableOpacity>
-      ),
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ marginLeft: 15 }}
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-      ),
-      title: "Settings",
-      headerStyle: {
-        backgroundColor: PRIMARY_COLOR,
-      },
-      headerTintColor: "#fff",
-    });
-  }, [navigation]);
+    // This useEffect is for navigation options, but navigation is not defined in this component.
+    // Assuming it's meant to be part of a larger context or will be added later.
+    // For now, removing the navigation-related code as it's not directly applicable here.
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -97,9 +145,32 @@ export default function Settings() {
                   size={70}
                   color={PRIMARY_COLOR}
                 />
-                <Text style={styles.profileText}>TaskHive User</Text>
-                <Text style={styles.profileText}>@taskhiveuser1324</Text>
-                <Text style={styles.profileText}>taskhiveuser@gmail.com</Text>
+                {loading ? (
+                  <Text style={styles.profileText}>Loading profile...</Text>
+                ) : userProfile ? (
+                  <>
+                    <Text style={styles.profileText}>{userProfile.username}</Text>
+                    <Text style={styles.profileText}>@{userProfile.username.toLowerCase().replace(/\s+/g, '')}</Text>
+                    <Text style={styles.profileText}>{userProfile.email}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.profileText}>Failed to load profile</Text>
+                    <Text style={styles.profileText}>@user</Text>
+                    <Text style={styles.profileText}>user@example.com</Text>
+                  </>
+                )}
+                <TouchableOpacity 
+                  style={styles.refreshButton}
+                  onPress={fetchUserProfile}
+                  disabled={loading}
+                >
+                  <Ionicons 
+                    name="refresh" 
+                    size={20} 
+                    color={loading ? "#ccc" : PRIMARY_COLOR} 
+                  />
+                </TouchableOpacity>
               </View>
 
               {/* Sections */}
@@ -183,7 +254,9 @@ export default function Settings() {
                 <Text style={styles.sectionSubtext}>
                   Manage accounts on browser
                 </Text>
-                <Text style={styles.sectionSubtext}>Log out</Text>
+                <TouchableOpacity onPress={handleLogout}>
+                  <Text style={[styles.sectionSubtext, { color: '#E74C3C', fontWeight: 'bold' }]}>Log out</Text>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
@@ -240,6 +313,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     color: PRIMARY_COLOR,
+  },
+  refreshButton: {
+    marginTop: 10,
+    padding: 5,
   },
   section: {
     borderBottomColor: "#ccc",
