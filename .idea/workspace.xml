@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5ea5eaf0-5481-4587-a842-6a54a0e3d64f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/.expo/types/router.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/.expo/types/router.d.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/app/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/app/(tabs)/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/app/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/app/boards/[id].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/app/boards/[id].tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/app/boards/boardScreenMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/app/boards/boardScreenMenu.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/appconstants/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/appconstants/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/components/CardMenuModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/components/CardMenuModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/components/ChatModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/components/ChatModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/components/ChatSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/components/ChatSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskHive/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/TaskHive/components/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/taskhive/taskhive_backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/taskhive/taskhive_backend/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/taskhive/taskhive_backend/service/WorkspaceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/taskhive/taskhive_backend/service/WorkspaceService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/taskhive-backend-0.0.1-SNAPSHOT.jar.original" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/taskhive-backend-0.0.1-SNAPSHOT.jar.original" afterDir="false" />
-    </list>
+    <list default="true" id="5ea5eaf0-5481-4587-a842-6a54a0e3d64f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
