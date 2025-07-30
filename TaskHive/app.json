@@ -2,36 +2,33 @@
   "expo": {
     "name": "TaskHive",
     "slug": "taskhive",
-    "owner":"emmayak",
+    "owner": "emmayak",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/taskhive-splash-screen.jpg",
+    "icon": "./assets/images/splash.png",
     "scheme": "mobileappdev53",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.emmayak.taskhive",
       "splash": {
-        "image": "./assets/images/taskhive-splash-screen.jpg",
+        "image": "./assets/images/splash.png",
         "backgroundColor": "#f4f6f8",
         "resizeMode": "contain"
       },
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select a background image."
-      },
-      "ios": {
-  "bundleIdentifier": "com.emmayak.taskhive"
-}
-
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/taskhive-splash-screen.jpg",
+        "foregroundImage": "./assets/images/splash.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "splash": {
-        "image": "./assets/images/taskhive-splash-screen.jpg",
+        "image": "./assets/images/splash.png",
         "imageWidth": 200,
         "backgroundColor": "#f4f6f8",
         "resizeMode": "contain"
@@ -46,14 +43,14 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/taskhive-splash-screen.jpg"
+      "favicon": "./assets/images/splash.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/taskhive-splash-screen.jpg",
+          "image": "./assets/images/splash.png",
           "backgroundColor": "#f4f6f8",
           "resizeMode": "contain"
         }

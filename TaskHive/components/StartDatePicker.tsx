@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, Modal, TouchableOpacity, StyleSheet } from "react-native";
-import DateTimePicker from "react-native-modal-datetime-picker";
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 
 interface StartDatePickerModalProps {
@@ -28,6 +28,20 @@ export default function StartDatePickerModal({
     }
   }, [visible]);
 
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setPickerVisible(false);
+    }
+    
+    if (selectedDate) {
+      onConfirm(selectedDate);
+    } else {
+      onCancel();
+    }
+  };
+
+  if (!visible) return null;
+
   return (
     <Modal
       transparent
@@ -38,19 +52,22 @@ export default function StartDatePickerModal({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Select Start Date & Time</Text>
-          <DateTimePicker
-            isVisible={pickerVisible}
-            mode="datetime"
-            date={date || new Date()}
-            onConfirm={(selectedDate) => {
-              setPickerVisible(false);
-              onConfirm(selectedDate);
-            }}
-            onCancel={() => {
-              setPickerVisible(false);
-              onCancel();
-            }}
-          />
+          {Platform.OS === 'ios' && (
+            <DateTimePicker
+              value={date || new Date()}
+              mode="datetime"
+              display="spinner"
+              onChange={handleDateChange}
+              style={{ width: '100%' }}
+            />
+          )}
+          {Platform.OS === 'android' && pickerVisible && (
+            <DateTimePicker
+              value={date || new Date()}
+              mode="datetime"
+              onChange={handleDateChange}
+            />
+          )}
           <View
             style={{
               marginTop: 10,
@@ -61,6 +78,11 @@ export default function StartDatePickerModal({
             <TouchableOpacity onPress={onCancel} style={{ marginRight: 16 }}>
               <Text style={{ color: "#3b82f6", fontSize: 16 }}>Cancel</Text>
             </TouchableOpacity>
+            {Platform.OS === 'ios' && (
+              <TouchableOpacity onPress={() => onConfirm(date || new Date())}>
+                <Text style={{ color: "#3b82f6", fontSize: 16 }}>Done</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>

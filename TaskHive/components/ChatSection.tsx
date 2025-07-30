@@ -1,204 +1,119 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Animated,
+  Modal,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import NoCollaboratorsModal from './NoCollaborators';
 
 interface ChatSectionProps {
-  onOpenChat: (options: { conversationId?: string; filter?: 'all' | 'unread' }) => void;
-  styles: any; // Reuse RootLayout styles for consistency
+  styles: any;
 }
 
-export default function ChatSection({ onOpenChat, styles }: ChatSectionProps) {
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [lastMessage, setLastMessage] = useState('');
-  const [lastUnreadMessage, setLastUnreadMessage] = useState('');
+export default function ChatSection({ styles }: ChatSectionProps) {
   const colorScheme = useColorScheme();
-  const scaleAnimInbox = useRef(new Animated.Value(1)).current;
-  const scaleAnimUnread = useRef(new Animated.Value(1)).current;
-  const scaleAnimNotes = useRef(new Animated.Value(1)).current;
-  const scaleAnimNewChat = useRef(new Animated.Value(1)).current;
-  const [showNoCollaboratorsModal, setShowNoCollaboratorsModal] = useState(false);
-
-  useEffect(() => {
-    // Load messages from AsyncStorage
-    const loadChatData = async () => {
-      try {
-        const storedMessages = await AsyncStorage.getItem('chatMessages');
-        if (storedMessages) {
-          const messages = JSON.parse(storedMessages);
-          if (messages.length > 0) {
-            // Latest message for Inbox
-            const lastMsg = messages[messages.length - 1];
-            setLastMessage(lastMsg.text);
-            // Unread count and latest unread message
-            const unreadMessages = messages.filter((msg: any) => !msg.read);
-            setUnreadCount(unreadMessages.length);
-            if (unreadMessages.length > 0) {
-              setLastUnreadMessage(unreadMessages[unreadMessages.length - 1].text);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load chat data:', error);
-      }
-    };
-
-    loadChatData();
-  }, []);
-
-  const handlePressIn = (anim: Animated.Value) => {
-    Animated.spring(anim, {
-      toValue: 0.95,
-      friction: 8,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = (anim: Animated.Value) => {
-    Animated.spring(anim, {
-      toValue: 1,
-      friction: 8,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleInviteCollaborators = () => {
-    setShowNoCollaboratorsModal(false);
-    // You can add navigation logic here to go to invite screen
-    Alert.alert(
-      'Invite Team Members',
-      'Navigate to invite screen to add team members for collaboration.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: () => console.log('Navigate to invite screen') }
-      ]
-    );
-  };
+  const [showInboxModal, setShowInboxModal] = useState(false);
+  const [showUnreadModal, setShowUnreadModal] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
 
   return (
     <View style={localStyles.container}>
       {/* Inbox Section */}
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => onOpenChat({ filter: 'all' })}
-        onPressIn={() => handlePressIn(scaleAnimInbox)}
-        onPressOut={() => handlePressOut(scaleAnimInbox)}
+        onPress={() => setShowInboxModal(true)}
       >
-        <Animated.View style={{ transform: [{ scale: scaleAnimInbox }] }}>
-          <View style={localStyles.sectionCard}>
-            <View style={localStyles.sectionHeader}>
-              <Ionicons
-                name="chatbubbles-outline"
-                size={20}
-                color={colorScheme === 'dark' ? '#EAEFFF' : '#2c3e50'}
-                style={localStyles.sectionIcon}
-              />
-              <Text style={[styles.yourWorkspacesLabel, localStyles.sectionTitle]}>
-                Inbox
-              </Text>
-            </View>
-            <Text
-              style={[
-                localStyles.messagePreview,
-                { color: colorScheme === 'dark' ? '#B8BCC8' : '#7f8c8d' },
-              ]}
-              numberOfLines={1}
-            >
-              {lastMessage || 'No messages yet'}
+        <View style={localStyles.sectionCard}>
+          <View style={localStyles.sectionHeader}>
+            <Ionicons
+              name="chatbubbles-outline"
+              size={20}
+              color={colorScheme === 'dark' ? '#EAEFFF' : '#2c3e50'}
+              style={localStyles.sectionIcon}
+            />
+            <Text style={[styles.yourWorkspacesLabel, localStyles.sectionTitle]}>
+              Inbox
             </Text>
           </View>
-        </Animated.View>
+          <Text
+            style={[
+              localStyles.messagePreview,
+              { color: colorScheme === 'dark' ? '#B8BCC8' : '#7f8c8d' },
+            ]}
+            numberOfLines={1}
+          >
+            No messages yet
+          </Text>
+        </View>
       </TouchableOpacity>
 
       {/* Unread Section */}
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => onOpenChat({ filter: 'unread' })}
-        onPressIn={() => handlePressIn(scaleAnimUnread)}
-        onPressOut={() => handlePressOut(scaleAnimUnread)}
+        onPress={() => setShowUnreadModal(true)}
       >
-        <Animated.View style={{ transform: [{ scale: scaleAnimUnread }] }}>
-          <View style={localStyles.sectionCard}>
-            <View style={localStyles.sectionHeader}>
-              <Ionicons
-                name="mail-unread-outline"
-                size={20}
-                color={colorScheme === 'dark' ? '#EAEFFF' : '#2c3e50'}
-                style={localStyles.sectionIcon}
-              />
-              <Text style={[styles.yourWorkspacesLabel, localStyles.sectionTitle]}>
-                Unread
-              </Text>
-              {unreadCount > 0 && (
-                <View style={localStyles.badge}>
-                  <Text style={localStyles.badgeText}>{unreadCount}</Text>
-                </View>
-              )}
-            </View>
-            <Text
-              style={[
-                localStyles.messagePreview,
-                { color: colorScheme === 'dark' ? '#B8BCC8' : '#7f8c8d' },
-              ]}
-              numberOfLines={1}
-            >
-              {lastUnreadMessage || 'No unread messages'}
+        <View style={localStyles.sectionCard}>
+          <View style={localStyles.sectionHeader}>
+            <Ionicons
+              name="mail-unread-outline"
+              size={20}
+              color={colorScheme === 'dark' ? '#EAEFFF' : '#2c3e50'}
+              style={localStyles.sectionIcon}
+            />
+            <Text style={[styles.yourWorkspacesLabel, localStyles.sectionTitle]}>
+              Unread
             </Text>
           </View>
-        </Animated.View>
+          <Text
+            style={[
+              localStyles.messagePreview,
+              { color: colorScheme === 'dark' ? '#B8BCC8' : '#7f8c8d' },
+            ]}
+            numberOfLines={1}
+          >
+            No unread messages
+          </Text>
+        </View>
       </TouchableOpacity>
 
-      {/* Notes (Self-Chat) Section */}
+      {/* Notes Section */}
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => onOpenChat({ conversationId: 'self' })}
-        onPressIn={() => handlePressIn(scaleAnimNotes)}
-        onPressOut={() => handlePressOut(scaleAnimNotes)}
+        onPress={() => setShowNotesModal(true)}
       >
-        <Animated.View style={{ transform: [{ scale: scaleAnimNotes }] }}>
-          <View style={localStyles.sectionCard}>
-            <View style={localStyles.sectionHeader}>
-              <Ionicons
-                name="document-text-outline"
-                size={20}
-                color={colorScheme === 'dark' ? '#EAEFFF' : '#2c3e50'}
-                style={localStyles.sectionIcon}
-              />
-              <Text style={[styles.yourWorkspacesLabel, localStyles.sectionTitle]}>
-                Notes
-              </Text>
-            </View>
-            <Text
-              style={[
-                localStyles.messagePreview,
-                { color: colorScheme === 'dark' ? '#B8BCC8' : '#7f8c8d' },
-              ]}
-              numberOfLines={1}
-            >
-              Personal notes and drafts
+        <View style={localStyles.sectionCard}>
+          <View style={localStyles.sectionHeader}>
+            <Ionicons
+              name="document-text-outline"
+              size={20}
+              color={colorScheme === 'dark' ? '#EAEFFF' : '#2c3e50'}
+              style={localStyles.sectionIcon}
+            />
+            <Text style={[styles.yourWorkspacesLabel, localStyles.sectionTitle]}>
+              Notes
             </Text>
           </View>
-        </Animated.View>
+          <Text
+            style={[
+              localStyles.messagePreview,
+              { color: colorScheme === 'dark' ? '#B8BCC8' : '#7f8c8d' },
+            ]}
+            numberOfLines={1}
+          >
+            No notes or drafts
+          </Text>
+        </View>
       </TouchableOpacity>
 
       {/* New Chat Button */}
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => setShowNoCollaboratorsModal(true)}
-        onPressIn={() => handlePressIn(scaleAnimNewChat)}
-        onPressOut={() => handlePressOut(scaleAnimNewChat)}
+        onPress={() => Alert.alert('New Chat', 'No collaborators available yet')}
       >
         <LinearGradient
           colors={['#00C6AE', '#007CF0']}
@@ -206,23 +121,78 @@ export default function ChatSection({ onOpenChat, styles }: ChatSectionProps) {
           end={{ x: 1, y: 0 }}
           style={localStyles.newChatButton}
         >
-          <Animated.View style={{ transform: [{ scale: scaleAnimNewChat }] }}>
-            <View style={localStyles.buttonRow}>
-              <Ionicons name="add" size={20} color="#fff" style={localStyles.buttonIcon} />
-              <Text style={[styles.createWorkspaceButtonText, localStyles.buttonText]}>
-                New Chat
-              </Text>
-            </View>
-          </Animated.View>
+          <View style={localStyles.buttonRow}>
+            <Ionicons name="add" size={20} color="#fff" style={localStyles.buttonIcon} />
+            <Text style={[styles.createWorkspaceButtonText, localStyles.buttonText]}>
+              New Chat
+            </Text>
+          </View>
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* No Collaborators Modal */}
-      <NoCollaboratorsModal
-        visible={showNoCollaboratorsModal}
-        onClose={() => setShowNoCollaboratorsModal(false)}
-        onInvite={handleInviteCollaborators}
-      />
+      {/* Simple Modals */}
+      <Modal
+        visible={showInboxModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowInboxModal(false)}
+      >
+        <View style={localStyles.modalOverlay}>
+          <View style={localStyles.modalContent}>
+            <Ionicons name="chatbubbles-outline" size={48} color="#667eea" />
+            <Text style={localStyles.modalTitle}>No Messages</Text>
+            <Text style={localStyles.modalText}>Your inbox is empty</Text>
+            <TouchableOpacity
+              style={localStyles.modalButton}
+              onPress={() => setShowInboxModal(false)}
+            >
+              <Text style={localStyles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showUnreadModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowUnreadModal(false)}
+      >
+        <View style={localStyles.modalOverlay}>
+          <View style={localStyles.modalContent}>
+            <Ionicons name="mail-unread-outline" size={48} color="#667eea" />
+            <Text style={localStyles.modalTitle}>No Unread Messages</Text>
+            <Text style={localStyles.modalText}>You're all caught up!</Text>
+            <TouchableOpacity
+              style={localStyles.modalButton}
+              onPress={() => setShowUnreadModal(false)}
+            >
+              <Text style={localStyles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showNotesModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowNotesModal(false)}
+      >
+        <View style={localStyles.modalOverlay}>
+          <View style={localStyles.modalContent}>
+            <Ionicons name="document-text-outline" size={48} color="#667eea" />
+            <Text style={localStyles.modalTitle}>No Notes</Text>
+            <Text style={localStyles.modalText}>No notes or drafts yet</Text>
+            <TouchableOpacity
+              style={localStyles.modalButton}
+              onPress={() => setShowNotesModal(false)}
+            >
+              <Text style={localStyles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -230,8 +200,16 @@ export default function ChatSection({ onOpenChat, styles }: ChatSectionProps) {
 const localStyles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    marginTop: 16,
+    marginTop: '50%',
     marginBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: 12,
   },
   sectionCard: {
     backgroundColor: 'transparent',
@@ -252,21 +230,6 @@ const localStyles = StyleSheet.create({
   sectionTitle: {
     fontWeight: '600',
     fontSize: 16,
-  },
-  badge: {
-    backgroundColor: '#e74c3c',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-    paddingHorizontal: 6,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
   },
   messagePreview: {
     fontSize: 14,
@@ -291,5 +254,47 @@ const localStyles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    marginHorizontal: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  modalText: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#667eea',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

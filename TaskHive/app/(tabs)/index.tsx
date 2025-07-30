@@ -26,6 +26,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BackHandler } from 'react-native';
 import { useOfflineBoardsStore } from "../stores/offlineBoardsStore";
+import { API_BASE_URL } from "../../appconstants/api.js";
 
 export default function HomeScreen() {
   const {theme,toggleTheme}=useTheme();
@@ -664,49 +665,60 @@ export default function HomeScreen() {
                 setInviteError('Please enter a valid email address.');
                 return;
               }
+
+              // Get current workspace ID
+              const currentWorkspaceId = useWorkspaceStore.getState().currentWorkspaceId;
+              if (!currentWorkspaceId) {
+                setInviteError('No workspace selected. Please select a workspace first.');
+                return;
+              }
+
+              // Convert frontend workspace ID to numeric ID for backend
+              const getNumericWorkspaceId = (workspaceId: string) => {
+                if (workspaceId === "default-workspace") {
+                  return 1; // Default workspace gets ID 1
+                }
+                // For other workspaces, extract numeric part or use a hash
+                const numericPart = workspaceId.replace(/[^0-9]/g, '');
+                return numericPart ? parseInt(numericPart) : 1;
+              };
+
               setInviteLoading(true);
               setInviteError("");
               try {
                 const token = await AsyncStorage.getItem('authToken');
-                const inviter = 'immajacobs2003@gmail.com'; // TODO: Replace with actual user email if available
-                const url = 'http://10.80.33.203:8080/api/invite';
-                const headers = {
-                  Authorization: `Bearer ${token}`,
-                };
-                const body = {
-                  email: inviteEmail.trim(),
-                  inviter,
-                  workspaceName: selectedWorkspace?.name || 'Workspace',
-                };
-                console.log('Invite token:', token);
-                console.log('Invite URL:', url);
-                console.log('Invite headers:', headers);
-                console.log('Invite body:', body);
-                const response = await axios.post(url, body, { headers });
-                console.log('Invite response:', response);
+                if (!token) {
+                  setInviteError('Authentication required. Please log in again.');
+                  return;
+                }
+
+                const numericWorkspaceId = getNumericWorkspaceId(currentWorkspaceId);
+
+                const response = await axios.post(
+                  `${API_BASE_URL}/workspaces/invite`,
+                  {
+                    workspaceId: numericWorkspaceId,
+                    email: inviteEmail.trim(),
+                  },
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json',
+                    },
+                  }
+                );
+
                 if (response.status === 200) {
                   setInviteSent(true);
+                  setInviteEmail("");
+                  setTimeout(() => setInviteSent(false), 3000);
                 } else {
                   setInviteError('Failed to send invite. Please try again.');
                 }
-              } catch (err) {
-                if (err.response) {
-                  // Server responded with a status code out of 2xx
-                  console.log('Invite error response:', err.response.data);
-                  console.log('Invite error status:', err.response.status);
-                  setInviteError(
-                    err.response.data?.message ||
-                    'Failed to send invite. Please try again.'
-                  );
-                } else if (err.request) {
-                  // Request was made but no response received
-                  console.log('Invite error request:', err.request);
-                  setInviteError('No response from server.');
-                } else {
-                  // Something else happened
-                  console.log('Invite error:', err.message);
-                  setInviteError('Failed to send invite. Please try again.');
-                }
+              } catch (err: any) {
+                console.error('Invite error:', err);
+                const errorMessage = err.response?.data || 'Failed to send invitation. Please try again.';
+                setInviteError(errorMessage);
               } finally {
                 setInviteLoading(false);
               }

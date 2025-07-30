@@ -85,6 +85,7 @@ export default function RootLayout() {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [chatModalVisible, setChatModalVisible] = useState(false);
+  const [chatOptions, setChatOptions] = useState({ conversationId: null, filter: null });
 
   // Initialize store when app starts
   useEffect(() => {
@@ -96,6 +97,11 @@ export default function RootLayout() {
   //const username = "JohnDoe";
 
   if (!loaded) return null;
+
+  const handleOpenChat = (options: any) => {
+    setChatOptions(options || {});
+    setChatModalVisible(true);
+  };
 
   return (
     <ThemeProvider>
@@ -256,7 +262,6 @@ export default function RootLayout() {
               ))}
               {/* Chat Section */}
               <ChatSection
-                onOpenChat={() => setChatModalVisible(true)}
                 styles={styles}
               />
               {/* Floating Bulk Delete FAB */}
@@ -407,6 +412,7 @@ export default function RootLayout() {
         visible={chatModalVisible}
         onClose={() => setChatModalVisible(false)}
         styles={styles}
+        chatOptions={chatOptions}
       />
     </ThemeProvider>
   );

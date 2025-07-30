@@ -19,9 +19,13 @@ import {
   Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useWorkspaceStore } from "../stores/workspaceStore";
+import { useNotificationStore } from "../stores/notificationsStore";
+import SearchModal from "@/components/SearchModal";
+import NotificationsModal from "@/components/NotificationModal";
+import CardMenuModal from "@/components/CardMenuModal";
 import { useTheme } from "../../ThemeContext";
 import { lightTheme, darkTheme } from "../../styles/themes";
-import CardMenuModal from "@/components/CardMenuModal";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -183,7 +187,9 @@ export default function BoardDetails() {
   } | null>(null);
   const { theme } = useTheme();
   const styles = theme === "dark" ? darkTheme : lightTheme;
-  const cardStyles = theme === "dark" ? darkNewStyles : newStyles;
+
+  // Get current workspace ID
+  const currentWorkspaceId = useWorkspaceStore((state) => state.currentWorkspaceId);
 
   const [isCardMenuVisible, setCardMenuVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
@@ -741,7 +747,7 @@ export default function BoardDetails() {
               const cardsToRender = eyeVisible ? list.cards : [];
 
               return (
-                <View key={list.id} style={cardStyles.listContainer}>
+                <View key={list.id} style={newStyles.listContainer}>
                   {list.editingTitle ? (
                     <TextInput
                       value={list.title}
@@ -770,13 +776,13 @@ export default function BoardDetails() {
                         }
                         setLists(updated);
                       }}
-                      style={cardStyles.listTitleInput}
+                      style={newStyles.listTitleInput}
                       autoFocus
                     />
                   ) : (
-                    <View style={cardStyles.header}>
+                    <View style={newStyles.header}>
                       <Text
-                        style={cardStyles.headerText}
+                        style={newStyles.headerText}
                         numberOfLines={1}
                         ellipsizeMode="tail"
                       >
@@ -789,9 +795,9 @@ export default function BoardDetails() {
                             isListDropdownVisible ? null : list.id
                           )
                         }
-                        style={cardStyles.ellipsisButton}
+                        style={newStyles.ellipsisButton}
                       >
-                        <Text style={cardStyles.ellipsisText}>...</Text>
+                        <Text style={newStyles.ellipsisText}>...</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -810,10 +816,10 @@ export default function BoardDetails() {
                         [list.id]: val,
                       })
                     }
-                    style={cardStyles.listDropdown}
+                    style={newStyles.listDropdown}
                   />
 
-                  <ScrollView contentContainerStyle={cardStyles.cardList}>
+                  <ScrollView contentContainerStyle={newStyles.cardList}>
                     {cardsToRender.map((card: any, cardIndex: number) => {
                       const cardDropdownVisible =
                         cardDropdownVisibleFor?.listId === list.id &&
@@ -834,12 +840,12 @@ export default function BoardDetails() {
                             handleLongPressCard(list.id, cardIndex)
                           }
                         >
-                          <View style={cardStyles.card}>
+                          <View style={newStyles.card}>
                             {/* Only show title bar/cover if user has set a cover color or image */}
                             {(card.coverColor || card.coverImage) && (
                               <View
                           style={[
-                                  cardStyles.titleBar,
+                                  newStyles.titleBar,
                             card.coverColor
                               ? { backgroundColor: card.coverColor }
                                     : null,
@@ -848,18 +854,18 @@ export default function BoardDetails() {
                           {card.coverImage && (
                             <ImageBackground
                               source={{ uri: card.coverImage }}
-                                    style={cardStyles.titleBarImage}
-                                    imageStyle={cardStyles.titleBarImageStyle}
+                                    style={newStyles.titleBarImage}
+                                    imageStyle={newStyles.titleBarImageStyle}
                               resizeMode="cover"
                             />
                                 )}
                               </View>
                             )}
 
-                            <View style={cardStyles.cardContent}>
+                            <View style={newStyles.cardContent}>
                               {card.isInput ? (
                                 <TextInput
-                                  style={cardStyles.cardTextInput}
+                                  style={newStyles.cardTextInput}
                                   placeholder="Enter card name..."
                                   placeholderTextColor={
                                     theme === "dark"
@@ -912,7 +918,7 @@ export default function BoardDetails() {
                                   {/* Card title text */}
                             <Text
                               style={[
-                                      cardStyles.cardTitleText,
+                                      newStyles.cardTitleText,
                                       { marginBottom: 8 }, // Add bottom margin for icons
                               ]}
                               numberOfLines={2}
@@ -957,7 +963,7 @@ export default function BoardDetails() {
                                     }
 
                                     return (
-                                      <View style={cardStyles.iconRow}>
+                                      <View style={newStyles.iconRow}>
                                         {/* Description icon */}
                                         {hasDescription && (
                                           <Ionicons
@@ -968,14 +974,14 @@ export default function BoardDetails() {
                                                 ? "#8B92B0"
                                                 : "#888"
                                             }
-                                            style={cardStyles.iconMargin}
+                                            style={newStyles.iconMargin}
                                           />
                                         )}
 
                                         {/* Checklist progress */}
                                         {hasChecklists && (
                                           <View
-                                            style={cardStyles.taskStatusRow}
+                                            style={newStyles.taskStatusRow}
                                           >
                                             <Ionicons
                                               name="checkbox-outline"
@@ -988,11 +994,11 @@ export default function BoardDetails() {
                                                   ? "#8B92B0"
                                                   : "#888"
                                               }
-                                              style={cardStyles.iconMargin}
+                                              style={newStyles.iconMargin}
                                             />
                               <Text
                                 style={[
-                                                cardStyles.iconText,
+                                                newStyles.iconText,
                                                 {
                                                   color:
                                                     theme === "dark"
@@ -1009,7 +1015,7 @@ export default function BoardDetails() {
                                         {/* Comments icon */}
                                         {hasComments && (
                                           <View
-                                            style={cardStyles.taskStatusRow}
+                                            style={newStyles.taskStatusRow}
                             >
                               <Ionicons
                                               name="chatbubble-outline"
@@ -1019,11 +1025,11 @@ export default function BoardDetails() {
                                                   ? "#8B92B0"
                                                   : "#888"
                                               }
-                                              style={cardStyles.iconMargin}
+                                              style={newStyles.iconMargin}
                                             />
                                             <Text
                                               style={[
-                                                cardStyles.iconText,
+                                                newStyles.iconText,
                                                 {
                                                   color:
                                                     theme === "dark"
@@ -1053,7 +1059,7 @@ export default function BoardDetails() {
                             onCopy={() => {}}
                               onClose={() => setCardDropdownVisibleFor(null)}
                             style={[
-                              cardStyles.cardDropdown,
+                              newStyles.cardDropdown,
                               cardDropdownVisible ? {} : { display: "none" },
                             ]}
                             />
@@ -1062,11 +1068,11 @@ export default function BoardDetails() {
                     })}
 
                     <TouchableOpacity
-                      style={cardStyles.addCardButton}
+                      style={newStyles.addCardButton}
                       onPress={() => addCardToList(listIndex)}
                     >
-                      <Text style={cardStyles.addCardIcon}>+</Text>
-                      <Text style={cardStyles.addCardText}>Add a card</Text>
+                      <Text style={newStyles.addCardIcon}>+</Text>
+                      <Text style={newStyles.addCardText}>Add a card</Text>
                     </TouchableOpacity>
                   </ScrollView>
                 </View>
@@ -1162,6 +1168,7 @@ export default function BoardDetails() {
         onUpdateCardName={updateCardName}
         onUpdateCardCover={updateCardCover}
         onUpdateCardData={updateCardData}
+        workspaceId={currentWorkspaceId}
       />
     </ImageBackground>
   );

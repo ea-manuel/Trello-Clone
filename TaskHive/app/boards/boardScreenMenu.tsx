@@ -36,6 +36,9 @@ export default function BoardScreenMenu() {
   const [backgroundImage, setBackgroundImage] = useState(null); // State for selected image URI
   const {updateBoard}=useWorkspaceStore();
   
+  // Get current workspace ID
+  const currentWorkspaceId = useWorkspaceStore((state) => state.currentWorkspaceId);
+  
   // Add invite functionality state
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState("");
@@ -149,6 +152,21 @@ export default function BoardScreenMenu() {
       return;
     }
 
+    if (!currentWorkspaceId) {
+      setInviteError('No workspace selected. Please select a workspace first.');
+      return;
+    }
+
+    // Convert frontend workspace ID to numeric ID for backend
+    const getNumericWorkspaceId = (workspaceId: string) => {
+      if (workspaceId === "default-workspace") {
+        return 1; // Default workspace gets ID 1
+      }
+      // For other workspaces, extract numeric part or use a hash
+      const numericPart = workspaceId.replace(/[^0-9]/g, '');
+      return numericPart ? parseInt(numericPart) : 1;
+    };
+
     setInviteLoading(true);
     setInviteError("");
     setInviteSuccess(false);
@@ -160,13 +178,12 @@ export default function BoardScreenMenu() {
         return;
       }
 
-      // Get current workspace ID (you might need to adjust this based on your data structure)
-      const workspaceId = board?.workspaceId || "default-workspace";
+      const numericWorkspaceId = getNumericWorkspaceId(currentWorkspaceId);
       
       const response = await axios.post(
         `${API_BASE_URL}${WORKSPACE_ENDPOINTS.INVITE}`,
         {
-          workspaceId: workspaceId,
+          workspaceId: numericWorkspaceId,
           email: inviteInput.trim()
         },
         {

@@ -31,9 +31,10 @@ interface ChatModalProps {
   visible: boolean;
   onClose: () => void;
   styles: any;
+  chatOptions?: { conversationId?: string; filter?: 'all' | 'unread' };
 }
 
-export default function ChatModal({ visible, onClose, styles }: ChatModalProps) {
+export default function ChatModal({ visible, onClose, styles, chatOptions }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,38 +44,49 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const storedMessages = await AsyncStorage.getItem('chatMessages');
+        const storageKey = chatOptions?.conversationId === 'self' 
+          ? 'selfChatMessages' 
+          : 'chatMessages';
+        
+        const storedMessages = await AsyncStorage.getItem(storageKey);
         if (storedMessages) {
           const parsedMessages = JSON.parse(storedMessages).map((msg: any) => ({
             ...msg,
             timestamp: new Date(msg.timestamp),
           }));
           setMessages(parsedMessages);
+        } else {
+          setMessages([]);
         }
       } catch (error) {
         console.error('Failed to load messages:', error);
+        setMessages([]);
       }
     };
 
     if (visible) {
       loadMessages();
     }
-  }, [visible]);
+  }, [visible, chatOptions]);
 
   // Save messages to AsyncStorage
   useEffect(() => {
     const saveMessages = async () => {
       try {
-        await AsyncStorage.setItem('chatMessages', JSON.stringify(messages));
+        const storageKey = chatOptions?.conversationId === 'self' 
+          ? 'selfChatMessages' 
+          : 'chatMessages';
+        
+        if (messages.length > 0) {
+          await AsyncStorage.setItem(storageKey, JSON.stringify(messages));
+        }
       } catch (error) {
         console.error('Failed to save messages:', error);
       }
     };
 
-    if (messages.length > 0) {
-      saveMessages();
-    }
-  }, [messages]);
+    saveMessages();
+  }, [messages, chatOptions]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -102,17 +114,31 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
       setMessages(prev => [...prev, message]);
       setNewMessage('');
 
-      // Simulate response (for demo purposes)
-      setTimeout(() => {
-        const response: Message = {
-          id: (Date.now() + 1).toString(),
-          text: 'Thanks for your message! This is a demo response.',
-          timestamp: new Date(),
-          isFromUser: false,
-          username: 'TaskHive',
-        };
-        setMessages(prev => [...prev, response]);
-      }, 1000);
+      // For self-chat, simulate a response
+      if (chatOptions?.conversationId === 'self') {
+        setTimeout(() => {
+          const response: Message = {
+            id: (Date.now() + 1).toString(),
+            text: 'This is your personal notes space. You can write reminders, ideas, or anything you want to remember.',
+            timestamp: new Date(),
+            isFromUser: false,
+            username: 'Notes',
+          };
+          setMessages(prev => [...prev, response]);
+        }, 1000);
+      } else {
+        // For regular chat, simulate response
+        setTimeout(() => {
+          const response: Message = {
+            id: (Date.now() + 1).toString(),
+            text: 'Thanks for your message! This is a demo response.',
+            timestamp: new Date(),
+            isFromUser: false,
+            username: 'TaskHive',
+          };
+          setMessages(prev => [...prev, response]);
+        }, 1000);
+      }
 
     } catch (error) {
       Alert.alert('Error', 'Failed to send message. Please try again.');
@@ -133,7 +159,10 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
           onPress: async () => {
             setMessages([]);
             try {
-              await AsyncStorage.removeItem('chatMessages');
+              const storageKey = chatOptions?.conversationId === 'self' 
+                ? 'selfChatMessages' 
+                : 'chatMessages';
+              await AsyncStorage.removeItem(storageKey);
             } catch (error) {
               console.error('Failed to clear messages:', error);
             }
@@ -157,6 +186,26 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
       return 'Yesterday';
     } else {
       return messageDate.toLocaleDateString();
+    }
+  };
+
+  const getHeaderTitle = () => {
+    if (chatOptions?.conversationId === 'self') {
+      return 'Notes';
+    } else if (chatOptions?.filter === 'unread') {
+      return 'Unread Messages';
+    } else {
+      return 'Messages';
+    }
+  };
+
+  const getHeaderSubtitle = () => {
+    if (chatOptions?.conversationId === 'self') {
+      return 'Your personal notes';
+    } else if (chatOptions?.filter === 'unread') {
+      return 'Unread conversations';
+    } else {
+      return 'Your inbox';
     }
   };
 
@@ -184,11 +233,15 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
             
             <View style={styles.ChatModalheaderContent}>
               <View style={styles.ChatModalheaderIcon}>
-                <Ionicons name="chatbubbles" size={24} color="white" />
+                <Ionicons 
+                  name={chatOptions?.conversationId === 'self' ? "document-text" : "chatbubbles"} 
+                  size={24} 
+                  color="white" 
+                />
               </View>
               <View style={styles.ChatModalheaderText}>
-                <Text style={styles.ChatModalheaderTitle}>Messages</Text>
-                <Text style={styles.ChatModalheaderSubtitle}>Your inbox</Text>
+                <Text style={styles.ChatModalheaderTitle}>{getHeaderTitle()}</Text>
+                <Text style={styles.ChatModalheaderSubtitle}>{getHeaderSubtitle()}</Text>
               </View>
             </View>
             
@@ -207,11 +260,20 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
             {messages.length === 0 ? (
               <View style={styles.ChatModalemptyState}>
                 <View style={styles.ChatModalemptyIcon}>
-                  <Ionicons name="chatbubbles" size={64} color="#667eea" />
+                  <Ionicons 
+                    name={chatOptions?.conversationId === 'self' ? "document-text" : "chatbubbles"} 
+                    size={64} 
+                    color="#667eea" 
+                  />
                 </View>
-                <Text style={styles.ChatModalemptyTitle}>No messages yet</Text>
+                <Text style={styles.ChatModalemptyTitle}>
+                  {chatOptions?.conversationId === 'self' ? 'No notes yet' : 'No messages yet'}
+                </Text>
                 <Text style={styles.ChatModalemptySubtitle}>
-                  Start a conversation by sending a message below
+                  {chatOptions?.conversationId === 'self' 
+                    ? 'Start writing your personal notes and reminders here'
+                    : 'Start a conversation by sending a message below'
+                  }
                 </Text>
               </View>
             ) : (
@@ -300,7 +362,7 @@ export default function ChatModal({ visible, onClose, styles }: ChatModalProps) 
             <View style={styles.ChatModalinputWrapper}>
               <TextInput
                 style={styles.ChatModalinput}
-                placeholder="Type a message..."
+                placeholder={chatOptions?.conversationId === 'self' ? "Write a note..." : "Type a message..."}
                 placeholderTextColor="#95a5a6"
                 value={newMessage}
                 onChangeText={setNewMessage}

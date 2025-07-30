@@ -11,11 +11,12 @@ import {
   ImageBackground,
   BackHandler,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
@@ -64,6 +65,7 @@ interface CardMenuModalProps {
   card: any;
   styles: any;
   boardBackgroundColor?: string;
+  workspaceId?: string; // Add workspaceId prop
   onDeleteCard?: () => void;
   onUpdateCardName?: (cardId: string, newName: string) => void;
   onUpdateCardCover?: (
@@ -80,6 +82,7 @@ export default function CardMenuModal({
   card,
   styles,
   boardBackgroundColor,
+  workspaceId, // Add workspaceId parameter
   onDeleteCard,
   onUpdateCardName,
   onUpdateCardCover,
@@ -416,13 +419,17 @@ export default function CardMenuModal({
   };
 
   // Start date handlers
-  const handleStartDateConfirm = (date: Date) => {
-    setStartDate(date);
-    setShowStartDateModal(false);
-  };
-
-  const handleStartDateCancel = () => {
-    setShowStartDateModal(false);
+  const handleStartDateConfirm = (event: any, date: Date | undefined) => {
+    if (Platform.OS === 'android') {
+      setShowStartDateModal(false);
+    }
+    
+    if (date) {
+      setStartDate(date);
+      if (Platform.OS === 'android') {
+        setShowStartDateModal(false);
+      }
+    }
   };
 
   // Labels handlers
@@ -613,6 +620,21 @@ export default function CardMenuModal({
       return;
     }
 
+    if (!workspaceId) {
+      setInviteError('Workspace context not available. Please try again.');
+      return;
+    }
+
+    // Convert frontend workspace ID to numeric ID for backend
+    const getNumericWorkspaceId = (workspaceId: string) => {
+      if (workspaceId === "default-workspace") {
+        return 1; // Default workspace gets ID 1
+      }
+      // For other workspaces, extract numeric part or use a hash
+      const numericPart = workspaceId.replace(/[^0-9]/g, '');
+      return numericPart ? parseInt(numericPart) : 1;
+    };
+
     try {
       setInviteLoading(true);
       setInviteError("");
@@ -624,12 +646,12 @@ export default function CardMenuModal({
         return;
       }
 
-      // For now, we'll simulate inviting to the workspace
-      // In a real app, you'd have workspace context
+      const numericWorkspaceId = getNumericWorkspaceId(workspaceId);
+
       const response = await axios.post(
         `${API_BASE_URL}/workspaces/invite`,
         {
-          workspaceId: '1', // This should be the actual workspace ID
+          workspaceId: numericWorkspaceId,
           email: inviteEmail.trim(),
         },
         {
@@ -1721,13 +1743,13 @@ export default function CardMenuModal({
       </Modal>
 
       {/* Start Date Picker Modal */}
-      <DateTimePickerModal
-        isVisible={showStartDateModal}
-        mode="datetime"
-        date={startDate || new Date()}
-        onConfirm={handleStartDateConfirm}
-        onCancel={handleStartDateCancel}
-      />
+      {showStartDateModal && (
+        <DateTimePicker
+          value={startDate || new Date()}
+          mode="datetime"
+          onChange={handleStartDateConfirm}
+        />
+      )}
 
       {/* Labels Modal */}
       <Modal

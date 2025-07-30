@@ -1,5 +1,5 @@
 // Centralized API configuration
-export const API_BASE_URL = "http://192.168.137.73:8080/api";
+export const API_BASE_URL = "http://100.112.17.249:8080/api";
 
 // Auth endpoints
 export const AUTH_ENDPOINTS = {

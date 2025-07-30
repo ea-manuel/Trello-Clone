@@ -29,7 +29,16 @@ export default function Header() {
   const currentWorkspace = workspaces.find(
     (ws) => ws.id === currentWorkspaceId
   );
-  const workspaceName = currentWorkspace ? currentWorkspace.name : "Workspace";
+  
+  // Show "Default workspace" for the first workspace to match the side drawer
+  let workspaceName = "Workspace";
+  if (currentWorkspace) {
+    if (workspaces.length > 0 && currentWorkspace.id === workspaces[0].id) {
+      workspaceName = "Default workspace";
+    } else {
+      workspaceName = currentWorkspace.name;
+    }
+  }
 
   const unreadCount = useNotificationStore((state) => state.notifications.filter(n => !n.read).length);
 
@@ -41,7 +50,7 @@ export default function Header() {
         activeOpacity={0.7}
       >
         <Ionicons name="menu-sharp" size={35} color="white" />
-        <Text style={styles.headerText}>{workspaceName} workspace</Text>
+        <Text style={styles.headerText}>{workspaceName}</Text>
       </TouchableOpacity>
 
       <View style={styles.rightIcons}>
