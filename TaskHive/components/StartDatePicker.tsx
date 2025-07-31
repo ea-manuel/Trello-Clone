@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import SafeDateTimePicker from "./SafeDateTimePicker";
 import { Ionicons } from "@expo/vector-icons";
 
 interface StartDatePickerModalProps {
@@ -31,6 +31,10 @@ export default function StartDatePickerModal({
   const handleDateChange = (event: any, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
       setPickerVisible(false);
+      if (event.type === 'dismissed') {
+        onCancel();
+        return;
+      }
     }
     
     if (selectedDate) {
@@ -53,7 +57,7 @@ export default function StartDatePickerModal({
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Select Start Date & Time</Text>
           {Platform.OS === 'ios' && (
-            <DateTimePicker
+            <SafeDateTimePicker
               value={date || new Date()}
               mode="datetime"
               display="spinner"
@@ -62,9 +66,10 @@ export default function StartDatePickerModal({
             />
           )}
           {Platform.OS === 'android' && pickerVisible && (
-            <DateTimePicker
+            <SafeDateTimePicker
               value={date || new Date()}
               mode="datetime"
+              display="default"
               onChange={handleDateChange}
             />
           )}

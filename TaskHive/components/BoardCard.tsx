@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, View, Text, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Heart } from "lucide-react-native";
+
 import { useTheme } from "../ThemeContext";
 import { lightTheme, darkTheme } from "../styles/themes";
 
@@ -48,7 +48,7 @@ const BoardCard: React.FC<BoardCardProps> = ({
         <Ionicons name="grid" size={30} color="#34495e" />
         <Text style={styles.boardcardText}>{title}</Text>
         <TouchableOpacity style={styles.favouriteicon} onPress={onToggleFavorite}>
-          {isFavorite ? <Heart color="red" /> : <Heart color="gray" />}
+          {isFavorite ? <Ionicons name="heart" size={24} color="red" /> : <Ionicons name="heart-outline" size={24} color="gray" />}
         </TouchableOpacity>
       </TouchableOpacity>
       {showToggle ? (

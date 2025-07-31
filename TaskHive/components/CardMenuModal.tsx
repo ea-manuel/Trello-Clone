@@ -16,7 +16,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import SafeDateTimePicker from "./SafeDateTimePicker";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
@@ -422,6 +422,9 @@ export default function CardMenuModal({
   const handleStartDateConfirm = (event: any, date: Date | undefined) => {
     if (Platform.OS === 'android') {
       setShowStartDateModal(false);
+      if (event.type === 'dismissed') {
+        return;
+      }
     }
     
     if (date) {
@@ -1744,10 +1747,11 @@ export default function CardMenuModal({
 
       {/* Start Date Picker Modal */}
       {showStartDateModal && (
-        <DateTimePicker
+        <SafeDateTimePicker
           value={startDate || new Date()}
           mode="datetime"
           onChange={handleStartDateConfirm}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
         />
       )}
 

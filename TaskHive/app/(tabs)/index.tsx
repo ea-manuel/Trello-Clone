@@ -19,7 +19,7 @@ import { useWorkspaceStore } from '../stores/workspaceStore'; // Import the hook
 import { useTheme } from "../../ThemeContext";
 import {lightTheme,darkTheme} from "../../styles/themes";
 import { useNotificationStore } from '../stores/notificationsStore';
-import {Heart,HeartOff} from "lucide-react-native";
+
 import BoardCard from "../../components/BoardCard";
 import NotificationToast from "../../components/NotificationToast";
 import axios from 'axios';

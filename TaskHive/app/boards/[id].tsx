@@ -620,7 +620,7 @@ export default function BoardDetails() {
     setLongPressedCardId({ listId, cardIndex });
 
     // Find the list index and card information
-    const listIndex = lists.findIndex((list) => list.id === listId);
+    const listIndex = lists.findIndex((list: any) => list.id === listId);
     if (listIndex !== -1 && lists[listIndex].cards[cardIndex]) {
       const card = lists[listIndex].cards[cardIndex];
       setCardToDelete({
@@ -632,11 +632,21 @@ export default function BoardDetails() {
     }
   };
 
-  const confirmDeleteCard = () => {
+  const confirmDeleteCard = async () => {
     if (cardToDelete) {
       const updated = [...lists];
       updated[cardToDelete.listIndex].cards.splice(cardToDelete.cardIndex, 1);
       setLists(updated);
+
+      // Save updated lists to storage
+      if (board?.id) {
+        try {
+          const storageKey = `boardLists-${board.id}`;
+          await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
+        } catch (e) {
+          console.error("Failed to save lists after card deletion:", e);
+        }
+      }
     }
 
     setShowDeleteCardModal(false);
@@ -1052,9 +1062,11 @@ export default function BoardDetails() {
 
                             <CardDropdownMenu
                             onArchive={() => {}}
-                            onDelete={() =>
-                              handleDeleteCard(listIndex, cardIndex)
-                            }
+                            onDelete={() => {
+                              console.log('Deleting card:', { listIndex, cardIndex });
+                              handleDeleteCard(listIndex, cardIndex);
+                              setCardDropdownVisibleFor(null);
+                            }}
                             onRename={() => {}}
                             onCopy={() => {}}
                               onClose={() => setCardDropdownVisibleFor(null)}

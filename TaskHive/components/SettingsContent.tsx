@@ -87,6 +87,8 @@ export default function SettingsContent({
 
   const [searchText, setSearchText] = useState("");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false);
+  const [comingSoonFeature, setComingSoonFeature] = useState("");
 
   // Load settings from AsyncStorage on mount
   useEffect(() => {
@@ -167,10 +169,19 @@ export default function SettingsContent({
     );
   };
 
+  const showComingSoon = (feature: string) => {
+    setComingSoonFeature(feature);
+    setShowComingSoonModal(true);
+  };
+
   const settingsData = [
     {
       section: "Notifications",
-      items: [{ label: "Open system settings", type: "text" }],
+      items: [{ 
+        label: "Open system settings", 
+        type: "action",
+        onPress: () => showComingSoon("System Settings")
+      }],
     },
     {
       section: "Application Theme",
@@ -208,32 +219,56 @@ export default function SettingsContent({
     },
     {
       section: "Sync",
-      items: [{ label: "Sync queue", type: "text" }],
+      items: [{ 
+        label: "Sync queue", 
+        type: "action",
+        onPress: () => showComingSoon("Sync Queue")
+      }],
     },
     {
       section: "General",
       items: [
-        { label: "Profile and visibility", type: "text" },
-        { label: "Set app language", type: "text" },
+        { 
+          label: "Profile and visibility", 
+          type: "action",
+          onPress: () => showComingSoon("Profile and Visibility")
+        },
+        { 
+          label: "Set app language", 
+          type: "action",
+          onPress: () => showComingSoon("App Language")
+        },
         {
           label: "Show quick add",
           type: "switch",
           value: switchStates.showQuickAdd,
           onToggle: () => toggleSwitch("showQuickAdd"),
         },
-        { label: "Delete account", type: "text" },
+        { 
+          label: "Delete account", 
+          type: "action",
+          onPress: () => showComingSoon("Delete Account")
+        },
         { 
           label: "About TaskHive", 
           type: "action",
           onPress: showAboutApp,
         },
-        { label: "More Atlassian apps", type: "text" },
+        { 
+          label: "More Atlassian apps", 
+          type: "action",
+          onPress: () => showComingSoon("More Atlassian Apps")
+        },
         { 
           label: "Contact support", 
           type: "action",
           onPress: contactSupport,
         },
-        { label: "Manage accounts on browser", type: "text" },
+        { 
+          label: "Manage accounts on browser", 
+          type: "action",
+          onPress: () => showComingSoon("Account Management")
+        },
         {
           label: "Log out",
           type: "action",
@@ -375,6 +410,40 @@ export default function SettingsContent({
                   />
                 </View>
               </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Coming Soon Modal */}
+      {showComingSoonModal && (
+        <Modal visible={showComingSoonModal} transparent animationType="fade">
+          <View style={styles.modalBackground}>
+            <BlurView
+              style={StyleSheet.absoluteFill}
+              intensity={100}
+              tint={theme === "dark" ? "dark" : "light"}
+            />
+            <View style={[styles.modalView, styles.comingSoonModal]}>
+              <View style={styles.comingSoonIconContainer}>
+                <Ionicons 
+                  name="construct-outline" 
+                  size={48} 
+                  color={theme === "dark" ? "#339dff" : "#0B1F3A"} 
+                />
+              </View>
+              <Text style={styles.comingSoonTitle}>Coming Soon</Text>
+              <Text style={styles.comingSoonFeature}>{comingSoonFeature}</Text>
+              <Text style={styles.comingSoonText}>
+                We're working hard to bring you this feature. Stay tuned for updates!
+              </Text>
+              <TouchableOpacity
+                style={styles.comingSoonButton}
+                onPress={() => setShowComingSoonModal(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.comingSoonButtonText}>Got it</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -534,5 +603,51 @@ const getSettingsStyles = (theme: any) =>
       marginLeft: 8,
       fontSize: 16,
       height: "100%",
+    },
+    comingSoonModal: {
+      backgroundColor: theme === "dark" ? "rgba(40, 44, 52, 0.95)" : "rgba(255, 255, 255, 0.95)",
+      padding: 30,
+      borderRadius: 20,
+      alignItems: "center",
+      maxWidth: 320,
+    },
+    comingSoonIconContainer: {
+      marginBottom: 20,
+    },
+    comingSoonTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: theme === "dark" ? "#ffffff" : "#0B1F3A",
+      marginBottom: 8,
+    },
+    comingSoonFeature: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme === "dark" ? "#339dff" : "#0B1F3A",
+      marginBottom: 16,
+      textAlign: "center",
+    },
+    comingSoonText: {
+      fontSize: 16,
+      color: theme === "dark" ? "#BFC9D6" : "#555",
+      textAlign: "center",
+      lineHeight: 22,
+      marginBottom: 24,
+    },
+    comingSoonButton: {
+      backgroundColor: theme === "dark" ? "#339dff" : "#0B1F3A",
+      paddingHorizontal: 32,
+      paddingVertical: 12,
+      borderRadius: 12,
+      elevation: 3,
+      shadowColor: "#000",
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 2 },
+    },
+    comingSoonButtonText: {
+      color: "#ffffff",
+      fontSize: 16,
+      fontWeight: "600",
     },
   });

@@ -2,5 +2,9 @@
   "urlRandomness": "tZ-_fSY",
   "dev": true,
   "minify": false,
-  "https": false
+  "https": false,
+  "devClient": true,
+  "scheme": "com.emmayak.taskhive",
+  "hostType": "lan",
+  "lanType": "ip"
 }

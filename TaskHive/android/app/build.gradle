@@ -87,7 +87,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.emmayak.taskhive"
+    namespace 'com.emmayak.taskhive'
     defaultConfig {
         applicationId 'com.emmayak.taskhive'
         minSdkVersion rootProject.ext.minSdkVersion

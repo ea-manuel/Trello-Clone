@@ -1,9 +1,7 @@
 {
   "dependencies": {
     "expo-crypto": "^14.1.5",
-    "lucide-react-native": "^0.525.0",
     "react-native-uuid": "^2.0.3",
-    "uuid": "^11.1.0",
-    "react-native-svg": "15.11.2"
+    "uuid": "^11.1.0"
   }
 }
